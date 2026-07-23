@@ -9,7 +9,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] Cursor SDD rules under `.cursor/rules/`
 - [x] Enable Astro server mode / Node adapter as required for API routes
 - [x] Add dependencies: `sharp`, `archiver`, ICO helper (`to-ico` or approved equivalent)
-- [ ] Create `src/lib/icons/matrix.ts` mirroring SPEC §2
+- [x] Create `src/lib/icons/matrix.ts` mirroring SPEC §2
 
 ## M1 — Processing Core
 
