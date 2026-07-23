@@ -23,6 +23,7 @@ describe('buildGenerateFormData', () => {
       ...SETTINGS_DEFAULTS,
       padding: 12,
       cornerRadius: 40,
+      monochrome: true,
       transparent: false,
       backgroundHex: '#abcdef',
       presets: ['favicon', 'og'],
@@ -31,6 +32,7 @@ describe('buildGenerateFormData', () => {
     expect(body.get('file')).toBe(file);
     expect(body.get('padding')).toBe('12');
     expect(body.get('cornerRadius')).toBe('40');
+    expect(body.get('monochrome')).toBe('true');
     expect(body.get('background')).toBe('#abcdef');
     expect(body.get('presets')).toBe('favicon,og');
   });

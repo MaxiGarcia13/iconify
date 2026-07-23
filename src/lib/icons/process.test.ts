@@ -160,6 +160,82 @@ describe('renderOgImage', () => {
   });
 });
 
+describe('monochrome greyscale via renderIcon / renderOgImage (SPEC §4 / AC10)', () => {
+  const optionsBase = {
+    background: 'transparent' as const,
+    padding: 0,
+    cornerRadius: 0,
+  };
+
+  /** Center pixel RGB from a raw RGBA PNG buffer. */
+  async function centerRgb(
+    png: Buffer,
+  ): Promise<readonly [number, number, number]> {
+    const { data, info } = await sharp(png)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const x = Math.floor(info.width / 2);
+    const y = Math.floor(info.height / 2);
+    const idx = (y * info.width + x) * info.channels;
+    return [data[idx]!, data[idx + 1]!, data[idx + 2]!];
+  }
+
+  function chroma(rgb: readonly [number, number, number]): number {
+    return Math.max(...rgb) - Math.min(...rgb);
+  }
+
+  it('renderIcon monochrome=true yields greyscale (chroma ≈ 0)', async () => {
+    const input = await solidPng(64);
+    const out = await renderIcon(input, 64, {
+      ...optionsBase,
+      monochrome: true,
+    });
+
+    const rgb = await centerRgb(out);
+    expect(rgb[0]).toBe(rgb[1]);
+    expect(rgb[1]).toBe(rgb[2]);
+    expect(chroma(rgb)).toBe(0);
+  });
+
+  it('renderIcon monochrome=false keeps source colors', async () => {
+    const input = await solidPng(64);
+    const out = await renderIcon(input, 64, {
+      ...optionsBase,
+      monochrome: false,
+    });
+
+    const rgb = await centerRgb(out);
+    // solidPng is #0080ff — distinct channels when color is preserved
+    expect(chroma(rgb)).toBeGreaterThan(0);
+    expect(rgb[0]).not.toBe(rgb[2]);
+  });
+
+  it('renderOgImage monochrome=true yields greyscale (chroma ≈ 0)', async () => {
+    const input = await solidPng(200);
+    const out = await renderOgImage(input, {
+      ...optionsBase,
+      monochrome: true,
+    });
+
+    const rgb = await centerRgb(out);
+    expect(rgb[0]).toBe(rgb[1]);
+    expect(rgb[1]).toBe(rgb[2]);
+    expect(chroma(rgb)).toBe(0);
+  });
+
+  it('renderOgImage monochrome=false keeps source colors', async () => {
+    const input = await solidPng(200);
+    const out = await renderOgImage(input, {
+      ...optionsBase,
+      monochrome: false,
+    });
+
+    const rgb = await centerRgb(out);
+    expect(chroma(rgb)).toBeGreaterThan(0);
+  });
+});
+
 describe('passthroughFaviconSvg', () => {
   it('preserves SVG markup for favicon.svg (SPEC §2.1 / §4.8 / AC2)', () => {
     const source = Buffer.from(
@@ -174,6 +250,16 @@ describe('passthroughFaviconSvg', () => {
     expect(text).toContain('viewBox="0 0 32 32"');
     expect(text).toContain('<circle');
     expect(text).not.toMatch(/^\x89PNG/);
+  });
+
+  it('does not greyscale SVG passthrough (AC10)', () => {
+    const source = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect fill="#ff0000" width="32" height="32"/></svg>',
+      'utf8',
+    );
+
+    const text = passthroughFaviconSvg(source).toString('utf8');
+    expect(text).toContain('fill="#ff0000"');
   });
 
   it('strips script and event handlers before ZIP storage', () => {

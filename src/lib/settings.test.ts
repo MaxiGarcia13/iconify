@@ -126,12 +126,43 @@ describe('toGenerateOptions / appendSettingsToFormData', () => {
     expect(body.get('cornerRadius')).toBe('88');
   });
 
+  it('maps monochrome into GenerateOptions and FormData (SPEC §5.5)', () => {
+    expect(
+      toGenerateOptions({
+        ...SETTINGS_DEFAULTS,
+        monochrome: true,
+      }).monochrome,
+    ).toBe(true);
+
+    expect(
+      toGenerateOptions({
+        ...SETTINGS_DEFAULTS,
+        monochrome: false,
+      }).monochrome,
+    ).toBe(false);
+
+    const on = new FormData();
+    appendSettingsToFormData(on, {
+      ...SETTINGS_DEFAULTS,
+      monochrome: true,
+    });
+    expect(on.get('monochrome')).toBe('true');
+
+    const off = new FormData();
+    appendSettingsToFormData(off, {
+      ...SETTINGS_DEFAULTS,
+      monochrome: false,
+    });
+    expect(off.get('monochrome')).toBe('false');
+  });
+
   it('appends SPEC §5.5 FormData fields', () => {
     const body = new FormData();
     appendSettingsToFormData(body, {
       ...SETTINGS_DEFAULTS,
       padding: 20,
       cornerRadius: 35,
+      monochrome: true,
       transparent: false,
       backgroundHex: '#0a0a0a',
       presets: ['favicon', 'apple'],
@@ -139,6 +170,7 @@ describe('toGenerateOptions / appendSettingsToFormData', () => {
 
     expect(body.get('padding')).toBe('20');
     expect(body.get('cornerRadius')).toBe('35');
+    expect(body.get('monochrome')).toBe('true');
     expect(body.get('background')).toBe('#0a0a0a');
     expect(body.get('presets')).toBe('favicon,apple');
   });

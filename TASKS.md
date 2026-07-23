@@ -72,7 +72,7 @@ SPEC §3 `monochrome` / §4 greyscale in `renderIcon` + `renderOgImage` / §5 se
 - [x] Types + defaults: `GenerateOptions.monochrome` (`boolean`, default `false`) in `types` / `generate-defaults`
 - [x] API: accept multipart `monochrome` as literals `true` / `false` (omit → `false`); reject other values with `400 VALIDATION_ERROR` + `details.field: monochrome`
 - [x] UI: settings checkbox/switch; wire into settings state + `FormData` (`monochrome=true|false`)
-- [ ] Unit tests: process greyscale on / off; validate accept/reject; API happy-path + invalid; settings → FormData mapping
+- [x] Unit tests: process greyscale on / off; validate accept/reject; API happy-path + invalid; settings → FormData mapping
 - [ ] Verify AC10
 
 ## M4 — Hardening
