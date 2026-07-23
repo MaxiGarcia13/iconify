@@ -40,6 +40,7 @@ npm run build     # production build
 npm run preview   # preview build
 npm run lint      # ESLint
 npm run lint:fix  # ESLint autofix
+npm run test:unit # Vitest unit tests
 ```
 
 ## Architecture Rules

@@ -21,7 +21,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "start": "node ./dist/server/entry.mjs",
-    "clean": "rm -rf dist node_modules .astro"
+    "clean": "rm -rf dist node_modules .astro",
+    "test:unit": "vitest"
   },
   "devDependencies": {
     "@eslint-react/eslint-plugin": "^3.0.0",

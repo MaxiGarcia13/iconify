@@ -743,6 +743,8 @@ Implementation progress lives in one place: [`TASKS.md`](./TASKS.md) (M0–M5 ch
 
 Do not duplicate milestone checklists here. When scope changes, update this SPEC (requirements) and adjust `TASKS.md` (work items) accordingly.
 
+**Done means green tests.** Do not check off a `TASKS.md` item (or treat a milestone as complete) unless `npm run test:unit` (Vitest) passes for all tests that cover that slice. If a slice has no tests yet, add them first, then mark done only after they pass.
+
 ---
 
 ## 7. Acceptance Criteria
@@ -765,6 +767,7 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 2. **Spec before code.** Requirement changes update SPEC (and OpenAPI section) first; adjust `TASKS.md` checkboxes if the work breakdown changes; then implement.
 3. **Drift is a defect.** If code and SPEC disagree, fix the drift in the same change set (prefer updating code to match SPEC unless the SPEC change is intentional).
 4. **Agents** must read `AGENTS.md` and `.cursor/rules/*` before implementing features.
+5. **Green tests before done.** A `TASKS.md` checkbox may be marked complete only when Vitest is green for the covered slice (`npm run test:unit` exit 0).
 
 ---
 
@@ -774,3 +777,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | --- | --- | --- |
 | 1.0.0 | 2026-07-23 | Initial technical specification |
 | 1.0.1 | 2026-07-23 | §6 milestones checklist moved solely to `TASKS.md` |
+| 1.0.2 | 2026-07-23 | §6 / §8: mark `TASKS.md` items done only when `npm run test:unit` is green |

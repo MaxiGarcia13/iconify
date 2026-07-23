@@ -1,6 +1,6 @@
 # Iconify — Implementation Tasks
 
-Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md) §6). Check items as they complete. Do not mark done unless acceptance criteria in SPEC §7 for that slice are met.
+Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md) §6). Check items as they complete. Do not mark done unless acceptance criteria in SPEC §7 for that slice are met **and** Vitest is green (`npm run test:unit` exit 0) for the covered slice (SPEC §6 / §8).
 
 ## M0 — Foundation
 
@@ -20,7 +20,11 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [ ] `site.webmanifest` generator
 - [ ] `head.html` / snippet generator
 - [ ] ZIP stream packager (`createZipStream` / `zipToWebResponse`)
-- [ ] Unit tests: one assertion per matrix filename/size
+- [x] Vitest setup: `"test:unit": "vitest"` in `package.json` scripts
+- [ ] Vitest config (`vitest.config.ts`) targeting `src/**/*.{test,spec}.{ts,tsx}`
+- [ ] Unit tests for processing core: one assertion per SPEC §2 matrix filename/size (`renderIcon`, `renderOgImage`, `buildFaviconIco`, SVG passthrough)
+- [ ] Unit tests for `site.webmanifest` + `head.html` generators (content matches SPEC §5)
+- [ ] Unit test that ZIP membership matches the generated asset set (no partial/empty archive)
 
 ## M2 — REST API
 
