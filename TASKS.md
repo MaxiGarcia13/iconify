@@ -17,7 +17,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] `renderOgImage` — 1200×630
 - [x] `buildFaviconIco` — 16 / 32 / 48 layers
 - [x] SVG passthrough for `favicon.svg` when source is SVG
-- [ ] `site.webmanifest` generator
+- [x] `site.webmanifest` generator
 - [ ] `head.html` / snippet generator
 - [ ] ZIP stream packager (`createZipStream` / `zipToWebResponse`)
 - [x] Vitest setup: `"test:unit": "vitest"` in `package.json` scripts
