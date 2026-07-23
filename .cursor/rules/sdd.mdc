@@ -11,3 +11,4 @@ alwaysApply: true
 - Prefer matching SPEC §2 matrix and §3 OpenAPI exactly.
 - After finishing a slice, update checkboxes in `TASKS.md`.
 - Keep diffs scoped to the active milestone; no unrelated refactors.
+- Source files use lowercase kebab-case; markdown docs use UPPERCASE basenames (SPEC §1.6).
