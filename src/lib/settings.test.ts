@@ -53,12 +53,7 @@ describe('preset checkboxes', () => {
 
   it('toggles all on/off', () => {
     expect(togglePreset(['favicon'], 'all', true)).toEqual(['all']);
-    expect(togglePreset(['all'], 'all', false)).toEqual([
-      'favicon',
-      'apple',
-      'android',
-      'og',
-    ]);
+    expect(togglePreset(['all'], 'all', false)).toEqual(['favicon']);
   });
 
   it('collapses four individuals to all', () => {

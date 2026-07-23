@@ -71,7 +71,8 @@ export function isPresetChecked(
 
 /**
  * Toggle a preset checkbox. `all` collapses to `['all']`;
- * selecting every individual preset also collapses to `['all']`.
+ * unchecking `all` leaves a single preset (`favicon`).
+ * Selecting every individual preset also collapses to `['all']`.
  * Always keeps at least one preset selected.
  */
 export function togglePreset(
@@ -80,7 +81,7 @@ export function togglePreset(
   checked: boolean,
 ): PresetId[] {
   if (id === 'all') {
-    return checked ? ['all'] : [...SELECTABLE_PRESETS];
+    return checked ? ['all'] : ['favicon'];
   }
 
   const current: SelectablePreset[] = hasAllPreset(presets)
