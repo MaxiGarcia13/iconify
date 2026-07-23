@@ -19,6 +19,7 @@ export type SelectablePreset = (typeof SELECTABLE_PRESETS)[number];
 export interface SettingsState {
   padding: number;
   cornerRadius: number;
+  monochrome: boolean;
   transparent: boolean;
   /** Last opaque pad fill; used when `transparent` is off. */
   backgroundHex: `#${string}`;
@@ -28,6 +29,7 @@ export interface SettingsState {
 export const SETTINGS_DEFAULTS: SettingsState = {
   padding: GENERATE_OPTION_DEFAULTS.padding,
   cornerRadius: GENERATE_OPTION_DEFAULTS.cornerRadius,
+  monochrome: GENERATE_OPTION_DEFAULTS.monochrome,
   transparent: GENERATE_OPTION_DEFAULTS.background === 'transparent',
   backgroundHex: '#ffffff',
   presets: [...GENERATE_OPTION_DEFAULTS.presets],
@@ -122,7 +124,7 @@ export function toGenerateOptions(state: SettingsState): GenerateOptions {
     padding: clampPadding(state.padding),
     cornerRadius: clampCornerRadius(state.cornerRadius),
     background: state.transparent ? 'transparent' : state.backgroundHex,
-    monochrome: GENERATE_OPTION_DEFAULTS.monochrome,
+    monochrome: state.monochrome,
     presets: state.presets.length > 0 ? [...state.presets] : ['all'],
   };
 }
@@ -135,6 +137,7 @@ export function appendSettingsToFormData(
   const options = toGenerateOptions(state);
   body.set('padding', String(options.padding));
   body.set('cornerRadius', String(options.cornerRadius));
+  body.set('monochrome', options.monochrome ? 'true' : 'false');
   body.set('background', options.background);
   body.set('presets', options.presets.join(','));
 }

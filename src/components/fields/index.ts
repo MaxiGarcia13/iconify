@@ -7,6 +7,8 @@ export { HexColorInput } from './hex-color-input';
 export type { HexColorInputProps } from './hex-color-input';
 export { IconBackgroundField } from './icon-background-field';
 export type { IconBackgroundFieldProps } from './icon-background-field';
+export { MonochromeField } from './monochrome-field';
+export type { MonochromeFieldProps } from './monochrome-field';
 export { PaddingField } from './padding-field';
 export type { PaddingFieldProps } from './padding-field';
 export { PresetsField } from './presets-field';

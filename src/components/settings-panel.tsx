@@ -6,6 +6,7 @@ import { SETTINGS_DEFAULTS } from '../lib/settings';
 import {
   CornerRadiusField,
   IconBackgroundField,
+  MonochromeField,
   PaddingField,
   PresetsField,
 } from './fields';
@@ -20,7 +21,7 @@ export interface SettingsPanelProps {
 
 /**
  * Generator settings — SPEC §5.3.
- * Padding, corner radius, background, presets.
+ * Padding, corner radius, monochrome, background, presets.
  */
 export function SettingsPanel({
   value,
@@ -56,6 +57,11 @@ export function SettingsPanel({
       <CornerRadiusField
         value={state.cornerRadius}
         onChange={(cornerRadius) => patch({ cornerRadius })}
+      />
+
+      <MonochromeField
+        value={state.monochrome}
+        onChange={(monochrome) => patch({ monochrome })}
       />
 
       <IconBackgroundField
