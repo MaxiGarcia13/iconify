@@ -1,12 +1,12 @@
 import type { ChangeEvent, DragEvent } from 'react';
+import type { DropzoneProps, DropzoneState } from './types';
+
 import { useId, useRef, useState } from 'react';
 
 import { validateSourceFile } from '../../lib/upload-constraints';
-
 import { DropzoneClearBar } from './dropzone-clear-bar';
 import { DropzoneStatus } from './dropzone-status';
 import { DropzoneTarget } from './dropzone-target';
-import type { DropzoneProps, DropzoneState } from './types';
 
 /**
  * Source upload dropzone — SPEC section 5.3.

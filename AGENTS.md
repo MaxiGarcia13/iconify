@@ -24,13 +24,13 @@ When SPEC and code disagree, treat it as a defect. Prefer aligning code to SPEC 
 
 ## Stack
 
-| Layer | Technology |
-| --- | --- |
-| UI | Astro 7, Tailwind 4, client islands where interactivity is required |
-| API | Astro server endpoints under `src/pages/api/v1/` |
-| Image | Sharp |
-| Package | archiver (ZIP stream) |
-| ICO | multi-layer builder per SPEC §4 |
+| Layer   | Technology                                                          |
+| ------- | ------------------------------------------------------------------- |
+| UI      | Astro 7, Tailwind 4, client islands where interactivity is required |
+| API     | Astro server endpoints under `src/pages/api/v1/`                    |
+| Image   | Sharp                                                               |
+| Package | archiver (ZIP stream)                                               |
+| ICO     | multi-layer builder per SPEC §4                                     |
 
 ## Commands
 

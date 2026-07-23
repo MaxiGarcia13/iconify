@@ -1,11 +1,11 @@
 # Iconify — Technical Specification
 
-| Field | Value |
-| --- | --- |
-| **Product** | Iconify |
-| **Version** | 1.0.8 |
-| **Status** | Draft |
-| **Stack** | Astro · Node.js (Astro API routes) · Sharp · archiver |
+| Field        | Value                                                                       |
+| ------------ | --------------------------------------------------------------------------- |
+| **Product**  | Iconify                                                                     |
+| **Version**  | 1.0.8                                                                       |
+| **Status**   | Draft                                                                       |
+| **Stack**    | Astro · Node.js (Astro API routes) · Sharp · archiver                       |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
 
 ---
@@ -18,12 +18,12 @@ Processing runs server-side via Sharp. The API streams a ZIP archive back to the
 
 ### 1.1 Goals
 
-| ID | Goal |
-| --- | --- |
-| G1 | Generate a complete favicon / PWA / iOS / Android / OG icon set from one upload in seconds |
-| G2 | Stream a ZIP response without writing intermediate files to persistent storage |
-| G3 | Expose a versioned REST API (`/api/v1/*`) consumable by the Astro UI and third parties |
-| G4 | Provide a focused UI: dropzone → settings → download ZIP + HTML snippet |
+| ID  | Goal                                                                                       |
+| --- | ------------------------------------------------------------------------------------------ |
+| G1  | Generate a complete favicon / PWA / iOS / Android / OG icon set from one upload in seconds |
+| G2  | Stream a ZIP response without writing intermediate files to persistent storage             |
+| G3  | Expose a versioned REST API (`/api/v1/*`) consumable by the Astro UI and third parties     |
+| G4  | Provide a focused UI: dropzone → settings → download ZIP + HTML snippet                    |
 
 ### 1.2 Non-Goals (v1)
 
@@ -103,12 +103,12 @@ src/
 
 ### 1.6 Project file naming
 
-| Kind | Rule | Examples |
-| --- | --- | --- |
-| Source | lowercase kebab-case + extension | `dropzone.tsx`, `settings-panel.tsx`, `upload-constraints.ts` |
-| Tests | same basename + `.test` / `.spec` suffix | `upload-constraints.test.ts` |
-| Docs / markdown | **UPPERCASE** basename + `.md` | `SPEC.md`, `TASKS.md`, `AGENTS.md`, `README.md` |
-| Cursor rules | lowercase kebab-case | `.cursor/rules/sdd.mdc` |
+| Kind            | Rule                                     | Examples                                                      |
+| --------------- | ---------------------------------------- | ------------------------------------------------------------- |
+| Source          | lowercase kebab-case + extension         | `dropzone.tsx`, `settings-panel.tsx`, `upload-constraints.ts` |
+| Tests           | same basename + `.test` / `.spec` suffix | `upload-constraints.test.ts`                                  |
+| Docs / markdown | **UPPERCASE** basename + `.md`           | `SPEC.md`, `TASKS.md`, `AGENTS.md`, `README.md`               |
+| Cursor rules    | lowercase kebab-case                     | `.cursor/rules/sdd.mdc`                                       |
 
 **Exceptions (do not rename to satisfy this rule):**
 
@@ -126,47 +126,47 @@ All raster outputs are PNG unless noted. Dimensions are width × height in pixel
 
 ### 2.1 Modern Web / Favicons
 
-| Filename | Size | Format | Use case |
-| --- | --- | --- | --- |
-| `favicon.ico` | 16, 32, 48 (layers) | `.ico` | Legacy browsers / bookmarks |
-| `favicon-16x16.png` | 16×16 | `.png` | Explicit small favicon |
-| `favicon-32x32.png` | 32×32 | `.png` | Standard browser tab icon |
-| `favicon.svg` | scalable | `.svg` | Modern browsers (source SVG only; otherwise omitted) |
-| `safari-pinned-tab.svg` | scalable | `.svg` | Safari pinned tab (monochrome SVG when source is SVG) |
+| Filename                | Size                | Format | Use case                                              |
+| ----------------------- | ------------------- | ------ | ----------------------------------------------------- |
+| `favicon.ico`           | 16, 32, 48 (layers) | `.ico` | Legacy browsers / bookmarks                           |
+| `favicon-16x16.png`     | 16×16               | `.png` | Explicit small favicon                                |
+| `favicon-32x32.png`     | 32×32               | `.png` | Standard browser tab icon                             |
+| `favicon.svg`           | scalable            | `.svg` | Modern browsers (source SVG only; otherwise omitted)  |
+| `safari-pinned-tab.svg` | scalable            | `.svg` | Safari pinned tab (monochrome SVG when source is SVG) |
 
 ### 2.2 iOS / Apple Touch
 
-| Filename | Size | Format | Use case |
-| --- | --- | --- | --- |
-| `apple-touch-icon-152x152.png` | 152×152 | `.png` | iPad (iOS 7+) |
-| `apple-touch-icon-167x167.png` | 167×167 | `.png` | iPad Pro |
-| `apple-touch-icon-180x180.png` | 180×180 | `.png` | iPhone (primary) |
-| `apple-touch-icon.png` | 180×180 | `.png` | Default Apple touch alias |
+| Filename                       | Size    | Format | Use case                  |
+| ------------------------------ | ------- | ------ | ------------------------- |
+| `apple-touch-icon-152x152.png` | 152×152 | `.png` | iPad (iOS 7+)             |
+| `apple-touch-icon-167x167.png` | 167×167 | `.png` | iPad Pro                  |
+| `apple-touch-icon-180x180.png` | 180×180 | `.png` | iPhone (primary)          |
+| `apple-touch-icon.png`         | 180×180 | `.png` | Default Apple touch alias |
 
 ### 2.3 Android / PWA
 
-| Filename | Size | Format | Use case |
-| --- | --- | --- | --- |
+| Filename                     | Size    | Format | Use case                  |
+| ---------------------------- | ------- | ------ | ------------------------- |
 | `android-chrome-192x192.png` | 192×192 | `.png` | Android home screen / PWA |
-| `android-chrome-512x512.png` | 512×512 | `.png` | Splash / maskable base |
+| `android-chrome-512x512.png` | 512×512 | `.png` | Splash / maskable base    |
 
 ### 2.4 Open Graph / Social
 
-| Filename | Size | Format | Use case |
-| --- | --- | --- | --- |
+| Filename       | Size     | Format | Use case                          |
+| -------------- | -------- | ------ | --------------------------------- |
 | `og-image.png` | 1200×630 | `.png` | Open Graph / Twitter card preview |
 
 ### 2.5 Preset Groups
 
 Clients may request subsets via the `presets` form field (comma-separated or repeated):
 
-| Preset ID | Includes |
-| --- | --- |
-| `favicon` | §2.1 |
-| `apple` | §2.2 |
-| `android` | §2.3 |
-| `og` | §2.4 |
-| `all` | Everything above (default) |
+| Preset ID | Includes                   |
+| --------- | -------------------------- |
+| `favicon` | §2.1                       |
+| `apple`   | §2.2                       |
+| `android` | §2.3                       |
+| `og`      | §2.4                       |
+| `all`     | Everything above (default) |
 
 ### 2.6 ZIP Package Layout
 
@@ -242,14 +242,14 @@ paths:
               examples:
                 invalidType:
                   value:
-                    error: 'VALIDATION_ERROR'
+                    error: VALIDATION_ERROR
                     message: 'Unsupported file type. Allowed: SVG, PNG, JPG.'
                     details:
                       field: file
                 tooLarge:
                   value:
-                    error: 'VALIDATION_ERROR'
-                    message: 'File exceeds maximum size of 10MB.'
+                    error: VALIDATION_ERROR
+                    message: File exceeds maximum size of 10MB.
                     details:
                       field: file
                       maxBytes: 10485760
@@ -266,8 +266,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
-                error: 'PROCESSING_ERROR'
-                message: 'Failed to process image.'
+                error: PROCESSING_ERROR
+                message: Failed to process image.
 
 components:
   schemas:
@@ -283,7 +283,7 @@ components:
         background:
           type: string
           pattern: '^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$'
-          default: 'transparent'
+          default: transparent
           description: |
             Background fill behind padded/resized icons.
             Use `transparent` (literal) or `#RRGGBB` / `#RRGGBBAA`.
@@ -331,22 +331,22 @@ components:
 
 ### 3.1 Status Code Contract
 
-| Code | When | Body |
-| --- | --- | --- |
-| `200` | Assets generated; ZIP streaming | Binary ZIP |
-| `400` | Missing file, bad MIME, >10MB, invalid options | JSON `ErrorResponse` |
-| `415` | Content-Type is not `multipart/form-data` | JSON `ErrorResponse` |
+| Code  | When                                             | Body                 |
+| ----- | ------------------------------------------------ | -------------------- |
+| `200` | Assets generated; ZIP streaming                  | Binary ZIP           |
+| `400` | Missing file, bad MIME, >10MB, invalid options   | JSON `ErrorResponse` |
+| `415` | Content-Type is not `multipart/form-data`        | JSON `ErrorResponse` |
 | `500` | Sharp failure, ICO build failure, ZIP pipe error | JSON `ErrorResponse` |
 
 ### 3.2 Constraints
 
-| Constraint | Value |
-| --- | --- |
-| Max upload size | 10 × 1024 × 1024 bytes (10 MB) |
-| Allowed MIME | `image/svg+xml`, `image/png`, `image/jpeg` |
-| Allowed extensions | `.svg`, `.png`, `.jpg`, `.jpeg` |
-| Response mode | Streamed ZIP (no persisted temp files in v1) |
-| API versioning | Path prefix `/api/v1` |
+| Constraint         | Value                                        |
+| ------------------ | -------------------------------------------- |
+| Max upload size    | 10 × 1024 × 1024 bytes (10 MB)               |
+| Allowed MIME       | `image/svg+xml`, `image/png`, `image/jpeg`   |
+| Allowed extensions | `.svg`, `.png`, `.jpg`, `.jpeg`              |
+| Response mode      | Streamed ZIP (no persisted temp files in v1) |
+| API versioning     | Path prefix `/api/v1`                        |
 
 ---
 
@@ -393,8 +393,8 @@ export interface ProcessResult {
 ### 4.3 Normalize + Pad
 
 ```typescript
-import sharp from 'sharp';
 import type { GenerateOptions } from './types';
+import sharp from 'sharp';
 
 /**
  * Decode source, apply padding + background, optionally round outer corners,
@@ -420,8 +420,8 @@ export async function renderIcon(
     .png()
     .toBuffer();
 
-  const canvasBg =
-    options.background === 'transparent'
+  const canvasBg
+    = options.background === 'transparent'
       ? { r: 0, g: 0, b: 0, alpha: 0 }
       : parseBackground(options.background);
 
@@ -449,7 +449,8 @@ async function applyCornerRadius(
   cornerRadius: number,
 ): Promise<Buffer> {
   const clamped = Math.min(Math.max(cornerRadius, 0), 50);
-  if (clamped === 0) return png;
+  if (clamped === 0)
+    return png;
   const r = Math.round((clamped / 100) * (Math.min(width, height) / 2));
   const mask = Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
@@ -467,10 +468,10 @@ function parseBackground(value: GenerateOptions['background']) {
     return { r: 0, g: 0, b: 0, alpha: 0 };
   }
   const hex = value.replace('#', '');
-  const r = parseInt(hex.slice(0, 2), 16);
-  const g = parseInt(hex.slice(2, 4), 16);
-  const b = parseInt(hex.slice(4, 6), 16);
-  const alpha = hex.length === 8 ? parseInt(hex.slice(6, 8), 16) / 255 : 1;
+  const r = Number.parseInt(hex.slice(0, 2), 16);
+  const g = Number.parseInt(hex.slice(2, 4), 16);
+  const b = Number.parseInt(hex.slice(4, 6), 16);
+  const alpha = hex.length === 8 ? Number.parseInt(hex.slice(6, 8), 16) / 255 : 1;
   return { r, g, b, alpha };
 }
 ```
@@ -478,9 +479,9 @@ function parseBackground(value: GenerateOptions['background']) {
 ### 4.4 Multi-layer ICO
 
 ```typescript
+import type { GenerateOptions } from './types';
 import toIco from 'to-ico';
 import { renderIcon } from './process';
-import type { GenerateOptions } from './types';
 
 const ICO_SIZES = [16, 32, 48] as const;
 
@@ -540,9 +541,9 @@ export async function renderOgImage(
 ### 4.6 ZIP Stream Packager
 
 ```typescript
-import { Readable, PassThrough } from 'node:stream';
-import archiver from 'archiver';
 import type { AssetEntry } from './types';
+import { PassThrough, Readable } from 'node:stream';
+import archiver from 'archiver';
 
 export function createZipStream(assets: AssetEntry[]): PassThrough {
   const output = new PassThrough();
@@ -584,9 +585,8 @@ export function zipToWebResponse(
 ```typescript
 // src/pages/api/v1/generate.ts
 import type { APIRoute } from 'astro';
+import { processIconPackage, zipToWebResponse } from '../../../lib/icons/package';
 import { parseGenerateForm } from '../../../lib/validate';
-import { processIconPackage } from '../../../lib/icons/package';
-import { zipToWebResponse } from '../../../lib/icons/package';
 
 export const prerender = false;
 
@@ -626,12 +626,12 @@ function jsonError(
 
 ### 4.8 Processing Rules
 
-| Rule | Behavior |
-| --- | --- |
-| SVG input | Preserve `favicon.svg` (and optional pinned-tab) as original/sanitized SVG; rasters via Sharp density 300 |
-| Raster input | Skip SVG outputs; still produce all PNG/ICO targets |
-| Transparency | Default background `transparent`; PNG stays alpha; ICO flattens per `to-ico` behavior |
-| Padding | Applied uniformly as % inset; content uses `fit: 'contain'` |
+| Rule              | Behavior                                                                                                          |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------- |
+| SVG input         | Preserve `favicon.svg` (and optional pinned-tab) as original/sanitized SVG; rasters via Sharp density 300         |
+| Raster input      | Skip SVG outputs; still produce all PNG/ICO targets                                                               |
+| Transparency      | Default background `transparent`; PNG stays alpha; ICO flattens per `to-ico` behavior                             |
+| Padding           | Applied uniformly as % inset; content uses `fit: 'contain'`                                                       |
 | Failure isolation | Any Sharp throw → 500; never start ZIP stream after a mid-pipeline failure (build all buffers first, then stream) |
 
 ---
@@ -661,15 +661,15 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 
 ### 5.2 Workflow
 
-| Step | Actor | Behavior |
-| --- | --- | --- |
-| 1 | User | Drops/selects SVG/PNG/JPG ≤ 10 MB |
-| 2 | UI | Validates client-side; shows filename, size, MIME; enables settings |
-| 3 | User | Toggles presets, adjusts padding / corner radius (0–50), picks background |
-| 4 | User | Clicks **Generate & Download ZIP** |
-| 5 | UI | `POST /api/v1/generate` with `FormData`; shows progress/disabled state |
-| 6 | UI | On 200: trigger browser download from blob URL; populate snippet panel |
-| 7 | UI | On 4xx/5xx: show inline error from JSON `message` |
+| Step | Actor | Behavior                                                                  |
+| ---- | ----- | ------------------------------------------------------------------------- |
+| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                         |
+| 2    | UI    | Validates client-side; shows filename, size, MIME; enables settings       |
+| 3    | User  | Toggles presets, adjusts padding / corner radius (0–50), picks background |
+| 4    | User  | Clicks **Generate & Download ZIP**                                        |
+| 5    | UI    | `POST /api/v1/generate` with `FormData`; shows progress/disabled state    |
+| 6    | UI    | On 200: trigger browser download from blob URL; populate snippet panel    |
+| 7    | UI    | On 4xx/5xx: show inline error from JSON `message`                         |
 
 ### 5.3 Component Contracts
 
@@ -682,12 +682,12 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 
 #### Settings Panel
 
-| Control | Type | Default | Notes |
-| --- | --- | --- | --- |
-| Padding | range / number | `0` | 0–50, step 1, suffix `%` |
-| Corner radius | range / number | `0` | 0–50, step 1, suffix `%` of half shorter side; rounds outer canvas |
-| Background | color + “transparent” toggle | transparent | Sends `transparent` or `#RRGGBB` |
-| Presets | checkbox group | all | Maps to `presets` form field |
+| Control       | Type                         | Default     | Notes                                                              |
+| ------------- | ---------------------------- | ----------- | ------------------------------------------------------------------ |
+| Padding       | range / number               | `0`         | 0–50, step 1, suffix `%`                                           |
+| Corner radius | range / number               | `0`         | 0–50, step 1, suffix `%` of half shorter side; rounds outer canvas |
+| Background    | color + “transparent” toggle | transparent | Sends `transparent` or `#RRGGBB`                                   |
+| Presets       | checkbox group               | all         | Maps to `presets` form field                                       |
 
 #### HTML Snippet
 
@@ -739,15 +739,15 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 
 ## 7. Acceptance Criteria
 
-| ID | Criterion |
-| --- | --- |
-| AC1 | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded) |
-| AC2 | Upload SVG returns ZIP that also includes `favicon.svg` |
-| AC3 | Invalid MIME or >10 MB returns `400` JSON with `VALIDATION_ERROR` |
-| AC4 | `padding=20` visibly insets icon content in generated PNG assets |
-| AC5 | `favicon.ico` contains 16, 32, and 48 px layers |
-| AC6 | UI can download ZIP and copy `<head>` snippet in one session without reload |
-| AC7 | No intermediate icon files persist on disk after the request completes |
+| ID  | Criterion                                                                                                                                                                                 |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC1 | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded)                                                                                    |
+| AC2 | Upload SVG returns ZIP that also includes `favicon.svg`                                                                                                                                   |
+| AC3 | Invalid MIME or >10 MB returns `400` JSON with `VALIDATION_ERROR`                                                                                                                         |
+| AC4 | `padding=20` visibly insets icon content in generated PNG assets                                                                                                                          |
+| AC5 | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                           |
+| AC6 | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                               |
+| AC7 | No intermediate icon files persist on disk after the request completes                                                                                                                    |
 | AC8 | `cornerRadius=50` on a square PNG yield produces circular (fully rounded) raster icons; `cornerRadius=0` leaves square corners; invalid values (`-1`, `51`) return `400 VALIDATION_ERROR` |
 
 ---
@@ -765,14 +765,14 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 
 ## Document History
 
-| Version | Date | Notes |
-| --- | --- | --- |
-| 1.0.0 | 2026-07-23 | Initial technical specification |
-| 1.0.1 | 2026-07-23 | §6 milestones checklist moved solely to `TASKS.md` |
-| 1.0.2 | 2026-07-23 | §6 / §8: mark `TASKS.md` items done only when `npm run test:unit` is green |
-| 1.0.3 | 2026-07-23 | §1.6 lowercase kebab-case for source; layout paths updated |
-| 1.0.4 | 2026-07-23 | §1.6 markdown docs use UPPERCASE basenames (`SPEC.md`, …) |
-| 1.0.5 | 2026-07-23 | §1.5 layout: `generator.tsx` island + `preview.ts` client approx. |
-| 1.0.6 | 2026-07-23 | Remove live preview grid from UI (§1.1 G4, §1.3, §1.5, §5) |
-| 1.0.7 | 2026-07-23 | Remove `site.webmanifest` and `head.html` from package + UI |
-| 1.0.8 | 2026-07-23 | Restore UI HTML `<head>` snippet (client-only; still omitted from ZIP) |
+| Version | Date       | Notes                                                                      |
+| ------- | ---------- | -------------------------------------------------------------------------- |
+| 1.0.0   | 2026-07-23 | Initial technical specification                                            |
+| 1.0.1   | 2026-07-23 | §6 milestones checklist moved solely to `TASKS.md`                         |
+| 1.0.2   | 2026-07-23 | §6 / §8: mark `TASKS.md` items done only when `npm run test:unit` is green |
+| 1.0.3   | 2026-07-23 | §1.6 lowercase kebab-case for source; layout paths updated                 |
+| 1.0.4   | 2026-07-23 | §1.6 markdown docs use UPPERCASE basenames (`SPEC.md`, …)                  |
+| 1.0.5   | 2026-07-23 | §1.5 layout: `generator.tsx` island + `preview.ts` client approx.          |
+| 1.0.6   | 2026-07-23 | Remove live preview grid from UI (§1.1 G4, §1.3, §1.5, §5)                 |
+| 1.0.7   | 2026-07-23 | Remove `site.webmanifest` and `head.html` from package + UI                |
+| 1.0.8   | 2026-07-23 | Restore UI HTML `<head>` snippet (client-only; still omitted from ZIP)     |

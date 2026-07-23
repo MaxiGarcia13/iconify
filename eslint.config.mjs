@@ -7,4 +7,9 @@ export default eslintConfig(
     react: true,
     astro: true,
   },
+  {
+    rules: {
+      'tailwindcss/no-custom-classname': 'off',
+    },
+  },
 );
