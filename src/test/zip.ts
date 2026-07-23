@@ -1,7 +1,7 @@
 import type { Buffer } from 'node:buffer';
 
-const EOCD_SIG = 0x06_05_4b_50;
-const CD_SIG = 0x02_01_4b_50;
+const EOCD_SIG = 0x06_05_4B_50;
+const CD_SIG = 0x02_01_4B_50;
 
 /** List entry names from a ZIP central directory (no extra deps). */
 export function listZipEntryNames(zip: Buffer): string[] {

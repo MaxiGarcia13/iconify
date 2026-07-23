@@ -56,8 +56,8 @@ describe('post /api/v1/generate', () => {
     });
   });
 
-  describe('ZIP membership via API (curl equivalent / AC1 / AC2)', () => {
-    it('PNG + presets=all ZIP matches §2.1–2.4 minus SVG (AC1)', async () => {
+  describe('zIP membership via API (curl equivalent / AC1 / AC2)', () => {
+    it('pNG + presets=all ZIP matches §2.1–2.4 minus SVG (AC1)', async () => {
       const png = await solidPng();
       const request = await multipartRequest({
         file: new File([Uint8Array.from(png)], 'logo.png', {
@@ -83,7 +83,7 @@ describe('post /api/v1/generate', () => {
       expect(names).not.toContain('safari-pinned-tab.svg');
     });
 
-    it('SVG upload ZIP includes favicon.svg (AC2)', async () => {
+    it('sVG upload ZIP includes favicon.svg (AC2)', async () => {
       const svg = solidSvg();
       const request = await multipartRequest({
         file: new File([Uint8Array.from(svg)], 'logo.svg', {
@@ -110,7 +110,7 @@ describe('post /api/v1/generate', () => {
     });
   });
 
-  describe('JSON error contract (SPEC §3.1)', () => {
+  describe('jSON error contract (SPEC §3.1)', () => {
     it('returns 415 UNSUPPORTED_MEDIA_TYPE when Content-Type is not multipart', async () => {
       const request = new Request('http://localhost/api/v1/generate', {
         method: 'POST',
@@ -207,7 +207,7 @@ describe('post /api/v1/generate', () => {
     it('returns 500 PROCESSING_ERROR when Sharp cannot decode the image', async () => {
       const request = await multipartRequest({
         file: new File(
-          [new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])],
+          [new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A])],
           'corrupt.png',
           { type: 'image/png' },
         ),

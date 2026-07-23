@@ -15,10 +15,10 @@ export function DropzoneFilePreview({ file }: DropzoneFilePreviewProps) {
       <span className="max-w-full text-sm font-medium break-all">
         {file.name}
       </span>
-      <span className="text-muted-foreground text-sm">
+      <span className="text-sm text-muted-foreground">
         {`${formatBytes(file.size)} · ${mimeLabel}`}
       </span>
-      <span className="text-muted-foreground text-xs">
+      <span className="text-xs text-muted-foreground">
         Tap to replace, or drop another file
       </span>
     </span>

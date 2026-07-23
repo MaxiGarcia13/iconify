@@ -370,6 +370,8 @@ components:
 ### 4.2 Types
 
 ```typescript
+import type { Buffer } from 'node:buffer';
+
 export type PresetId = 'favicon' | 'apple' | 'android' | 'og' | 'all';
 
 export interface GenerateOptions {
@@ -394,6 +396,7 @@ export interface ProcessResult {
 
 ```typescript
 import type { GenerateOptions } from './types';
+import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
 
 /**
@@ -479,6 +482,7 @@ function parseBackground(value: GenerateOptions['background']) {
 ### 4.4 Multi-layer ICO
 
 ```typescript
+import type { Buffer } from 'node:buffer';
 import type { GenerateOptions } from './types';
 import toIco from 'to-ico';
 import { renderIcon } from './process';
@@ -499,6 +503,10 @@ export async function buildFaviconIco(
 ### 4.5 OG Image (non-square)
 
 ```typescript
+import type { Buffer } from 'node:buffer';
+import type { GenerateOptions } from './types';
+import sharp from 'sharp';
+
 export async function renderOgImage(
   input: Buffer,
   options: Pick<GenerateOptions, 'background' | 'padding' | 'cornerRadius'>,

@@ -16,7 +16,7 @@ export function DropzonePrompt({ displayState }: DropzonePromptProps) {
   return (
     <span className="flex max-w-full flex-col items-center gap-2">
       <span className="text-sm font-medium">{label}</span>
-      <span className="text-muted-foreground text-sm">
+      <span className="text-sm text-muted-foreground">
         {`or tap to browse · max ${formatBytes(MAX_UPLOAD_BYTES)}`}
       </span>
     </span>

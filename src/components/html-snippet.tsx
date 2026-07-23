@@ -71,7 +71,7 @@ export function HtmlSnippet({ html }: HtmlSnippetProps) {
         id={statusId}
         role="status"
         aria-live="polite"
-        className={copyStatus ? 'text-muted-foreground text-sm' : 'sr-only'}
+        className={copyStatus ? 'text-sm text-muted-foreground' : 'sr-only'}
       >
         {copyStatus ?? ''}
       </p>
