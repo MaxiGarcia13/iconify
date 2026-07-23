@@ -19,7 +19,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] SVG passthrough for `favicon.svg` when source is SVG
 - [x] `site.webmanifest` generator
 - [x] `head.html` / snippet generator
-- [ ] ZIP stream packager (`createZipStream` / `zipToWebResponse`)
+- [x] ZIP stream packager (`createZipStream` / `zipToWebResponse`)
 - [x] Vitest setup: `"test:unit": "vitest"` in `package.json` scripts
 - [x] Vitest config (`vitest.config.ts`) targeting `src/**/*.{test,spec}.{ts,tsx}`
 - [ ] Unit tests for processing core: one assertion per SPEC §2 matrix filename/size (`renderIcon`, `renderOgImage`, `buildFaviconIco`, SVG passthrough)
