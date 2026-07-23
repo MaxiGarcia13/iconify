@@ -100,9 +100,9 @@ SPEC §2.5 upload-basename / §2.6 preset `original` / §4.6 `renderOriginal` / 
 
 ## M5 — Release
 
-- [ ] SPEC status → Accepted
-- [ ] Version bump + changelog
-- [ ] Deploy config verified (SSR adapter if needed)
+- [x] SPEC status → Accepted
+- [x] Version bump + changelog
+- [x] Deploy config verified (SSR adapter if needed)
 
 ## Verification Shortcuts
 

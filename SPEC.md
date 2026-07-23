@@ -3,8 +3,8 @@
 | Field        | Value                                                                       |
 | ------------ | --------------------------------------------------------------------------- |
 | **Product**  | Iconify                                                                     |
-| **Version**  | 1.0.15                                                                      |
-| **Status**   | Draft                                                                       |
+| **Version**  | 1.0.16                                                                      |
+| **Status**   | Accepted                                                                    |
 | **Stack**    | Astro · Node.js (Astro API routes) · Sharp · archiver                       |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
 
@@ -105,12 +105,12 @@ src/
 
 ### 1.6 Project file naming
 
-| Kind            | Rule                                     | Examples                                                      |
-| --------------- | ---------------------------------------- | ------------------------------------------------------------- |
-| Source          | lowercase kebab-case + extension         | `dropzone.tsx`, `settings-panel.tsx`, `upload-constraints.ts` |
-| Tests           | same basename + `.test` / `.spec` suffix | `upload-constraints.test.ts`                                  |
-| Docs / markdown | **UPPERCASE** basename + `.md`           | `SPEC.md`, `TASKS.md`, `AGENTS.md`, `README.md`               |
-| Cursor rules    | lowercase kebab-case                     | `.cursor/rules/sdd.mdc`                                       |
+| Kind            | Rule                                     | Examples                                                        |
+| --------------- | ---------------------------------------- | --------------------------------------------------------------- |
+| Source          | lowercase kebab-case + extension         | `dropzone.tsx`, `settings-panel.tsx`, `upload-constraints.ts`   |
+| Tests           | same basename + `.test` / `.spec` suffix | `upload-constraints.test.ts`                                    |
+| Docs / markdown | **UPPERCASE** basename + `.md`           | `SPEC.md`, `TASKS.md`, `AGENTS.md`, `README.md`, `CHANGELOG.md` |
+| Cursor rules    | lowercase kebab-case                     | `.cursor/rules/sdd.mdc`                                         |
 
 **Exceptions (do not rename to satisfy this rule):**
 
@@ -434,7 +434,8 @@ Helper: `isSameOriginRequest(request)` in `src/lib/same-origin.ts`.
 ```typescript
 import type { Buffer } from 'node:buffer';
 
-export type PresetId = 'favicon' | 'apple' | 'android' | 'og' | 'original' | 'all';
+export type PresetId
+  = 'favicon' | 'apple' | 'android' | 'og' | 'original' | 'all';
 
 export interface GenerateOptions {
   background: 'transparent' | `#${string}`;
@@ -514,7 +515,12 @@ export async function renderIcon(
     .png()
     .toBuffer();
 
-  png = await applyCornerRadius(png, targetSize, targetSize, options.cornerRadius);
+  png = await applyCornerRadius(
+    png,
+    targetSize,
+    targetSize,
+    options.cornerRadius,
+  );
   return png;
 }
 
@@ -548,7 +554,8 @@ function parseBackground(value: GenerateOptions['background']) {
   const r = Number.parseInt(hex.slice(0, 2), 16);
   const g = Number.parseInt(hex.slice(2, 4), 16);
   const b = Number.parseInt(hex.slice(4, 6), 16);
-  const alpha = hex.length === 8 ? Number.parseInt(hex.slice(6, 8), 16) / 255 : 1;
+  const alpha
+    = hex.length === 8 ? Number.parseInt(hex.slice(6, 8), 16) / 255 : 1;
   return { r, g, b, alpha };
 }
 ```
@@ -740,7 +747,10 @@ export function zipToWebResponse(
 ```typescript
 // src/pages/api/v1/generate.ts
 import type { APIRoute } from 'astro';
-import { processIconPackage, zipToWebResponse } from '../../../lib/icons/package';
+import {
+  processIconPackage,
+  zipToWebResponse,
+} from '../../../lib/icons/package';
 import { isSameOriginRequest } from '../../../lib/same-origin';
 import { parseGenerateForm } from '../../../lib/validate';
 
@@ -758,7 +768,11 @@ export const POST: APIRoute = async ({ request }) => {
 
     const contentType = request.headers.get('content-type') ?? '';
     if (!contentType.includes('multipart/form-data')) {
-      return jsonError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Expected multipart/form-data.');
+      return jsonError(
+        415,
+        'UNSUPPORTED_MEDIA_TYPE',
+        'Expected multipart/form-data.',
+      );
     }
 
     const form = await request.formData();
@@ -1022,3 +1036,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.13  | 2026-07-23 | Preset `original` → `original.png` at source size; AC11                    |
 | 1.0.14  | 2026-07-23 | Default `all,original`; original ZIP name = upload basename; AC11          |
 | 1.0.15  | 2026-07-23 | `POST /api/v1/generate` same-origin only (`FORBIDDEN_ORIGIN`); AC12        |
+| 1.0.16  | 2026-07-23 | Status → Accepted; v1 release (package `1.0.16`, `CHANGELOG.md`)           |
