@@ -652,8 +652,10 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 
 ```text
 ┌─────────────────────────────────────────────────────────┐
-│  Iconify                                                 │
-│  High-performance icon set generator                     │
+│  [app icon]  Iconify                                     │
+│              High-performance icon set generator         │
+│              Short product description (one upload →     │
+│              favicons, PWA/iOS, OG, HTML snippet)        │
 ├────────────────────────────┬────────────────────────────┤
 │  Dropzone                  │  Settings                   │
 │  • drag & drop             │  • padding %                │
@@ -666,6 +668,8 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 │  HTML <head> snippet                    [ Copy ]         │
 └─────────────────────────────────────────────────────────┘
 ```
+
+Header brand mark uses an existing `public/` icon (e.g. `android-chrome-192x192.png`); do not invent filenames.
 
 ### 5.2 Workflow
 
@@ -848,3 +852,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.7   | 2026-07-23 | Remove `site.webmanifest` and `head.html` from package + UI                |
 | 1.0.8   | 2026-07-23 | Restore UI HTML `<head>` snippet (client-only; still omitted from ZIP)     |
 | 1.0.9   | 2026-07-23 | §5.6 site document head: SEO, Open Graph, Twitter Card via `public/`       |
+| 1.0.10  | 2026-07-23 | §5.1 header: `public/` brand icon + short product description              |
