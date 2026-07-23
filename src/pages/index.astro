@@ -1,5 +1,6 @@
 ---
 import { Dropzone } from '../components/dropzone';
+import { SettingsPanel } from '../components/settings-panel';
 import AppLayout from '../layouts/app.astro';
 ---
 
@@ -12,8 +13,20 @@ import AppLayout from '../layouts/app.astro';
       </p>
     </header>
 
-    <section aria-label="Upload source image" class="max-w-xl">
-      <Dropzone client:load />
-    </section>
+    <div class="grid gap-8 md:grid-cols-2 md:gap-10">
+      <section aria-label="Upload source image" class="min-w-0">
+        <h2 class="mb-3 text-sm font-medium tracking-wide uppercase">
+          Dropzone
+        </h2>
+        <Dropzone client:load />
+      </section>
+
+      <section aria-label="Generation settings" class="min-w-0">
+        <h2 class="mb-3 text-sm font-medium tracking-wide uppercase">
+          Settings
+        </h2>
+        <SettingsPanel client:load />
+      </section>
+    </div>
   </main>
 </AppLayout>
