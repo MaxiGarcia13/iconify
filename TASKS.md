@@ -42,6 +42,17 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] Loading / disabled / error states (`aria-live`)
 - [ ] Mobile support styles
 
+## M3b — Corner radius
+
+SPEC §3 `cornerRadius` / §4 `applyCornerRadius` / §5 settings / AC8.
+
+- [ ] Processing: `applyCornerRadius` SVG mask (`dest-in`) after pad/background in `renderIcon` + `renderOgImage` (ICO inherits via `renderIcon`); no-op at `0`; skip SVG passthrough
+- [ ] Types + defaults: `GenerateOptions.cornerRadius` (0–50, default `0`) in `types` / `generate-defaults`
+- [ ] API: accept multipart `cornerRadius`; validate 0–50 like padding; reject with `400 VALIDATION_ERROR` + `details.field: cornerRadius`
+- [ ] UI: settings control (range/number 0–50, `%`); wire into settings state + `FormData` (`cornerRadius`)
+- [ ] Unit tests: process mask math / no-op at 0; validate boundaries; API happy-path + invalid; settings → FormData mapping
+- [ ] Verify AC8
+
 ## M4 — Hardening
 
 - [ ] Transparent PNG + opaque background edge cases
@@ -66,3 +77,4 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 | AC5 | Inspect `favicon.ico` layers 16/32/48                  |
 | AC6 | UI download + copy snippet without reload              |
 | AC7 | No leftover files under OS temp after request          |
+| AC8 | `cornerRadius=50` → circular square PNGs; `0` → square; bad value → `400` |

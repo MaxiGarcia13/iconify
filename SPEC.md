@@ -69,7 +69,7 @@ flowchart LR
 1. User drops or selects an image in the Astro UI.
 2. Client sends `multipart/form-data` to `POST /api/v1/generate`.
 3. API validates MIME type, size (≤ 10 MB), and option fields.
-4. Sharp normalizes the buffer (decode → optional pad/background → resize per target).
+4. Sharp normalizes the buffer (decode → optional pad/background → resize per target → optional corner-radius mask).
 5. Specialized builders emit `.ico`, `.png`, and optional `.svg` assets.
 6. Packager pipes all entries into an `archiver` ZIP stream.
 7. Response headers set `Content-Type: application/zip` and `Content-Disposition: attachment`.
@@ -293,6 +293,16 @@ components:
           maximum: 50
           default: 0
           description: Padding as percentage of the shorter side (0–50).
+        cornerRadius:
+          type: number
+          minimum: 0
+          maximum: 50
+          default: 0
+          description: |
+            Outer corner radius as a percentage of half the shorter canvas side (0–50).
+            `0` = square corners; `50` = fully rounded (circle on square icons).
+            Applied to raster outputs via an SVG rounded-rect alpha mask after pad/background.
+            Does not alter SVG passthrough (`favicon.svg`).
         presets:
           type: string
           default: all
@@ -365,6 +375,7 @@ export type PresetId = 'favicon' | 'apple' | 'android' | 'og' | 'all';
 export interface GenerateOptions {
   background: 'transparent' | `#${string}`;
   padding: number; // 0–50
+  cornerRadius: number; // 0–50 (% of half the shorter canvas side)
   presets: PresetId[];
 }
 
@@ -386,13 +397,16 @@ import sharp from 'sharp';
 import type { GenerateOptions } from './types';
 
 /**
- * Decode source, apply padding + background, return a square PNG buffer
- * at `targetSize` suitable for further encoding.
+ * Decode source, apply padding + background, optionally round outer corners,
+ * return a square PNG buffer at `targetSize` suitable for further encoding.
+ *
+ * Corner rounding: when `cornerRadius > 0`, composite an SVG rounded-rect mask
+ * with blend `dest-in`. Radius px = round((cornerRadius / 100) * (min(w,h) / 2)).
  */
 export async function renderIcon(
   input: Buffer,
   targetSize: number,
-  options: Pick<GenerateOptions, 'background' | 'padding'>,
+  options: Pick<GenerateOptions, 'background' | 'padding' | 'cornerRadius'>,
 ): Promise<Buffer> {
   const padRatio = Math.min(Math.max(options.padding, 0), 50) / 100;
   const contentSize = Math.max(1, Math.round(targetSize * (1 - padRatio * 2)));
@@ -411,7 +425,7 @@ export async function renderIcon(
       ? { r: 0, g: 0, b: 0, alpha: 0 }
       : parseBackground(options.background);
 
-  return sharp({
+  let png = await sharp({
     create: {
       width: targetSize,
       height: targetSize,
@@ -420,6 +434,30 @@ export async function renderIcon(
     },
   })
     .composite([{ input: resized, left: paddingPx, top: paddingPx }])
+    .png()
+    .toBuffer();
+
+  png = await applyCornerRadius(png, targetSize, targetSize, options.cornerRadius);
+  return png;
+}
+
+/** Apply outer rounded-rect alpha mask; no-op when radius is 0. */
+async function applyCornerRadius(
+  png: Buffer,
+  width: number,
+  height: number,
+  cornerRadius: number,
+): Promise<Buffer> {
+  const clamped = Math.min(Math.max(cornerRadius, 0), 50);
+  if (clamped === 0) return png;
+  const r = Math.round((clamped / 100) * (Math.min(width, height) / 2));
+  const mask = Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
+      <rect width="${width}" height="${height}" rx="${r}" ry="${r}" fill="#fff"/>
+    </svg>`,
+  );
+  return sharp(png)
+    .composite([{ input: mask, blend: 'dest-in' }])
     .png()
     .toBuffer();
 }
@@ -448,7 +486,7 @@ const ICO_SIZES = [16, 32, 48] as const;
 
 export async function buildFaviconIco(
   input: Buffer,
-  options: Pick<GenerateOptions, 'background' | 'padding'>,
+  options: Pick<GenerateOptions, 'background' | 'padding' | 'cornerRadius'>,
 ): Promise<Buffer> {
   const layers = await Promise.all(
     ICO_SIZES.map((size) => renderIcon(input, size, options)),
@@ -462,7 +500,7 @@ export async function buildFaviconIco(
 ```typescript
 export async function renderOgImage(
   input: Buffer,
-  options: Pick<GenerateOptions, 'background' | 'padding'>,
+  options: Pick<GenerateOptions, 'background' | 'padding' | 'cornerRadius'>,
 ): Promise<Buffer> {
   const width = 1200;
   const height = 630;
@@ -482,7 +520,7 @@ export async function renderOgImage(
   const left = Math.floor((width - (meta.width ?? innerW)) / 2);
   const top = Math.floor((height - (meta.height ?? innerH)) / 2);
 
-  return sharp({
+  let png = await sharp({
     create: {
       width,
       height,
@@ -493,6 +531,9 @@ export async function renderOgImage(
     .composite([{ input: logo, left, top }])
     .png()
     .toBuffer();
+
+  png = await applyCornerRadius(png, width, height, options.cornerRadius);
+  return png;
 }
 ```
 
@@ -608,8 +649,9 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 ├────────────────────────────┬────────────────────────────┤
 │  Dropzone                  │  Settings                   │
 │  • drag & drop             │  • padding %                │
-│  • click to browse         │  • background color         │
-│  • file meta + clear       │  • presets (checkboxes)     │
+│  • click to browse         │  • corner radius %          │
+│  • file meta + clear       │  • background color         │
+│                            │  • presets (checkboxes)     │
 ├────────────────────────────┴────────────────────────────┤
 │  [ Generate & Download ZIP ]                             │
 ├─────────────────────────────────────────────────────────┤
@@ -623,7 +665,7 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 | --- | --- | --- |
 | 1 | User | Drops/selects SVG/PNG/JPG ≤ 10 MB |
 | 2 | UI | Validates client-side; shows filename, size, MIME; enables settings |
-| 3 | User | Toggles presets, adjusts padding (0–50), picks background |
+| 3 | User | Toggles presets, adjusts padding / corner radius (0–50), picks background |
 | 4 | User | Clicks **Generate & Download ZIP** |
 | 5 | UI | `POST /api/v1/generate` with `FormData`; shows progress/disabled state |
 | 6 | UI | On 200: trigger browser download from blob URL; populate snippet panel |
@@ -643,6 +685,7 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 | Control | Type | Default | Notes |
 | --- | --- | --- | --- |
 | Padding | range / number | `0` | 0–50, step 1, suffix `%` |
+| Corner radius | range / number | `0` | 0–50, step 1, suffix `%` of half shorter side; rounds outer canvas |
 | Background | color + “transparent” toggle | transparent | Sends `transparent` or `#RRGGBB` |
 | Presets | checkbox group | all | Maps to `presets` form field |
 
@@ -675,6 +718,7 @@ Omit the SVG `<link>` when source was not SVG. **Copy** button uses `navigator.c
 const body = new FormData();
 body.set('file', file);
 body.set('padding', String(padding));
+body.set('cornerRadius', String(cornerRadius));
 body.set('background', transparent ? 'transparent' : backgroundHex);
 body.set('presets', selectedPresets.join(','));
 
@@ -704,6 +748,7 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | AC5 | `favicon.ico` contains 16, 32, and 48 px layers |
 | AC6 | UI can download ZIP and copy `<head>` snippet in one session without reload |
 | AC7 | No intermediate icon files persist on disk after the request completes |
+| AC8 | `cornerRadius=50` on a square PNG yield produces circular (fully rounded) raster icons; `cornerRadius=0` leaves square corners; invalid values (`-1`, `51`) return `400 VALIDATION_ERROR` |
 
 ---
 
