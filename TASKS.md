@@ -50,8 +50,8 @@ SPEC §3 `cornerRadius` / §4 `applyCornerRadius` / §5 settings / AC8.
 - [x] Types + defaults: `GenerateOptions.cornerRadius` (0–100, default `0`) in `types` / `generate-defaults`
 - [x] API: accept multipart `cornerRadius`; validate 0–100; reject with `400 VALIDATION_ERROR` + `details.field: cornerRadius`
 - [x] UI: settings control (range/number 0–100, `%`); wire into settings state + `FormData` (`cornerRadius`)
-- [ ] Unit tests: process mask math / no-op at 0; validate boundaries; API happy-path + invalid; settings → FormData mapping
-- [ ] Verify AC8
+- [x] Unit tests: process mask math / no-op at 0; validate boundaries; API happy-path + invalid; settings → FormData mapping
+- [x] Verify AC8
 
 ## M3c — Site SEO & social meta
 

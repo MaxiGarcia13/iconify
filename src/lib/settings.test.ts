@@ -105,6 +105,27 @@ describe('toGenerateOptions / appendSettingsToFormData', () => {
     ).toBe('#112233');
   });
 
+  it('maps cornerRadius into GenerateOptions and FormData (SPEC §5.5)', () => {
+    const options = toGenerateOptions({
+      ...SETTINGS_DEFAULTS,
+      cornerRadius: 75,
+    });
+    expect(options.cornerRadius).toBe(75);
+
+    const clamped = toGenerateOptions({
+      ...SETTINGS_DEFAULTS,
+      cornerRadius: 150,
+    });
+    expect(clamped.cornerRadius).toBe(100);
+
+    const body = new FormData();
+    appendSettingsToFormData(body, {
+      ...SETTINGS_DEFAULTS,
+      cornerRadius: 88,
+    });
+    expect(body.get('cornerRadius')).toBe('88');
+  });
+
   it('appends SPEC §5.5 FormData fields', () => {
     const body = new FormData();
     appendSettingsToFormData(body, {

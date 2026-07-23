@@ -204,25 +204,48 @@ describe('post /api/v1/generate', () => {
       });
     });
 
-    it('returns 400 VALIDATION_ERROR for invalid cornerRadius', async () => {
+    it('returns 200 ZIP when cornerRadius=100 (AC8 happy path)', async () => {
       const png = await solidPng();
       const request = await multipartRequest({
         file: new File([Uint8Array.from(png)], 'logo.png', {
           type: 'image/png',
         }),
-        cornerRadius: '101',
+        presets: 'favicon',
+        cornerRadius: '100',
       });
 
       const response = await POST(apiContext(request));
-      expect(response.status).toBe(400);
-      expect(response.headers.get('Content-Type')).toBe('application/json');
+      expect(response.status).toBe(200);
+      expect(response.headers.get('Content-Type')).toBe('application/zip');
 
-      const body = await response.json();
-      expect(body).toEqual({
-        error: 'VALIDATION_ERROR',
-        message: 'Invalid cornerRadius. Expected a number from 0 to 100.',
-        details: { field: 'cornerRadius' },
-      });
+      const bytes = Buffer.from(await response.arrayBuffer());
+      expect(bytes.subarray(0, 2).toString('ascii')).toBe('PK');
+      expect(listZipEntryNames(bytes)).toEqual(
+        resolveMatrix(['favicon'], false).map((e) => e.name),
+      );
+    });
+
+    it('returns 400 VALIDATION_ERROR for invalid cornerRadius', async () => {
+      const png = await solidPng();
+      for (const cornerRadius of ['-1', '101']) {
+        const request = await multipartRequest({
+          file: new File([Uint8Array.from(png)], 'logo.png', {
+            type: 'image/png',
+          }),
+          cornerRadius,
+        });
+
+        const response = await POST(apiContext(request));
+        expect(response.status).toBe(400);
+        expect(response.headers.get('Content-Type')).toBe('application/json');
+
+        const body = await response.json();
+        expect(body).toEqual({
+          error: 'VALIDATION_ERROR',
+          message: 'Invalid cornerRadius. Expected a number from 0 to 100.',
+          details: { field: 'cornerRadius' },
+        });
+      }
     });
 
     it('returns 500 PROCESSING_ERROR when Sharp cannot decode the image', async () => {
