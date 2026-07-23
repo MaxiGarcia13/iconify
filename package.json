@@ -1,0 +1,20 @@
+{
+  "name": "iconify",
+  "version": "0.0.0",
+  "description": "⚡ High-performance icon set generator built with Astro and Sharp. Generate favicons, PWA icons, iOS, and Android assets in seconds.",
+  "homepage": "https://github.com/MaxiGarcia13/iconify#readme",
+  "bugs": {
+    "url": "https://github.com/MaxiGarcia13/iconify/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MaxiGarcia13/iconify.git"
+  },
+  "license": "ISC",
+  "author": "Maximiliano Garcia Mortigliengo",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
