@@ -1,7 +1,5 @@
 ---
-import { siteCanonicalUrl } from '@/lib/site';
-import { SITE_ICON_LINKS } from '@/lib/site-icons';
-import { siteOpenGraph, siteTwitterCard } from '@/lib/site-meta';
+import { capitalize } from '@maxigarcia/js-utils';
 import { description, name } from '../../package.json';
 import '@/index.css';
 
@@ -9,13 +7,76 @@ if (!Astro.site) {
   throw new Error('Astro `site` must be set (SPEC §5.6)');
 }
 
-const canonicalUrl = siteCanonicalUrl(Astro.site);
-const og = siteOpenGraph(Astro.site);
-const twitter = siteTwitterCard(Astro.site);
+/** Favicon / Apple Touch / Android Chrome links — SPEC §5.6 table order. */
+const SITE_ICON_LINKS: {
+  rel: 'icon' | 'apple-touch-icon';
+  href: string;
+  sizes: string;
+  type?: 'image/png';
+}[] = [
+  { rel: 'icon', href: '/favicon.ico', sizes: 'any' },
+  {
+    rel: 'icon',
+    type: 'image/png',
+    sizes: '16x16',
+    href: '/favicon-16x16.png',
+  },
+  {
+    rel: 'icon',
+    type: 'image/png',
+    sizes: '32x32',
+    href: '/favicon-32x32.png',
+  },
+  {
+    rel: 'apple-touch-icon',
+    sizes: '180x180',
+    href: '/apple-touch-icon.png',
+  },
+  {
+    rel: 'apple-touch-icon',
+    sizes: '152x152',
+    href: '/apple-touch-icon-152x152.png',
+  },
+  {
+    rel: 'apple-touch-icon',
+    sizes: '167x167',
+    href: '/apple-touch-icon-167x167.png',
+  },
+  {
+    rel: 'apple-touch-icon',
+    sizes: '180x180',
+    href: '/apple-touch-icon-180x180.png',
+  },
+  {
+    rel: 'icon',
+    type: 'image/png',
+    sizes: '192x192',
+    href: '/android-chrome-192x192.png',
+  },
+  {
+    rel: 'icon',
+    type: 'image/png',
+    sizes: '512x512',
+    href: '/android-chrome-512x512.png',
+  },
+];
+
+/** Path under `public/` — SPEC §5.6 / §2.4. */
+const SITE_OG_IMAGE_PATH = '/og-image.png';
+const SITE_OG_IMAGE_WIDTH = 1200;
+const SITE_OG_IMAGE_HEIGHT = 630;
+const SITE_OG_IMAGE_TYPE = 'image/png';
+/** Shared by `og:image:alt` and `twitter:image:alt` (SPEC §5.6). */
+const SITE_OG_IMAGE_ALT
+  = 'Iconify — high-performance icon set generator preview';
+
+const canonicalUrl = new URL('/', Astro.site).href;
+const ogImageUrl = new URL(SITE_OG_IMAGE_PATH, Astro.site).href;
 
 /** SPEC §5.6 — matches `public/site.webmanifest` theme_color / dark canvas. */
 const themeColor = '#141826';
 const webManifestHref = '/site.webmanifest';
+const title = capitalize(name);
 ---
 
 <html lang="en">
@@ -26,7 +87,7 @@ const webManifestHref = '/site.webmanifest';
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
 
-    <title>{name}</title>
+    <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content={themeColor} />
     <link rel="canonical" href={canonicalUrl} />
@@ -43,23 +104,23 @@ const webManifestHref = '/site.webmanifest';
       ))
     }
 
-    <meta property="og:type" content={og.type} />
-    <meta property="og:locale" content={og.locale} />
-    <meta property="og:site_name" content={og.siteName} />
-    <meta property="og:title" content={og.title} />
-    <meta property="og:description" content={og.description} />
-    <meta property="og:url" content={og.url} />
-    <meta property="og:image" content={og.image} />
-    <meta property="og:image:width" content={String(og.imageWidth)} />
-    <meta property="og:image:height" content={String(og.imageHeight)} />
-    <meta property="og:image:type" content={og.imageType} />
-    <meta property="og:image:alt" content={og.imageAlt} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content={title} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content={String(SITE_OG_IMAGE_WIDTH)} />
+    <meta property="og:image:height" content={String(SITE_OG_IMAGE_HEIGHT)} />
+    <meta property="og:image:type" content={SITE_OG_IMAGE_TYPE} />
+    <meta property="og:image:alt" content={SITE_OG_IMAGE_ALT} />
 
-    <meta name="twitter:card" content={twitter.card} />
-    <meta name="twitter:title" content={twitter.title} />
-    <meta name="twitter:description" content={twitter.description} />
-    <meta name="twitter:image" content={twitter.image} />
-    <meta name="twitter:image:alt" content={twitter.imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={SITE_OG_IMAGE_ALT} />
   </head>
 
   <body>
