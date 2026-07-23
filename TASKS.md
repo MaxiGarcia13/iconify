@@ -8,7 +8,7 @@ Derived from [`SPEC.md`](./SPEC.md) §6. Check items as they complete. Do not ma
 - [x] `AGENTS.md` authored
 - [x] Cursor SDD rules under `.cursor/rules/`
 - [x] Enable Astro server mode / Node adapter as required for API routes
-- [ ] Add dependencies: `sharp`, `archiver`, ICO helper (`to-ico` or approved equivalent)
+- [x] Add dependencies: `sharp`, `archiver`, ICO helper (`to-ico` or approved equivalent)
 - [ ] Create `src/lib/icons/matrix.ts` mirroring SPEC §2
 
 ## M1 — Processing Core
