@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { solidPng } from '../test/fixtures';
 import {
   GENERATE_OPTION_DEFAULTS,
+  MAX_UPLOAD_BYTES,
   parseGenerateForm,
 } from './validate';
 
@@ -90,5 +91,132 @@ describe('parseGenerateForm', () => {
       return;
 
     expect(parsed.sourceIsSvg).toBe(true);
+  });
+
+  it('rejects disallowed MIME types (SPEC §3.2 / AC3)', async () => {
+    const form = await formWithFile(
+      undefined,
+      new File([new Uint8Array([0x47, 0x49, 0x46])], 'anim.gif', {
+        type: 'image/gif',
+      }),
+    );
+
+    const parsed = await parseGenerateForm(form);
+    expect(parsed).toEqual({
+      ok: false,
+      message: 'Unsupported file type. Allowed: SVG, PNG, JPG.',
+      details: { field: 'file' },
+    });
+  });
+
+  it('rejects disallowed extensions even with an allowed MIME', async () => {
+    const png = await solidPng();
+    const form = await formWithFile(
+      undefined,
+      new File([Uint8Array.from(png)], 'logo.webp', { type: 'image/png' }),
+    );
+
+    const parsed = await parseGenerateForm(form);
+    expect(parsed.ok).toBe(false);
+    if (parsed.ok)
+      return;
+    expect(parsed.message).toBe(
+      'Unsupported file type. Allowed: SVG, PNG, JPG.',
+    );
+    expect(parsed.details).toEqual({ field: 'file' });
+  });
+
+  it('rejects uploads larger than 10 MB (SPEC §3.2 / AC3)', async () => {
+    const form = await formWithFile(
+      undefined,
+      new File([new Uint8Array(MAX_UPLOAD_BYTES + 1)], 'huge.png', {
+        type: 'image/png',
+      }),
+    );
+
+    const parsed = await parseGenerateForm(form);
+    expect(parsed).toEqual({
+      ok: false,
+      message: 'File exceeds maximum size of 10MB.',
+      details: { field: 'file', maxBytes: MAX_UPLOAD_BYTES },
+    });
+  });
+
+  it('rejects padding outside 0–50', async () => {
+    for (const padding of ['-1', '51', 'abc']) {
+      const form = await formWithFile({ padding });
+      const parsed = await parseGenerateForm(form);
+      expect(parsed.ok).toBe(false);
+      if (parsed.ok)
+        continue;
+      expect(parsed.message).toBe(
+        'Invalid padding. Expected a number from 0 to 50.',
+      );
+      expect(parsed.details).toEqual({ field: 'padding' });
+    }
+  });
+
+  it('accepts padding boundary values 0 and 50', async () => {
+    for (const padding of ['0', '50']) {
+      const form = await formWithFile({ padding });
+      const parsed = await parseGenerateForm(form);
+      expect(parsed.ok).toBe(true);
+      if (!parsed.ok)
+        return;
+      expect(parsed.options.padding).toBe(Number(padding));
+    }
+  });
+
+  it('rejects invalid hex colors for background / theme / backgroundColor', async () => {
+    const cases: Array<{ field: string; value: string; message: string }> = [
+      {
+        field: 'background',
+        value: '#gg0000',
+        message:
+          'Invalid background. Use `transparent` or #RRGGBB / #RRGGBBAA.',
+      },
+      {
+        field: 'background',
+        value: '#fff',
+        message:
+          'Invalid background. Use `transparent` or #RRGGBB / #RRGGBBAA.',
+      },
+      {
+        field: 'themeColor',
+        value: '#ffffffaa',
+        message: 'Invalid themeColor. Expected #RRGGBB.',
+      },
+      {
+        field: 'themeColor',
+        value: 'ffffff',
+        message: 'Invalid themeColor. Expected #RRGGBB.',
+      },
+      {
+        field: 'backgroundColor',
+        value: 'red',
+        message: 'Invalid backgroundColor. Expected #RRGGBB.',
+      },
+    ];
+
+    for (const { field, value, message } of cases) {
+      const form = await formWithFile({ [field]: value });
+      const parsed = await parseGenerateForm(form);
+      expect(parsed.ok).toBe(false);
+      if (parsed.ok)
+        continue;
+      expect(parsed.message).toBe(message);
+      expect(parsed.details).toEqual({ field });
+    }
+  });
+
+  it('accepts transparent and 8-digit hex backgrounds', async () => {
+    for (const background of ['transparent', '#11223344'] as const) {
+      const form = await formWithFile({ background });
+      const parsed = await parseGenerateForm(form);
+      expect(parsed.ok).toBe(true);
+      if (!parsed.ok)
+        return;
+      expect(parsed.options.background).toBe(background);
+    }
   });
 });

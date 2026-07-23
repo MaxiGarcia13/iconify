@@ -2,6 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { describe, expect, it } from 'vitest';
 
+import { MAX_UPLOAD_BYTES } from '../../../lib/validate';
 import { solidPng } from '../../../test/fixtures';
 import { POST } from './generate';
 
@@ -42,6 +43,56 @@ describe('post /api/v1/generate', () => {
     const body = await response.json();
     expect(body.error).toBe('VALIDATION_ERROR');
     expect(body.details).toEqual({ field: 'file' });
+  });
+
+  it('returns 400 VALIDATION_ERROR for invalid MIME (AC3)', async () => {
+    const form = new FormData();
+    form.set(
+      'file',
+      new File([new Uint8Array([0x47, 0x49, 0x46])], 'anim.gif', {
+        type: 'image/gif',
+      }),
+    );
+
+    const request = new Request('http://localhost/api/v1/generate', {
+      method: 'POST',
+      body: form,
+    });
+
+    const response = await POST(apiContext(request));
+    expect(response.status).toBe(400);
+
+    const body = await response.json();
+    expect(body).toEqual({
+      error: 'VALIDATION_ERROR',
+      message: 'Unsupported file type. Allowed: SVG, PNG, JPG.',
+      details: { field: 'file' },
+    });
+  });
+
+  it('returns 400 VALIDATION_ERROR when file exceeds 10 MB (AC3)', async () => {
+    const form = new FormData();
+    form.set(
+      'file',
+      new File([new Uint8Array(MAX_UPLOAD_BYTES + 1)], 'huge.png', {
+        type: 'image/png',
+      }),
+    );
+
+    const request = new Request('http://localhost/api/v1/generate', {
+      method: 'POST',
+      body: form,
+    });
+
+    const response = await POST(apiContext(request));
+    expect(response.status).toBe(400);
+
+    const body = await response.json();
+    expect(body).toEqual({
+      error: 'VALIDATION_ERROR',
+      message: 'File exceeds maximum size of 10MB.',
+      details: { field: 'file', maxBytes: MAX_UPLOAD_BYTES },
+    });
   });
 
   it('returns 200 application/zip with Content-Disposition for a valid PNG', async () => {
