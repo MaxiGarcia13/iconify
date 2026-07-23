@@ -60,6 +60,7 @@ npm run test:unit # Vitest unit tests
 - Return JSON errors with `{ error, message, details? }` shapes from SPEC
 - Match existing file style; do not drive-by refactor unrelated files
 - Do not add dependencies unless required by SPEC or explicitly requested
+- Source file basenames: **lowercase kebab-case**; markdown docs: **UPPERCASE** (SPEC §1.6)
 
 ## Security
 
