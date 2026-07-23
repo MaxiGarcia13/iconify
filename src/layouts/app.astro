@@ -1,12 +1,32 @@
 ---
+import { description, name } from '../../package.json';
 import '../index.css';
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Iconify</title>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+
+    <title>{name}</title>
+    <meta name="description" content={description} />
+
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:title" content={name} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content={name} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
   </head>
 
   <body>
