@@ -3,7 +3,13 @@
  * Downstream processing must not invent names or dimensions.
  */
 
-export type PresetId = 'favicon' | 'apple' | 'android' | 'og' | 'all';
+export type PresetId
+  = | 'favicon'
+    | 'apple'
+    | 'android'
+    | 'og'
+    | 'original'
+    | 'all';
 
 export type AssetFormat = 'ico' | 'png' | 'svg';
 
@@ -12,10 +18,12 @@ export type AssetSize
   = | { kind: 'square'; px: number }
     | { kind: 'layers'; px: readonly number[] }
     | { kind: 'rect'; width: number; height: number }
+    /** Source metadata width×height — SPEC §2.5. */
+    | { kind: 'native' }
     | { kind: 'scalable' };
 
 export interface MatrixEntry {
-  /** Path / filename inside the ZIP (§2.6). */
+  /** Path / filename inside the ZIP (§2.7). */
   name: string;
   size: AssetSize;
   format: AssetFormat;
@@ -34,10 +42,11 @@ export const PRESET_IDS: readonly PresetId[] = [
   'apple',
   'android',
   'og',
+  'original',
   'all',
 ] as const;
 
-/** Full matrix: §2.1–§2.4 assets. */
+/** Full matrix: §2.1–§2.5 assets. */
 export const ASSET_MATRIX: readonly MatrixEntry[] = [
   // §2.1 Modern Web / Favicons
   {
@@ -132,11 +141,20 @@ export const ASSET_MATRIX: readonly MatrixEntry[] = [
     contentType: 'image/png',
     preset: 'og',
   },
+
+  // §2.5 Original size — ZIP name overridden to upload basename at package time
+  {
+    name: 'original.png',
+    size: { kind: 'native' },
+    format: 'png',
+    contentType: 'image/png',
+    preset: 'original',
+  },
 ] as const;
 
 /**
- * Expand `presets` (§2.5) into concrete matrix rows.
- * `all` expands to every preset-owned asset.
+ * Expand `presets` (§2.6) into concrete matrix rows.
+ * `all` expands to §2.1–§2.4 only (not `original`).
  * SVG-only rows are dropped when `sourceIsSvg` is false (AC1/AC2).
  */
 export function resolveMatrix(
@@ -161,4 +179,43 @@ export function resolveMatrix(
       return false;
     return active.has(entry.preset);
   });
+}
+
+/**
+ * ZIP entry name for the original-size asset — SPEC §2.5 / AC11.
+ * Uses the upload basename; falls back to `original.png`; disambiguates collisions.
+ */
+export function originalZipName(
+  uploadFilename: string,
+  takenNames: ReadonlySet<string>,
+): string {
+  const base = sanitizeUploadBasename(uploadFilename);
+  if (!takenNames.has(base))
+    return base;
+
+  const dot = base.lastIndexOf('.');
+  const stem = dot > 0 ? base.slice(0, dot) : base;
+  const ext = dot > 0 ? base.slice(dot) : '';
+  let candidate = `${stem}-original${ext}`;
+  let n = 2;
+  while (takenNames.has(candidate)) {
+    candidate = `${stem}-original-${n}${ext}`;
+    n += 1;
+  }
+  return candidate;
+}
+
+/** Strip directories / unsafe segments; empty → `original.png`. */
+function sanitizeUploadBasename(uploadFilename: string): string {
+  const base = uploadFilename
+    .replace(/\\/g, '/')
+    .split('/')
+    .pop()
+    ?.trim() ?? '';
+  if (!base || base === '.' || base === '..')
+    return 'original.png';
+  const cleaned = [...base]
+    .filter((ch) => ch !== '/' && ch !== '\\' && ch !== '\0')
+    .join('');
+  return cleaned.length > 0 ? cleaned : 'original.png';
 }

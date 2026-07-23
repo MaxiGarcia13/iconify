@@ -5,7 +5,12 @@ import { describe, expect, it } from 'vitest';
 
 import { solidPng } from '../../test/fixtures';
 import { ASSET_MATRIX } from './matrix';
-import { passthroughFaviconSvg, renderIcon, renderOgImage } from './process';
+import {
+  passthroughFaviconSvg,
+  renderIcon,
+  renderOgImage,
+  renderOriginal,
+} from './process';
 
 const SQUARE_PNG_ENTRIES = ASSET_MATRIX.filter(
   (entry) => entry.format === 'png' && entry.size.kind === 'square',
@@ -157,6 +162,79 @@ describe('renderOgImage', () => {
     expect(meta.format).toBe('png');
     expect(meta.width).toBe(1200);
     expect(meta.height).toBe(630);
+  });
+});
+
+describe('renderOriginal (SPEC §2.5 / §4.6 / AC11)', () => {
+  const optionsBase = {
+    background: 'transparent' as const,
+    padding: 0,
+    cornerRadius: 0,
+    monochrome: false,
+  };
+
+  it('keeps source metadata width×height (non-square OK)', async () => {
+    const input = await solidPng(120, 80);
+    const out = await renderOriginal(input, optionsBase);
+
+    const meta = await sharp(out).metadata();
+    expect(meta.format).toBe('png');
+    expect(meta.width).toBe(120);
+    expect(meta.height).toBe(80);
+  });
+
+  it('applies padding without changing canvas size', async () => {
+    const input = await solidPng(100, 50);
+    const out = await renderOriginal(input, {
+      ...optionsBase,
+      padding: 20,
+      background: '#ffffff',
+    });
+
+    const meta = await sharp(out).metadata();
+    expect(meta.width).toBe(100);
+    expect(meta.height).toBe(50);
+  });
+
+  it('applies monochrome greyscale when enabled', async () => {
+    const input = await solidPng(64, 48);
+    const out = await renderOriginal(input, {
+      ...optionsBase,
+      monochrome: true,
+    });
+
+    const { data, info } = await sharp(out)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const x = Math.floor(info.width / 2);
+    const y = Math.floor(info.height / 2);
+    const idx = (y * info.width + x) * info.channels;
+    const rgb = [data[idx]!, data[idx + 1]!, data[idx + 2]!];
+    expect(rgb[0]).toBe(rgb[1]);
+    expect(rgb[1]).toBe(rgb[2]);
+  });
+
+  it('applies cornerRadius mask on native canvas', async () => {
+    const input = await solidPng(64, 64);
+    const out = await renderOriginal(input, {
+      background: '#0080ff',
+      padding: 0,
+      cornerRadius: 100,
+      monochrome: false,
+    });
+
+    const { data, info } = await sharp(out)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const alphaAt = (x: number, y: number) =>
+      data[(y * info.width + x) * info.channels + 3]!;
+
+    expect(alphaAt(0, 0)).toBe(0);
+    expect(alphaAt(Math.floor(info.width / 2), Math.floor(info.height / 2))).toBe(
+      255,
+    );
   });
 });
 

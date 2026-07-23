@@ -2,12 +2,15 @@ import { Buffer } from 'node:buffer';
 
 import sharp from 'sharp';
 
-/** Solid square PNG for unit tests (sizes / packaging / API). */
-export async function solidPng(size = 64): Promise<Buffer> {
+/** Solid PNG for unit tests; defaults to square. */
+export async function solidPng(
+  width = 64,
+  height = width,
+): Promise<Buffer> {
   return sharp({
     create: {
-      width: size,
-      height: size,
+      width,
+      height,
       channels: 4,
       background: { r: 0, g: 128, b: 255, alpha: 1 },
     },

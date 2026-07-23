@@ -109,6 +109,61 @@ export async function renderOgImage(
   return applyCornerRadius(png, width, height, options.cornerRadius);
 }
 
+/**
+ * Same pad / background / corner-radius / monochrome pipeline as `renderOgImage`,
+ * but canvas width×height = source metadata (no fixed target resize).
+ * Content is fitted with `contain` into the padded inner box; aspect ratio preserved.
+ * SPEC §4.6 / AC11.
+ */
+export async function renderOriginal(
+  input: Buffer,
+  options: Pick<
+    GenerateOptions,
+    'background' | 'padding' | 'cornerRadius' | 'monochrome'
+  >,
+): Promise<Buffer> {
+  const meta = await sharp(input, { density: 300 }).metadata();
+  const width = meta.width;
+  const height = meta.height;
+  if (!width || !height) {
+    throw new Error('Source image has no measurable dimensions');
+  }
+
+  const padRatio = Math.min(Math.max(options.padding, 0), 50) / 100;
+  const innerW = Math.max(1, Math.round(width * (1 - padRatio * 2)));
+  const innerH = Math.max(1, Math.round(height * (1 - padRatio * 2)));
+
+  let pipeline = sharp(input, { density: 300 });
+  if (options.monochrome) {
+    pipeline = pipeline.greyscale();
+  }
+  const content = await pipeline
+    .resize(innerW, innerH, {
+      fit: 'contain',
+      background: parseBackground(options.background),
+    })
+    .png()
+    .toBuffer();
+
+  const contentMeta = await sharp(content).metadata();
+  const left = Math.floor((width - (contentMeta.width ?? innerW)) / 2);
+  const top = Math.floor((height - (contentMeta.height ?? innerH)) / 2);
+
+  const png = await sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: parseBackground(options.background),
+    },
+  })
+    .composite([{ input: content, left, top }])
+    .png()
+    .toBuffer();
+
+  return applyCornerRadius(png, width, height, options.cornerRadius);
+}
+
 /** Apply outer rounded-rect alpha mask; no-op when radius is 0. SPEC §4.3. */
 async function applyCornerRadius(
   png: Buffer,

@@ -20,6 +20,8 @@ export type ParseGenerateFormResult
     ok: true;
     file: Buffer;
     sourceIsSvg: boolean;
+    /** Upload basename for §2.5 original ZIP naming. */
+    sourceFilename: string;
     options: GenerateOptions;
   }
   | {
@@ -131,7 +133,8 @@ export async function parseGenerateForm(
   if (presets === null) {
     return {
       ok: false,
-      message: 'Invalid presets. Allowed: favicon, apple, android, og, all.',
+      message:
+        'Invalid presets. Allowed: favicon, apple, android, og, original, all.',
       details: { field: 'presets' },
     };
   }
@@ -140,6 +143,7 @@ export async function parseGenerateForm(
     ok: true,
     file: buffer,
     sourceIsSvg: isSourceSvg(fileEntry),
+    sourceFilename: fileEntry.name,
     options: {
       background,
       padding,

@@ -6,5 +6,5 @@ export const GENERATE_OPTION_DEFAULTS: GenerateOptions = {
   padding: 0,
   cornerRadius: 0,
   monochrome: false,
-  presets: ['all'],
+  presets: ['all', 'original'],
 };

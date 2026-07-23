@@ -56,6 +56,7 @@ describe('processIconPackage', () => {
 
     expect(result.assets.map((a) => a.name)).toEqual(expected);
     expect(result.assets.some((a) => a.name.endsWith('.svg'))).toBe(false);
+    expect(result.assets.map((a) => a.name)).not.toContain('original.png');
   });
 
   it('includes favicon.svg when source is SVG', async () => {
@@ -71,6 +72,68 @@ describe('processIconPackage', () => {
 
     expect(result.assets.map((a) => a.name)).toContain('favicon.svg');
     expect(result.assets.map((a) => a.name)).toContain('safari-pinned-tab.svg');
+  });
+});
+
+describe('aC11 original preset package outputs', () => {
+  it('presets=original alone yields only the upload basename at source size', async () => {
+    const input = await solidPng(120, 80);
+    const result = await processIconPackage(
+      input,
+      { ...packageDefaults, presets: ['original'] },
+      false,
+      'my-logo.png',
+    );
+
+    expect(result.assets.map((a) => a.name)).toEqual(['my-logo.png']);
+    const meta = await sharp(result.assets[0]!.buffer).metadata();
+    expect(meta.width).toBe(120);
+    expect(meta.height).toBe(80);
+  });
+
+  it('presets=all omits original-size file', async () => {
+    const input = await solidPng(90, 60);
+    const result = await processIconPackage(
+      input,
+      packageDefaults,
+      false,
+      'logo.png',
+    );
+    const names = result.assets.map((a) => a.name);
+
+    expect(names).not.toContain('logo.png');
+    expect(names).not.toContain('original.png');
+    expect(names).toEqual(resolveMatrix(['all'], false).map((e) => e.name));
+  });
+
+  it('combining original with all adds upload basename alongside §2.1–2.4', async () => {
+    const input = await solidPng(100, 70);
+    const result = await processIconPackage(
+      input,
+      { ...packageDefaults, presets: ['all', 'original'] },
+      false,
+      'brand.png',
+    );
+    const names = result.assets.map((a) => a.name);
+
+    expect(names).toContain('brand.png');
+    expect(names).toContain('og-image.png');
+    expect(names).toContain('favicon.ico');
+    expect(names).not.toContain('original.png');
+  });
+
+  it('disambiguates when upload basename collides with a matrix name', async () => {
+    const input = await solidPng(64);
+    const result = await processIconPackage(
+      input,
+      { ...packageDefaults, presets: ['favicon', 'original'] },
+      false,
+      'favicon.ico',
+    );
+    const names = result.assets.map((a) => a.name);
+
+    expect(names).toContain('favicon.ico');
+    expect(names).toContain('favicon-original.ico');
   });
 });
 

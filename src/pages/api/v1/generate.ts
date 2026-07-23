@@ -23,6 +23,7 @@ export const POST: APIRoute = async ({ request }) => {
       parsed.file,
       parsed.options,
       parsed.sourceIsSvg,
+      parsed.sourceFilename,
     );
     return zipToWebResponse(result.assets);
   } catch (err) {

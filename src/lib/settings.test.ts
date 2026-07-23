@@ -55,16 +55,48 @@ describe('normalizeHex6', () => {
 });
 
 describe('preset checkboxes', () => {
-  it('treats all as every preset checked', () => {
+  it('treats all as every platform preset checked (not original)', () => {
     expect(hasAllPreset(['all'])).toBe(true);
     expect(isPresetChecked(['all'], 'favicon')).toBe(true);
     expect(isPresetChecked(['all'], 'og')).toBe(true);
+    expect(isPresetChecked(['all'], 'original')).toBe(false);
     expect(isPresetChecked(['favicon'], 'apple')).toBe(false);
+    expect(isPresetChecked(['all', 'original'], 'original')).toBe(true);
   });
 
   it('toggles all on/off', () => {
     expect(togglePreset(['favicon'], 'all', true)).toEqual(['all']);
     expect(togglePreset(['all'], 'all', false)).toEqual(['favicon']);
+  });
+
+  it('preserves original when collapsing platform presets to all', () => {
+    expect(
+      togglePreset(['favicon', 'apple', 'android', 'original'], 'og', true),
+    ).toEqual(['all', 'original']);
+  });
+
+  it('preserves original when exiting all-mode', () => {
+    expect(togglePreset(['all', 'original'], 'og', false)).toEqual([
+      'favicon',
+      'apple',
+      'android',
+      'original',
+    ]);
+  });
+
+  it('toggles original independently of all (AC11)', () => {
+    expect(togglePreset(['all'], 'original', true)).toEqual([
+      'all',
+      'original',
+    ]);
+    expect(togglePreset(['all', 'original'], 'original', false)).toEqual([
+      'all',
+    ]);
+    expect(togglePreset(['favicon'], 'original', true)).toEqual([
+      'favicon',
+      'original',
+    ]);
+    expect(togglePreset(['original'], 'original', false)).toEqual(['all']);
   });
 
   it('collapses four individuals to all', () => {
@@ -173,5 +205,27 @@ describe('toGenerateOptions / appendSettingsToFormData', () => {
     expect(body.get('monochrome')).toBe('true');
     expect(body.get('background')).toBe('#0a0a0a');
     expect(body.get('presets')).toBe('favicon,apple');
+  });
+
+  it('maps original preset into FormData (SPEC §5.5 / AC11)', () => {
+    const alone = new FormData();
+    appendSettingsToFormData(alone, {
+      ...SETTINGS_DEFAULTS,
+      presets: ['original'],
+    });
+    expect(alone.get('presets')).toBe('original');
+
+    const combined = new FormData();
+    appendSettingsToFormData(combined, {
+      ...SETTINGS_DEFAULTS,
+      presets: ['all', 'original'],
+    });
+    expect(combined.get('presets')).toBe('all,original');
+  });
+
+  it('defaults include original selected with all', () => {
+    expect(SETTINGS_DEFAULTS.presets).toEqual(['all', 'original']);
+    expect(isPresetChecked(SETTINGS_DEFAULTS.presets, 'original')).toBe(true);
+    expect(isPresetChecked(SETTINGS_DEFAULTS.presets, 'favicon')).toBe(true);
   });
 });

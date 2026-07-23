@@ -144,6 +144,32 @@ describe('parseGenerateForm', () => {
     expect(parsed.options.presets).toEqual(['favicon', 'og']);
   });
 
+  it('accepts original preset alone and combined (SPEC §2.6 / AC11)', async () => {
+    const alone = await formWithFile({ presets: 'original' });
+    const aloneParsed = await parseGenerateForm(alone);
+    expect(aloneParsed.ok).toBe(true);
+    if (aloneParsed.ok)
+      expect(aloneParsed.options.presets).toEqual(['original']);
+
+    const combined = await formWithFile({ presets: 'all,original' });
+    const combinedParsed = await parseGenerateForm(combined);
+    expect(combinedParsed.ok).toBe(true);
+    if (combinedParsed.ok)
+      expect(combinedParsed.options.presets).toEqual(['all', 'original']);
+  });
+
+  it('rejects unknown preset IDs', async () => {
+    const form = await formWithFile({ presets: 'favicon,nope' });
+    const parsed = await parseGenerateForm(form);
+    expect(parsed.ok).toBe(false);
+    if (parsed.ok)
+      return;
+    expect(parsed.message).toBe(
+      'Invalid presets. Allowed: favicon, apple, android, og, original, all.',
+    );
+    expect(parsed.details).toEqual({ field: 'presets' });
+  });
+
   it('marks SVG uploads via MIME or extension', async () => {
     const svg = new File(
       [new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"/>')],

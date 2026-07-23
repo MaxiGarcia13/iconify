@@ -81,6 +81,63 @@ describe('post /api/v1/generate', () => {
       expect(names).toEqual(expectedNames);
       expect(names).not.toContain('favicon.svg');
       expect(names).not.toContain('safari-pinned-tab.svg');
+      expect(names).not.toContain('original.png');
+    });
+
+    it('presets=original alone yields only the upload basename (AC11)', async () => {
+      const png = await solidPng(120, 80);
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(png)], 'my-logo.png', {
+          type: 'image/png',
+        }),
+        presets: 'original',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+      expect(response.headers.get('X-Iconify-Assets')).toBe('my-logo.png');
+
+      const names = listZipEntryNames(
+        Buffer.from(await response.arrayBuffer()),
+      );
+      expect(names).toEqual(['my-logo.png']);
+    });
+
+    it('omitted presets defaults to all,original with upload basename (AC11)', async () => {
+      const png = await solidPng(64);
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(png)], 'icon.png', {
+          type: 'image/png',
+        }),
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+      const names = listZipEntryNames(
+        Buffer.from(await response.arrayBuffer()),
+      );
+      expect(names).toContain('icon.png');
+      expect(names).toContain('favicon.ico');
+      expect(names).not.toContain('original.png');
+    });
+
+    it('presets=all omits original-size file (AC11)', async () => {
+      const png = await solidPng(90, 60);
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(png)], 'logo.png', {
+          type: 'image/png',
+        }),
+        presets: 'all',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+      const names = listZipEntryNames(
+        Buffer.from(await response.arrayBuffer()),
+      );
+      expect(names).not.toContain('logo.png');
+      expect(names).not.toContain('original.png');
+      expect(names).toEqual(resolveMatrix(['all'], false).map((e) => e.name));
     });
 
     it('sVG upload ZIP includes favicon.svg (AC2)', async () => {

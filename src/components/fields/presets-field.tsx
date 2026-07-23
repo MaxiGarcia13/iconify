@@ -19,6 +19,7 @@ const PRESET_LABELS: Record<SelectablePreset, string> = {
   apple: 'Apple',
   android: 'Android',
   og: 'Open Graph',
+  original: 'Original',
 };
 
 /** Preset checkbox group — SPEC §5.3. */

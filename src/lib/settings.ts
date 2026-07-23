@@ -2,12 +2,23 @@ import type { GenerateOptions, PresetId } from './icons/types';
 
 import { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 
-/** Individual preset checkboxes (excludes `all`) — SPEC §2.5 / §5.3. */
-export const SELECTABLE_PRESETS = [
+/**
+ * Platform presets that collapse into `all` — SPEC §2.6.
+ * Does **not** include opt-in `original`.
+ */
+export const PLATFORM_PRESETS = [
   'favicon',
   'apple',
   'android',
   'og',
+] as const satisfies readonly Exclude<PresetId, 'all' | 'original'>[];
+
+export type PlatformPreset = (typeof PLATFORM_PRESETS)[number];
+
+/** Individual preset checkboxes (excludes `all`) — SPEC §2.5 / §5.3. */
+export const SELECTABLE_PRESETS = [
+  ...PLATFORM_PRESETS,
+  'original',
 ] as const satisfies readonly Exclude<PresetId, 'all'>[];
 
 export type SelectablePreset = (typeof SELECTABLE_PRESETS)[number];
@@ -74,20 +85,28 @@ export function hasAllPreset(presets: readonly PresetId[]): boolean {
   return presets.includes('all');
 }
 
+export function hasOriginalPreset(presets: readonly PresetId[]): boolean {
+  return presets.includes('original');
+}
+
 /** Whether a preset checkbox should appear checked. */
 export function isPresetChecked(
   presets: readonly PresetId[],
   id: PresetId,
 ): boolean {
+  // `original` is opt-in and never implied by `all` (SPEC §2.6 / AC11).
+  if (id === 'original')
+    return hasOriginalPreset(presets);
   if (hasAllPreset(presets))
     return true;
   return presets.includes(id);
 }
 
 /**
- * Toggle a preset checkbox. `all` collapses to `['all']`;
- * unchecking `all` leaves a single preset (`favicon`).
- * Selecting every individual preset also collapses to `['all']`.
+ * Toggle a preset checkbox. Platform presets collapse to `['all']`;
+ * unchecking `all` leaves a single platform preset (`favicon`).
+ * Selecting every platform preset also collapses to `['all']`.
+ * `original` is independent of `all` and may combine with any set.
  * Always keeps at least one preset selected.
  */
 export function togglePreset(
@@ -95,15 +114,33 @@ export function togglePreset(
   id: PresetId,
   checked: boolean,
 ): PresetId[] {
-  if (id === 'all') {
-    return checked ? ['all'] : ['favicon'];
+  const withOriginal = hasOriginalPreset(presets);
+
+  if (id === 'original') {
+    if (checked) {
+      if (withOriginal)
+        return [...presets];
+      const rest = presets.filter((p) => p !== 'original');
+      return rest.length > 0 ? [...rest, 'original'] : ['original'];
+    }
+    const next = presets.filter((p) => p !== 'original');
+    return next.length > 0 ? next : ['all'];
   }
 
-  const current: SelectablePreset[] = hasAllPreset(presets)
-    ? [...SELECTABLE_PRESETS]
-    : SELECTABLE_PRESETS.filter((p) => presets.includes(p));
+  if (id === 'all') {
+    if (checked)
+      return withOriginal ? ['all', 'original'] : ['all'];
+    return withOriginal ? ['favicon', 'original'] : ['favicon'];
+  }
 
-  let next: SelectablePreset[];
+  if (!isPlatformPreset(id))
+    return [...presets];
+
+  const current: PlatformPreset[] = hasAllPreset(presets)
+    ? [...PLATFORM_PRESETS]
+    : PLATFORM_PRESETS.filter((p) => presets.includes(p));
+
+  let next: PlatformPreset[];
   if (checked) {
     next = current.includes(id) ? current : [...current, id];
   } else {
@@ -112,10 +149,14 @@ export function togglePreset(
       next = [id === 'favicon' ? 'apple' : 'favicon'];
   }
 
-  if (SELECTABLE_PRESETS.every((p) => next.includes(p)))
-    return ['all'];
+  if (PLATFORM_PRESETS.every((p) => next.includes(p)))
+    return withOriginal ? ['all', 'original'] : ['all'];
 
-  return next;
+  return withOriginal ? [...next, 'original'] : next;
+}
+
+function isPlatformPreset(id: PresetId): id is PlatformPreset {
+  return (PLATFORM_PRESETS as readonly string[]).includes(id);
 }
 
 /** Map UI state → API `GenerateOptions` — SPEC §4.2 / §5.5. */
@@ -125,7 +166,7 @@ export function toGenerateOptions(state: SettingsState): GenerateOptions {
     cornerRadius: clampCornerRadius(state.cornerRadius),
     background: state.transparent ? 'transparent' : state.backgroundHex,
     monochrome: state.monochrome,
-    presets: state.presets.length > 0 ? [...state.presets] : ['all'],
+    presets: state.presets.length > 0 ? [...state.presets] : ['all', 'original'],
   };
 }
 

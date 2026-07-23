@@ -7,25 +7,37 @@ import { PassThrough, Readable } from 'node:stream';
 import archiver from 'archiver';
 
 import { buildFaviconIco } from './ico';
-import { resolveMatrix } from './matrix';
-import { passthroughFaviconSvg, renderIcon, renderOgImage } from './process';
+import { originalZipName, resolveMatrix } from './matrix';
+import {
+  passthroughFaviconSvg,
+  renderIcon,
+  renderOgImage,
+  renderOriginal,
+} from './process';
 
 /**
  * Build every asset buffer for the requested presets, then return them for ZIP.
  * Never starts packaging until all buffers succeed (SPEC §4.8).
+ * `sourceFilename` sets the §2.5 original-size ZIP entry name (upload basename).
  */
 export async function processIconPackage(
   input: Buffer,
   options: GenerateOptions,
   sourceIsSvg: boolean,
+  sourceFilename = 'original.png',
 ): Promise<ProcessResult> {
   const entries = resolveMatrix(options.presets, sourceIsSvg);
   const assets: AssetEntry[] = [];
+  const taken = new Set<string>();
 
   for (const entry of entries) {
     const buffer = await renderMatrixEntry(input, entry, options, sourceIsSvg);
+    const name = entry.preset === 'original'
+      ? originalZipName(sourceFilename, taken)
+      : entry.name;
+    taken.add(name);
     assets.push({
-      name: entry.name,
+      name,
       buffer,
       contentType: entry.contentType,
     });
@@ -48,6 +60,8 @@ async function renderMatrixEntry(
         return renderOgImage(input, options);
       if (entry.size.kind === 'square')
         return renderIcon(input, entry.size.px, options);
+      if (entry.size.kind === 'native')
+        return renderOriginal(input, options);
       throw new Error(`Unsupported PNG size for ${entry.name}`);
     }
     case 'svg': {
