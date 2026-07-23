@@ -5,11 +5,12 @@ import { useState } from 'react';
 import { previewBackgroundFromSettings } from '../lib/preview';
 import { SETTINGS_DEFAULTS } from '../lib/settings';
 import { Dropzone } from './dropzone';
+import { GenerateButton } from './generate-button';
 import { PreviewGrid } from './preview-grid';
 import { SettingsPanel } from './settings-panel';
 
 /**
- * Client island composing dropzone, settings, and live preview — SPEC §5.1 / §5.2.
+ * Client island composing dropzone, settings, preview, and download — SPEC §5.1 / §5.2.
  * Holds shared file + settings so previews update when padding / background change.
  */
 export function Generator() {
@@ -47,6 +48,10 @@ export function Generator() {
           padding={settings.padding}
           background={previewBackgroundFromSettings(settings)}
         />
+      </section>
+
+      <section aria-label="Download package" className="min-w-0">
+        <GenerateButton file={file} settings={settings} />
       </section>
     </div>
   );
