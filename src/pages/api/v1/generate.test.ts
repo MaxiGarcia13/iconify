@@ -4,7 +4,13 @@ import { describe, expect, it } from 'vitest';
 
 import { resolveMatrix } from '../../../lib/icons/matrix';
 import { MAX_UPLOAD_BYTES } from '../../../lib/validate';
-import { complexSvg, hugeDimensionSvg, solidPng, solidSvg } from '../../../test/fixtures';
+import {
+  complexSvg,
+  hugeDimensionSvg,
+  solidJpeg,
+  solidPng,
+  solidSvg,
+} from '../../../test/fixtures';
 import { listZipEntryNames } from '../../../test/zip';
 import { POST } from './generate';
 
@@ -164,6 +170,34 @@ describe('post /api/v1/generate', () => {
       expect(names).toEqual(expectedNames);
       expect(names).toContain('favicon.svg');
       expect(names).toContain('safari-pinned-tab.svg');
+    });
+  });
+
+  describe('omit SVG when source is raster (M4 / SPEC §4.9)', () => {
+    it('jPEG + presets=all ZIP matches §2.1–2.4 minus SVG', async () => {
+      const jpeg = await solidJpeg();
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(jpeg)], 'photo.jpg', {
+          type: 'image/jpeg',
+        }),
+        presets: 'all',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+
+      const expectedNames = resolveMatrix(['all'], false).map((e) => e.name);
+      expect(response.headers.get('X-Iconify-Assets')).toBe(
+        expectedNames.join(','),
+      );
+
+      const names = listZipEntryNames(
+        Buffer.from(await response.arrayBuffer()),
+      );
+      expect(names).toEqual(expectedNames);
+      expect(names.some((n) => n.endsWith('.svg'))).toBe(false);
+      expect(names).not.toContain('favicon.svg');
+      expect(names).not.toContain('safari-pinned-tab.svg');
     });
   });
 

@@ -80,6 +80,23 @@ export async function alphaPng(
     .toBuffer();
 }
 
+/** Solid JPEG for raster omission tests (SPEC §4.9 / AC1). */
+export async function solidJpeg(
+  width = 64,
+  height = width,
+): Promise<Buffer> {
+  return sharp({
+    create: {
+      width,
+      height,
+      channels: 3,
+      background: { r: 0, g: 128, b: 255 },
+    },
+  })
+    .jpeg()
+    .toBuffer();
+}
+
 /** Minimal valid SVG source for API / packaging tests (AC2). */
 export function solidSvg(size = 32): Buffer {
   return Buffer.from(

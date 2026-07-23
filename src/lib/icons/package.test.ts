@@ -6,7 +6,13 @@ import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { complexSvg, hugeDimensionSvg, solidPng, solidSvg } from '../../test/fixtures';
+import {
+  complexSvg,
+  hugeDimensionSvg,
+  solidJpeg,
+  solidPng,
+  solidSvg,
+} from '../../test/fixtures';
 import { listZipEntryNames } from '../../test/zip';
 import { GENERATE_OPTION_DEFAULTS } from '../generate-defaults';
 import { resolveMatrix } from './matrix';
@@ -72,6 +78,40 @@ describe('processIconPackage', () => {
 
     expect(result.assets.map((a) => a.name)).toContain('favicon.svg');
     expect(result.assets.map((a) => a.name)).toContain('safari-pinned-tab.svg');
+  });
+});
+
+describe('omit SVG files when source is raster (M4 / SPEC §4.9 / AC1)', () => {
+  it('jPEG + presets=all ZIP has no .svg entries', async () => {
+    const input = await solidJpeg();
+    const result = await processIconPackage(
+      input,
+      packageDefaults,
+      false,
+      'photo.jpg',
+    );
+    const names = result.assets.map((a) => a.name);
+
+    expect(names).toEqual(resolveMatrix(['all'], false).map((e) => e.name));
+    expect(names.some((n) => n.endsWith('.svg'))).toBe(false);
+    expect(names).not.toContain('favicon.svg');
+    expect(names).not.toContain('safari-pinned-tab.svg');
+  });
+
+  it('pNG favicon preset omits both SVG matrix rows', async () => {
+    const input = await solidPng();
+    const result = await processIconPackage(
+      input,
+      { ...packageDefaults, presets: ['favicon'] },
+      false,
+    );
+    const names = result.assets.map((a) => a.name);
+
+    expect(names).toEqual([
+      'favicon.ico',
+      'favicon-16x16.png',
+      'favicon-32x32.png',
+    ]);
   });
 });
 

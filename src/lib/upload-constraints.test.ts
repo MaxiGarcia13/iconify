@@ -97,6 +97,8 @@ describe('upload-constraints', () => {
     expect(isSourceSvg({ name: 'mark.svg', type: 'image/svg+xml' })).toBe(true);
     expect(isSourceSvg({ name: 'mark.SVG', type: '' })).toBe(true);
     expect(isSourceSvg({ name: 'logo.png', type: 'image/png' })).toBe(false);
+    expect(isSourceSvg({ name: 'photo.jpg', type: 'image/jpeg' })).toBe(false);
+    expect(isSourceSvg({ name: 'photo.JPEG', type: 'image/jpeg' })).toBe(false);
     expect(isSourceSvg({ name: 'logo.png', type: 'image/svg+xml' })).toBe(true);
   });
 });
