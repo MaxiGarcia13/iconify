@@ -75,6 +75,18 @@ SPEC §3 `monochrome` / §4 greyscale in `renderIcon` + `renderOgImage` / §5 se
 - [x] Unit tests: process greyscale on / off; validate accept/reject; API happy-path + invalid; settings → FormData mapping
 - [ ] Verify AC10
 
+## M3e — Original size preset
+
+SPEC §2.5 `original.png` / §2.6 preset `original` / §4.6 `renderOriginal` / §5 presets / AC11.
+
+- [ ] Matrix: `original` preset row → `original.png` (native size); `all` still expands to §2.1–§2.4 only
+- [ ] Processing: `renderOriginal` — canvas = source metadata W×H; pad / background / cornerRadius / monochrome; preserve aspect
+- [ ] Types: `PresetId` includes `'original'`; validate accepts `original`; reject unknown IDs
+- [ ] Package: include `original.png` when preset selected (alone or combined)
+- [ ] UI: Presets checkbox **Original**; independent of `all` (checking platform presets → `all` does not force Original on/off)
+- [ ] Unit tests: dimensions match source; options applied; `all` ZIP omits `original.png`; `original` alone ZIP membership; settings → FormData
+- [ ] Verify AC11
+
 ## M4 — Hardening
 
 - [ ] Transparent PNG + opaque background edge cases
@@ -102,3 +114,4 @@ SPEC §3 `monochrome` / §4 greyscale in `renderIcon` + `renderOgImage` / §5 se
 | AC8  | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400`  |
 | AC9  | View-source `/`: all §5.6 `public/` icons + absolute OG/Twitter + canonical |
 | AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`    |
+| AC11 | `presets=original` → only `original.png` at source size; `all` omits it     |

@@ -3,7 +3,7 @@
 | Field        | Value                                                                       |
 | ------------ | --------------------------------------------------------------------------- |
 | **Product**  | Iconify                                                                     |
-| **Version**  | 1.0.12                                                                      |
+| **Version**  | 1.0.13                                                                      |
 | **Status**   | Draft                                                                       |
 | **Stack**    | Astro · Node.js (Astro API routes) · Sharp · archiver                       |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -156,19 +156,32 @@ All raster outputs are PNG unless noted. Dimensions are width × height in pixel
 | -------------- | -------- | ------ | --------------------------------- |
 | `og-image.png` | 1200×630 | `.png` | Open Graph / Twitter card preview |
 
-### 2.5 Preset Groups
+### 2.5 Original size
+
+Single raster export at the source image’s native pixel dimensions, with the same padding / background / corner-radius / monochrome settings as other assets (no resize to a fixed matrix size).
+
+| Filename       | Size                         | Format | Use case                                               |
+| -------------- | ---------------------------- | ------ | ------------------------------------------------------ |
+| `original.png` | source width × source height | `.png` | Processed export keeping upload dimensions (aspect OK) |
+
+Canvas size equals Sharp metadata `width` × `height` after decode. Non-square sources stay non-square. SVG sources use intrinsic pixel size from the decoded raster; if dimensions are unavailable, return `500 PROCESSING_ERROR`.
+
+### 2.6 Preset Groups
 
 Clients may request subsets via the `presets` form field (comma-separated or repeated):
 
-| Preset ID | Includes                   |
-| --------- | -------------------------- |
-| `favicon` | §2.1                       |
-| `apple`   | §2.2                       |
-| `android` | §2.3                       |
-| `og`      | §2.4                       |
-| `all`     | Everything above (default) |
+| Preset ID  | Includes                                                  |
+| ---------- | --------------------------------------------------------- |
+| `favicon`  | §2.1                                                      |
+| `apple`    | §2.2                                                      |
+| `android`  | §2.3                                                      |
+| `og`       | §2.4                                                      |
+| `original` | §2.5                                                      |
+| `all`      | §2.1–§2.4 only (default); does **not** include `original` |
 
-### 2.6 ZIP Package Layout
+`original` is opt-in: combine it with any other preset IDs, or request it alone. Default `presets=all` keeps the platform icon package unchanged.
+
+### 2.7 ZIP Package Layout
 
 ```text
 iconify-package/
@@ -182,7 +195,8 @@ iconify-package/
 ├── apple-touch-icon-180x180.png
 ├── android-chrome-192x192.png
 ├── android-chrome-512x512.png
-└── og-image.png
+├── og-image.png
+└── original.png                   # if presets includes original
 ```
 
 ---
@@ -319,8 +333,9 @@ components:
           type: string
           default: all
           description: |
-            Comma-separated preset IDs: favicon, apple, android, og, all.
-          example: favicon,apple,android
+            Comma-separated preset IDs: favicon, apple, android, og, original, all.
+            `all` expands to favicon+apple+android+og only (not original).
+          example: favicon,apple,original
 
     ErrorResponse:
       type: object
@@ -384,7 +399,7 @@ components:
 ```typescript
 import type { Buffer } from 'node:buffer';
 
-export type PresetId = 'favicon' | 'apple' | 'android' | 'og' | 'all';
+export type PresetId = 'favicon' | 'apple' | 'android' | 'og' | 'original' | 'all';
 
 export interface GenerateOptions {
   background: 'transparent' | `#${string}`;
@@ -580,7 +595,70 @@ export async function renderOgImage(
 }
 ```
 
-### 4.6 ZIP Stream Packager
+### 4.6 Original size (native dimensions)
+
+```typescript
+import type { Buffer } from 'node:buffer';
+import type { GenerateOptions } from './types';
+import sharp from 'sharp';
+
+/**
+ * Same pad / background / corner-radius / monochrome pipeline as `renderOgImage`,
+ * but canvas width×height = source metadata (no fixed target resize).
+ * Content is fitted with `contain` into the padded inner box; aspect ratio preserved.
+ */
+export async function renderOriginal(
+  input: Buffer,
+  options: Pick<
+    GenerateOptions,
+    'background' | 'padding' | 'cornerRadius' | 'monochrome'
+  >,
+): Promise<Buffer> {
+  const meta = await sharp(input, { density: 300 }).metadata();
+  const width = meta.width;
+  const height = meta.height;
+  if (!width || !height) {
+    throw new Error('Source image has no measurable dimensions');
+  }
+
+  const padRatio = Math.min(Math.max(options.padding, 0), 50) / 100;
+  const innerW = Math.max(1, Math.round(width * (1 - padRatio * 2)));
+  const innerH = Math.max(1, Math.round(height * (1 - padRatio * 2)));
+
+  let pipeline = sharp(input, { density: 300 });
+  if (options.monochrome) {
+    pipeline = pipeline.greyscale();
+  }
+  const content = await pipeline
+    .resize(innerW, innerH, {
+      fit: 'contain',
+      background: parseBackground(options.background),
+    })
+    .png()
+    .toBuffer();
+
+  const contentMeta = await sharp(content).metadata();
+  const left = Math.floor((width - (contentMeta.width ?? innerW)) / 2);
+  const top = Math.floor((height - (contentMeta.height ?? innerH)) / 2);
+
+  let png = await sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: parseBackground(options.background),
+    },
+  })
+    .composite([{ input: content, left, top }])
+    .png()
+    .toBuffer();
+
+  png = await applyCornerRadius(png, width, height, options.cornerRadius);
+  return png;
+}
+```
+
+### 4.7 ZIP Stream Packager
 
 ```typescript
 import type { AssetEntry } from './types';
@@ -622,7 +700,7 @@ export function zipToWebResponse(
 }
 ```
 
-### 4.7 Endpoint Skeleton (Astro)
+### 4.8 Endpoint Skeleton (Astro)
 
 ```typescript
 // src/pages/api/v1/generate.ts
@@ -666,7 +744,7 @@ function jsonError(
 }
 ```
 
-### 4.8 Processing Rules
+### 4.9 Processing Rules
 
 | Rule              | Behavior                                                                                                          |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -675,6 +753,7 @@ function jsonError(
 | Transparency      | Default background `transparent`; PNG stays alpha; ICO flattens per `to-ico` behavior                             |
 | Padding           | Applied uniformly as % inset; content uses `fit: 'contain'`                                                       |
 | Monochrome        | When `monochrome=true`, Sharp `.greyscale()` on upload content before background composite; SVG passthrough skip  |
+| Original preset   | `original.png` at source metadata width×height; same options as other rasters; not part of `presets=all`          |
 | Failure isolation | Any Sharp throw → 500; never start ZIP stream after a mid-pipeline failure (build all buffers first, then stream) |
 
 ---
@@ -730,13 +809,13 @@ Header brand mark uses an existing `public/` icon (e.g. `android-chrome-192x192.
 
 #### Settings Panel
 
-| Control       | Type                         | Default     | Notes                                                               |
-| ------------- | ---------------------------- | ----------- | ------------------------------------------------------------------- |
-| Padding       | range / number               | `0`         | 0–50, step 1, suffix `%`                                            |
-| Corner radius | range / number               | `0`         | 0–100, step 1, suffix `%` of half shorter side; rounds outer canvas |
-| Monochrome    | checkbox / switch            | off         | Sends `monochrome=true` \| `false`; greyscale raster content only   |
-| Background    | color + “transparent” toggle | transparent | Sends `transparent` or `#RRGGBB`                                    |
-| Presets       | checkbox group               | all         | Maps to `presets` form field                                        |
+| Control       | Type                         | Default     | Notes                                                                            |
+| ------------- | ---------------------------- | ----------- | -------------------------------------------------------------------------------- |
+| Padding       | range / number               | `0`         | 0–50, step 1, suffix `%`                                                         |
+| Corner radius | range / number               | `0`         | 0–100, step 1, suffix `%` of half shorter side; rounds outer canvas              |
+| Monochrome    | checkbox / switch            | off         | Sends `monochrome=true` \| `false`; greyscale raster content only                |
+| Background    | color + “transparent” toggle | transparent | Sends `transparent` or `#RRGGBB`                                                 |
+| Presets       | checkbox group               | all         | Maps to `presets`; includes opt-in **Original** (`original`) — not part of `all` |
 
 #### HTML Snippet
 
@@ -851,18 +930,19 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 
 ## 7. Acceptance Criteria
 
-| ID   | Criterion                                                                                                                                                                                         |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AC1  | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded)                                                                                            |
-| AC2  | Upload SVG returns ZIP that also includes `favicon.svg`                                                                                                                                           |
-| AC3  | Invalid MIME or >10 MB returns `400` JSON with `VALIDATION_ERROR`                                                                                                                                 |
-| AC4  | `padding=20` visibly insets icon content in generated PNG assets                                                                                                                                  |
-| AC5  | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                                   |
-| AC6  | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                                       |
-| AC7  | No intermediate icon files persist on disk after the request completes                                                                                                                            |
-| AC8  | `cornerRadius=100` on a square PNG yield produces circular (fully rounded) raster icons; `cornerRadius=0` leaves square corners; invalid values (`-1`, `101`) return `400 VALIDATION_ERROR`       |
-| AC9  | Document head on `/` wires every §5.6 `public/` icon, absolute Open Graph + Twitter Card tags for `/og-image.png` (1200×630), and canonical / `og:url` from Astro `site`                          |
-| AC10 | `monochrome=true` yields greyscale raster PNG/ICO content (chroma ≈ 0); `monochrome=false` / omitted keeps source colors; invalid values return `400 VALIDATION_ERROR`; SVG passthrough unchanged |
+| ID   | Criterion                                                                                                                                                                                                                                                                             |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC1  | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded)                                                                                                                                                                                |
+| AC2  | Upload SVG returns ZIP that also includes `favicon.svg`                                                                                                                                                                                                                               |
+| AC3  | Invalid MIME or >10 MB returns `400` JSON with `VALIDATION_ERROR`                                                                                                                                                                                                                     |
+| AC4  | `padding=20` visibly insets icon content in generated PNG assets                                                                                                                                                                                                                      |
+| AC5  | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                                                                                                                       |
+| AC6  | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                                                                                                                           |
+| AC7  | No intermediate icon files persist on disk after the request completes                                                                                                                                                                                                                |
+| AC8  | `cornerRadius=100` on a square PNG yield produces circular (fully rounded) raster icons; `cornerRadius=0` leaves square corners; invalid values (`-1`, `101`) return `400 VALIDATION_ERROR`                                                                                           |
+| AC9  | Document head on `/` wires every §5.6 `public/` icon, absolute Open Graph + Twitter Card tags for `/og-image.png` (1200×630), and canonical / `og:url` from Astro `site`                                                                                                              |
+| AC10 | `monochrome=true` yields greyscale raster PNG/ICO content (chroma ≈ 0); `monochrome=false` / omitted keeps source colors; invalid values return `400 VALIDATION_ERROR`; SVG passthrough unchanged                                                                                     |
+| AC11 | `presets=original` alone yields ZIP with only `original.png` at source width×height; padding / background / cornerRadius / monochrome still apply; `presets=all` does **not** include `original.png`; combining `original` with other presets adds the file alongside §2.1–2.4 assets |
 
 ---
 
@@ -894,3 +974,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.10  | 2026-07-23 | §5.1 header: `public/` brand icon + short product description              |
 | 1.0.11  | 2026-07-23 | `cornerRadius` range 0–100 (`100` = full circle); AC8 updated              |
 | 1.0.12  | 2026-07-23 | `monochrome` option (Sharp greyscale); UI + API; AC10                      |
+| 1.0.13  | 2026-07-23 | Preset `original` → `original.png` at source size; AC11                    |
