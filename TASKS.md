@@ -39,7 +39,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 
 - [x] Dropzone island (drag/drop, browse, type/size validation)
 - [x] Settings: padding, background, presets, app name, theme/background colors
-- [ ] Live preview grid (client approximation)
+- [x] Live preview grid (client approximation)
 - [ ] Generate button → `FormData` POST → blob download
 - [ ] HTML snippet panel + copy to clipboard
 - [ ] Loading / disabled / error states (`aria-live`)

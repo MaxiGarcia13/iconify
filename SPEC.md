@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | **Product** | Iconify |
-| **Version** | 1.0.4 |
+| **Version** | 1.0.5 |
 | **Status** | Draft |
 | **Stack** | Astro · Node.js (Astro API routes) · Sharp · archiver |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -88,7 +88,8 @@ src/
 │   ├── index.astro                 # Generator UI
 │   └── api/v1/generate.ts          # POST endpoint
 ├── components/
-│   ├── dropzone.tsx                # Client island
+│   ├── generator.tsx               # Client island: dropzone + settings + preview
+│   ├── dropzone.tsx
 │   ├── settings-panel.tsx
 │   ├── preview-grid.tsx
 │   └── html-snippet.tsx
@@ -98,6 +99,7 @@ src/
 │   │   ├── process.ts              # Sharp pipeline
 │   │   ├── ico.ts                  # Multi-resolution ICO
 │   │   └── package.ts              # ZIP stream assembly
+│   ├── preview.ts                  # Client preview geometry (Canvas approx.)
 │   ├── manifest.ts                 # site.webmanifest builder
 │   ├── snippet.ts                  # HTML <head> generator
 │   ├── upload-constraints.ts       # Shared MIME / size checks
@@ -799,3 +801,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.2 | 2026-07-23 | §6 / §8: mark `TASKS.md` items done only when `npm run test:unit` is green |
 | 1.0.3 | 2026-07-23 | §1.6 lowercase kebab-case for source; layout paths updated |
 | 1.0.4 | 2026-07-23 | §1.6 markdown docs use UPPERCASE basenames (`SPEC.md`, …) |
+| 1.0.5 | 2026-07-23 | §1.5 layout: `generator.tsx` island + `preview.ts` client approx. |
