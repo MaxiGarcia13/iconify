@@ -131,6 +131,7 @@ export async function parseGenerateForm(
       background,
       padding,
       cornerRadius,
+      monochrome: GENERATE_OPTION_DEFAULTS.monochrome,
       presets,
     },
   };

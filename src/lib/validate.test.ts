@@ -55,6 +55,7 @@ describe('parseGenerateForm', () => {
       background: '#112233',
       padding: 20,
       cornerRadius: 0,
+      monochrome: false,
       presets: ['favicon', 'apple'],
     });
   });

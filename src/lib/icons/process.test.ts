@@ -25,6 +25,7 @@ describe('renderIcon', () => {
         background: 'transparent',
         padding: 0,
         cornerRadius: 0,
+        monochrome: false,
       });
 
       const meta = await sharp(out).metadata();
@@ -40,6 +41,7 @@ describe('applyCornerRadius via renderIcon (SPEC §4.3 / AC8)', () => {
   const optionsBase = {
     background: '#0080ff' as const,
     padding: 0,
+    monochrome: false,
   };
 
   /** Alpha of pixel (x, y) in a raw RGBA buffer. */
@@ -106,6 +108,7 @@ describe('applyCornerRadius via renderOgImage (SPEC §4.5)', () => {
       background: '#0080ff',
       padding: 0,
       cornerRadius: 100,
+      monochrome: false,
     });
 
     const { data, info } = await sharp(out)
@@ -128,6 +131,7 @@ describe('applyCornerRadius via renderOgImage (SPEC §4.5)', () => {
       background: '#0080ff',
       padding: 0,
       cornerRadius: 0,
+      monochrome: false,
     });
 
     const { data, info } = await sharp(out)
@@ -146,6 +150,7 @@ describe('renderOgImage', () => {
       background: 'transparent',
       padding: 10,
       cornerRadius: 0,
+      monochrome: false,
     });
 
     const meta = await sharp(out).metadata();

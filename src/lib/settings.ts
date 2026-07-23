@@ -122,6 +122,7 @@ export function toGenerateOptions(state: SettingsState): GenerateOptions {
     padding: clampPadding(state.padding),
     cornerRadius: clampCornerRadius(state.cornerRadius),
     background: state.transparent ? 'transparent' : state.backgroundHex,
+    monochrome: GENERATE_OPTION_DEFAULTS.monochrome,
     presets: state.presets.length > 0 ? [...state.presets] : ['all'],
   };
 }

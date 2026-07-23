@@ -10,6 +10,8 @@ export interface GenerateOptions {
   padding: number; // 0–50
   /** Outer corner radius as % of half the shorter canvas side (0–100). */
   cornerRadius: number; // 0–100
+  /** Sharp greyscale on raster content before background composite. */
+  monochrome: boolean;
   presets: PresetId[];
 }
 

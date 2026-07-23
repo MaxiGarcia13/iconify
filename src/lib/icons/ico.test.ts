@@ -12,6 +12,7 @@ describe('buildFaviconIco', () => {
       background: 'transparent',
       padding: 0,
       cornerRadius: 0,
+      monochrome: false,
     });
 
     expect(ico.subarray(0, 2).readUInt16LE(0)).toBe(0); // reserved
