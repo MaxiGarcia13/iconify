@@ -44,6 +44,46 @@ export async function renderIcon(
     .toBuffer();
 }
 
+/**
+ * Decode source, apply padding + background, return a 1200×630 PNG
+ * suitable for Open Graph / social previews.
+ * SPEC §4.5.
+ */
+export async function renderOgImage(
+  input: Buffer,
+  options: Pick<GenerateOptions, 'background' | 'padding'>,
+): Promise<Buffer> {
+  const width = 1200;
+  const height = 630;
+  const padRatio = Math.min(Math.max(options.padding, 0), 50) / 100;
+  const innerW = Math.round(width * (1 - padRatio * 2));
+  const innerH = Math.round(height * (1 - padRatio * 2));
+
+  const logo = await sharp(input, { density: 300 })
+    .resize(innerW, innerH, {
+      fit: 'contain',
+      background: parseBackground(options.background),
+    })
+    .png()
+    .toBuffer();
+
+  const meta = await sharp(logo).metadata();
+  const left = Math.floor((width - (meta.width ?? innerW)) / 2);
+  const top = Math.floor((height - (meta.height ?? innerH)) / 2);
+
+  return sharp({
+    create: {
+      width,
+      height,
+      channels: 4,
+      background: parseBackground(options.background),
+    },
+  })
+    .composite([{ input: logo, left, top }])
+    .png()
+    .toBuffer();
+}
+
 function parseBackground(value: GenerateOptions['background']) {
   if (value === 'transparent') {
     return { r: 0, g: 0, b: 0, alpha: 0 };
