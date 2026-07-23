@@ -1,7 +1,19 @@
 ---
+import { Dropzone } from '../components/dropzone';
 import AppLayout from '../layouts/app.astro';
 ---
 
 <AppLayout>
-  <h1>Iconify</h1>
+  <main class="mx-auto flex min-h-dvh w-full max-w-5xl flex-col gap-8 px-6 py-10">
+    <header class="flex flex-col gap-2">
+      <h1 class="text-3xl font-semibold tracking-tight">Iconify</h1>
+      <p class="text-muted-foreground">
+        High-performance icon set generator
+      </p>
+    </header>
+
+    <section aria-label="Upload source image" class="max-w-xl">
+      <Dropzone client:load />
+    </section>
+  </main>
 </AppLayout>

@@ -3,9 +3,14 @@ import type { GenerateOptions, PresetId } from './icons/types';
 import { Buffer } from 'node:buffer';
 
 import { PRESET_IDS } from './icons/matrix';
+import {
+  extensionOf,
+  MAX_UPLOAD_BYTES,
+  normalizeMime,
+  validateSourceFile,
+} from './upload-constraints';
 
-/** Max upload size — SPEC §3.2. */
-export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+export { MAX_UPLOAD_BYTES } from './upload-constraints';
 
 /** Option defaults from SPEC §3 `GenerateRequest`. */
 export const GENERATE_OPTION_DEFAULTS: GenerateOptions = {
@@ -16,14 +21,6 @@ export const GENERATE_OPTION_DEFAULTS: GenerateOptions = {
   themeColor: '#ffffff',
   backgroundColor: '#ffffff',
 };
-
-const ALLOWED_MIME = new Set([
-  'image/svg+xml',
-  'image/png',
-  'image/jpeg',
-]);
-
-const ALLOWED_EXTENSIONS = new Set(['.svg', '.png', '.jpg', '.jpeg']);
 
 const HEX6 = /^#[0-9a-f]{6}$/i;
 const HEX_BG = /^#(?:[0-9a-f]{6}|[0-9a-f]{8})$/i;
@@ -65,24 +62,20 @@ export async function parseGenerateForm(
     };
   }
 
+  const sourceCheck = validateSourceFile(fileEntry);
+  if (!sourceCheck.ok) {
+    const details: Record<string, unknown> = { field: 'file' };
+    if (sourceCheck.message.includes('10MB'))
+      details.maxBytes = MAX_UPLOAD_BYTES;
+    return {
+      ok: false,
+      message: sourceCheck.message,
+      details,
+    };
+  }
+
   const mime = normalizeMime(fileEntry.type);
   const ext = extensionOf(fileEntry.name);
-
-  if (!ALLOWED_MIME.has(mime) || !ALLOWED_EXTENSIONS.has(ext)) {
-    return {
-      ok: false,
-      message: 'Unsupported file type. Allowed: SVG, PNG, JPG.',
-      details: { field: 'file' },
-    };
-  }
-
-  if (fileEntry.size > MAX_UPLOAD_BYTES) {
-    return {
-      ok: false,
-      message: 'File exceeds maximum size of 10MB.',
-      details: { field: 'file', maxBytes: MAX_UPLOAD_BYTES },
-    };
-  }
 
   const buffer = Buffer.from(await fileEntry.arrayBuffer());
   if (buffer.byteLength > MAX_UPLOAD_BYTES) {
@@ -193,17 +186,6 @@ function presetsField(form: FormData): string | null {
   if (values.length === 0)
     return null;
   return values.join(',');
-}
-
-function normalizeMime(type: string): string {
-  return type.trim().toLowerCase().split(';')[0] ?? '';
-}
-
-function extensionOf(filename: string): string {
-  const i = filename.lastIndexOf('.');
-  if (i < 0)
-    return '';
-  return filename.slice(i).toLowerCase();
 }
 
 function parseBackground(

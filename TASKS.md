@@ -37,7 +37,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 
 ## M3 — Astro UI
 
-- [ ] Dropzone island (drag/drop, browse, type/size validation)
+- [x] Dropzone island (drag/drop, browse, type/size validation)
 - [ ] Settings: padding, background, presets, app name, theme/background colors
 - [ ] Live preview grid (client approximation)
 - [ ] Generate button → `FormData` POST → blob download
