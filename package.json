@@ -22,7 +22,7 @@
     "preview": "astro preview",
     "start": "node ./dist/server/entry.mjs",
     "clean": "rm -rf dist node_modules .astro",
-    "test:unit": "vitest"
+    "test:unit": "vitest run"
   },
   "devDependencies": {
     "@eslint-react/eslint-plugin": "^3.0.0",
