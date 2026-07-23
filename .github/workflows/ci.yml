@@ -39,4 +39,4 @@ jobs:
     secrets: inherit
     with:
       deployment_environment: Production
-      deployment_url: https://icon-sets-generator.vercel.app
+      deployment_url: https://iconset-generator.vercel.app
