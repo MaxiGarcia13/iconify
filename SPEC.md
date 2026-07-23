@@ -3,7 +3,7 @@
 | Field        | Value                                                                       |
 | ------------ | --------------------------------------------------------------------------- |
 | **Product**  | Iconify                                                                     |
-| **Version**  | 1.0.17                                                                      |
+| **Version**  | 1.0.18                                                                      |
 | **Status**   | Accepted                                                                    |
 | **Stack**    | Astro · Node.js (Astro API routes) · Sharp · archiver                       |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -87,7 +87,8 @@ src/
 │   ├── generator.tsx               # Client island: dropzone + settings + download + snippet
 │   ├── dropzone.tsx
 │   ├── settings-panel.tsx
-│   └── html-snippet.tsx
+│   ├── html-snippet.tsx
+│   └── footer.astro                # GitHub repository link
 ├── lib/
 │   ├── icons/
 │   │   ├── matrix.ts               # Asset matrix (sizes, names, presets)
@@ -839,10 +840,14 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 │  [ Generate & Download ZIP ]                             │
 ├─────────────────────────────────────────────────────────┤
 │  HTML <head> snippet                    [ Copy ]         │
+├─────────────────────────────────────────────────────────┤
+│  Footer: [GitHub icon] link to repository                │
 └─────────────────────────────────────────────────────────┘
 ```
 
 Header brand mark uses an existing `public/` icon (e.g. `android-chrome-192x192.png`); do not invent filenames.
+
+Footer links to the project GitHub repository (`package.json` `homepage` / `repository`); implemented as `src/components/footer.astro` using `src/components/icons/github.astro`.
 
 ### 5.2 Workflow
 
@@ -1054,3 +1059,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.15  | 2026-07-23 | `POST /api/v1/generate` same-origin only (`FORBIDDEN_ORIGIN`); AC12        |
 | 1.0.16  | 2026-07-23 | Status → Accepted; v1 release (package `1.0.16`, `CHANGELOG.md`)           |
 | 1.0.17  | 2026-07-24 | §5.6 site PWA: `public/site.webmanifest` + head `manifest` / `theme-color` |
+| 1.0.18  | 2026-07-24 | §5.1 footer: GitHub repository link with `github.astro` icon               |

@@ -1,0 +1,20 @@
+---
+import GithubIcon from '@/components/icons/github.astro';
+import { homepage } from '../../package.json';
+
+/** Repo URL from `package.json` homepage (strip hash fragment). */
+const githubRepoUrl = homepage.split('#')[0]!;
+---
+
+<footer class="mt-auto flex justify-center pt-2">
+  <a
+    href={githubRepoUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    class="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+    aria-label="View Iconify on GitHub"
+  >
+    <GithubIcon width={20} height={20} class="size-5" />
+    <span>GitHub</span>
+  </a>
+</footer>

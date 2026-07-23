@@ -1,4 +1,5 @@
 ---
+import Footer from '@/components/footer.astro';
 import { Generator } from '@/components/generator';
 import AppLayout from '@/layouts/app.astro';
 
@@ -32,5 +33,7 @@ const appIconSrc = '/android-chrome-192x192.png';
     </header>
 
     <Generator client:load />
+
+    <Footer />
   </main>
 </AppLayout>
