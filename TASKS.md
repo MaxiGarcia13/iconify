@@ -59,7 +59,7 @@ SPEC §5.6 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
 
 - [x] Configure Astro `site` (canonical public origin) so social URLs can be absolute
 - [x] Wire all §5.6 favicon / Apple Touch / Android Chrome links from `public/`
-- [ ] Core SEO: `<title>`, meta description, `link[rel=canonical]` for `/`
+- [x] Core SEO: `<title>`, meta description, `link[rel=canonical]` for `/`
 - [ ] Open Graph: full §5.6 tag set with absolute `og:url` + `og:image` (`/og-image.png`, 1200×630)
 - [ ] Twitter Card: `summary_large_image` + title / description / absolute image + alt
 - [ ] Verify AC9 (view-source; optional Twitter/Facebook sharing debugger)
