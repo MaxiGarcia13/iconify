@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { resolveMatrix } from '../../../lib/icons/matrix';
 import { MAX_UPLOAD_BYTES } from '../../../lib/validate';
-import { solidPng } from '../../../test/fixtures';
+import { solidPng, solidSvg } from '../../../test/fixtures';
 import { listZipEntryNames } from '../../../test/zip';
 import { POST } from './generate';
 
@@ -53,6 +53,60 @@ describe('post /api/v1/generate', () => {
       expect(bytes.byteLength).toBeGreaterThan(0);
       expect(bytes.subarray(0, 2).toString('ascii')).toBe('PK');
       expect(listZipEntryNames(bytes)).toEqual(expectedNames);
+    });
+  });
+
+  describe('ZIP membership via API (curl equivalent / AC1 / AC2)', () => {
+    it('PNG + presets=all ZIP matches §2.1–2.4 minus SVG (AC1)', async () => {
+      const png = await solidPng();
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(png)], 'logo.png', {
+          type: 'image/png',
+        }),
+        presets: 'all',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+
+      const expectedNames = resolveMatrix(['all'], false).map((e) => e.name);
+      expect(expectedNames.some((n) => n.endsWith('.svg'))).toBe(false);
+      expect(response.headers.get('X-Iconify-Assets')).toBe(
+        expectedNames.join(','),
+      );
+
+      const names = listZipEntryNames(
+        Buffer.from(await response.arrayBuffer()),
+      );
+      expect(names).toEqual(expectedNames);
+      expect(names).not.toContain('favicon.svg');
+      expect(names).not.toContain('safari-pinned-tab.svg');
+    });
+
+    it('SVG upload ZIP includes favicon.svg (AC2)', async () => {
+      const svg = solidSvg();
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(svg)], 'logo.svg', {
+          type: 'image/svg+xml',
+        }),
+        presets: 'all',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+
+      const expectedNames = resolveMatrix(['all'], true).map((e) => e.name);
+      expect(expectedNames).toContain('favicon.svg');
+      expect(response.headers.get('X-Iconify-Assets')).toBe(
+        expectedNames.join(','),
+      );
+
+      const names = listZipEntryNames(
+        Buffer.from(await response.arrayBuffer()),
+      );
+      expect(names).toEqual(expectedNames);
+      expect(names).toContain('favicon.svg');
+      expect(names).toContain('safari-pinned-tab.svg');
     });
   });
 

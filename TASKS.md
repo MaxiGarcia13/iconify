@@ -33,7 +33,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] Validation: MIME, extension, ≤ 10 MB, padding 0–50, hex colors
 - [x] `200` streamed ZIP with `Content-Disposition`
 - [x] `400` / `415` / `500` JSON error contract
-- [ ] Curl (or equivalent) verification of ZIP membership
+- [x] Curl (or equivalent) verification of ZIP membership
 
 ## M3 — Astro UI
 
