@@ -3,25 +3,13 @@ import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
+import { solidPng } from '../../test/fixtures';
 import { ASSET_MATRIX } from './matrix';
 import { passthroughFaviconSvg, renderIcon, renderOgImage } from './process';
 
 const SQUARE_PNG_ENTRIES = ASSET_MATRIX.filter(
   (entry) => entry.format === 'png' && entry.size.kind === 'square',
 );
-
-async function solidPng(size = 64): Promise<Buffer> {
-  return sharp({
-    create: {
-      width: size,
-      height: size,
-      channels: 4,
-      background: { r: 255, g: 0, b: 0, alpha: 1 },
-    },
-  })
-    .png()
-    .toBuffer();
-}
 
 describe('renderIcon', () => {
   it.each(

@@ -1,21 +1,12 @@
-import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
+import { solidPng } from '../../test/fixtures';
 import { buildFaviconIco } from './ico';
 import { ICO_SIZES } from './matrix';
 
 describe('buildFaviconIco', () => {
   it('returns an ICO with 16, 32, and 48 px layers (SPEC §2.1 / §4.4 / AC5)', async () => {
-    const input = await sharp({
-      create: {
-        width: 64,
-        height: 64,
-        channels: 4,
-        background: { r: 0, g: 128, b: 255, alpha: 1 },
-      },
-    })
-      .png()
-      .toBuffer();
+    const input = await solidPng();
 
     const ico = await buildFaviconIco(input, {
       background: 'transparent',

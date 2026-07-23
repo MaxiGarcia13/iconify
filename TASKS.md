@@ -28,7 +28,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 
 ## M2 — REST API
 
-- [ ] `src/pages/api/v1/generate.ts` — `POST` handler
+- [x] `src/pages/api/v1/generate.ts` — `POST` handler
 - [ ] Multipart parse + option defaults (SPEC §3)
 - [ ] Validation: MIME, extension, ≤ 10 MB, padding 0–50, hex colors
 - [ ] `200` streamed ZIP with `Content-Disposition`

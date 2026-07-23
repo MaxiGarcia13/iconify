@@ -1,8 +1,75 @@
-import type { AssetEntry } from './types';
+import type { MatrixEntry } from './matrix';
+import type { AssetEntry, GenerateOptions, ProcessResult } from './types';
 
+import { Buffer } from 'node:buffer';
 import { PassThrough, Readable } from 'node:stream';
 
 import archiver from 'archiver';
+
+import { buildSiteWebmanifest } from '../manifest';
+import { buildHeadHtml } from '../snippet';
+import { buildFaviconIco } from './ico';
+import { resolveMatrix } from './matrix';
+import { passthroughFaviconSvg, renderIcon, renderOgImage } from './process';
+
+/**
+ * Build every asset buffer for the requested presets, then return them for ZIP.
+ * Never starts packaging until all buffers succeed (SPEC §4.8).
+ */
+export async function processIconPackage(
+  input: Buffer,
+  options: GenerateOptions,
+  sourceIsSvg: boolean,
+): Promise<ProcessResult> {
+  const entries = resolveMatrix(options.presets, sourceIsSvg);
+  const assets: AssetEntry[] = [];
+
+  for (const entry of entries) {
+    const buffer = await renderMatrixEntry(input, entry, options, sourceIsSvg);
+    assets.push({
+      name: entry.name,
+      buffer,
+      contentType: entry.contentType,
+    });
+  }
+
+  const headHtml = buildHeadHtml(options, sourceIsSvg);
+  const manifestJson = buildSiteWebmanifest(options);
+
+  return { assets, headHtml, manifestJson };
+}
+
+async function renderMatrixEntry(
+  input: Buffer,
+  entry: MatrixEntry,
+  options: GenerateOptions,
+  sourceIsSvg: boolean,
+): Promise<Buffer> {
+  switch (entry.format) {
+    case 'ico':
+      return buildFaviconIco(input, options);
+    case 'png': {
+      if (entry.size.kind === 'rect')
+        return renderOgImage(input, options);
+      if (entry.size.kind === 'square')
+        return renderIcon(input, entry.size.px, options);
+      throw new Error(`Unsupported PNG size for ${entry.name}`);
+    }
+    case 'svg': {
+      if (!sourceIsSvg)
+        throw new Error(`SVG asset ${entry.name} requested for non-SVG source`);
+      return passthroughFaviconSvg(input);
+    }
+    case 'webmanifest':
+      return Buffer.from(buildSiteWebmanifest(options), 'utf8');
+    case 'html':
+      return Buffer.from(buildHeadHtml(options, sourceIsSvg), 'utf8');
+    default: {
+      const _exhaustive: never = entry.format;
+      throw new Error(`Unknown asset format: ${_exhaustive}`);
+    }
+  }
+}
 
 /**
  * Pipe asset buffers into an archiver ZIP stream.

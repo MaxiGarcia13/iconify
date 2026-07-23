@@ -5,7 +5,9 @@ import { Buffer } from 'node:buffer';
 
 import { describe, expect, it } from 'vitest';
 
-import { createZipStream, zipToWebResponse } from './package';
+import { solidPng } from '../../test/fixtures';
+import { resolveMatrix } from './matrix';
+import { createZipStream, processIconPackage, zipToWebResponse } from './package';
 
 const EOCD_SIG = 0x06_05_4b_50;
 const CD_SIG = 0x02_01_4b_50;
@@ -68,6 +70,43 @@ function makeAssets(): AssetEntry[] {
     },
   ];
 }
+
+const packageDefaults = {
+  background: 'transparent' as const,
+  padding: 0,
+  presets: ['all' as const],
+  appName: 'App',
+  themeColor: '#ffffff',
+  backgroundColor: '#ffffff',
+};
+
+describe('processIconPackage', () => {
+  it('builds assets matching resolveMatrix for PNG (no SVG outputs)', async () => {
+    const input = await solidPng();
+    const result = await processIconPackage(input, packageDefaults, false);
+    const expected = resolveMatrix(['all'], false).map((e) => e.name);
+
+    expect(result.assets.map((a) => a.name)).toEqual(expected);
+    expect(result.assets.some((a) => a.name.endsWith('.svg'))).toBe(false);
+    expect(result.headHtml).toContain('favicon.ico');
+    expect(result.manifestJson).toContain('"name":"App"');
+  });
+
+  it('includes favicon.svg when source is SVG', async () => {
+    const input = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#0af"/></svg>',
+      'utf8',
+    );
+    const result = await processIconPackage(
+      input,
+      { ...packageDefaults, presets: ['favicon'] },
+      true,
+    );
+
+    expect(result.assets.map((a) => a.name)).toContain('favicon.svg');
+    expect(result.assets.map((a) => a.name)).toContain('safari-pinned-tab.svg');
+  });
+});
 
 describe('createZipStream', () => {
   it('streams a non-empty ZIP whose membership matches the asset set (SPEC §4.6)', async () => {
