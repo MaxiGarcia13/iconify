@@ -70,7 +70,7 @@ SPEC §3 `monochrome` / §4 greyscale in `renderIcon` + `renderOgImage` / §5 se
 
 - [x] Processing: Sharp `.greyscale()` on upload content when `monochrome` is true (before background composite) in `renderIcon` + `renderOgImage` (ICO inherits); no-op when false; skip SVG passthrough
 - [x] Types + defaults: `GenerateOptions.monochrome` (`boolean`, default `false`) in `types` / `generate-defaults`
-- [ ] API: accept multipart `monochrome` as literals `true` / `false` (omit → `false`); reject other values with `400 VALIDATION_ERROR` + `details.field: monochrome`
+- [x] API: accept multipart `monochrome` as literals `true` / `false` (omit → `false`); reject other values with `400 VALIDATION_ERROR` + `details.field: monochrome`
 - [ ] UI: settings checkbox/switch; wire into settings state + `FormData` (`monochrome=true|false`)
 - [ ] Unit tests: process greyscale on / off; validate accept/reject; API happy-path + invalid; settings → FormData mapping
 - [ ] Verify AC10

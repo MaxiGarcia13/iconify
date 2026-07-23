@@ -110,6 +110,19 @@ export async function parseGenerateForm(
     };
   }
 
+  const monochromeRaw = stringField(form, 'monochrome');
+  const monochrome
+    = monochromeRaw === null
+      ? GENERATE_OPTION_DEFAULTS.monochrome
+      : parseMonochrome(monochromeRaw);
+  if (monochrome === null) {
+    return {
+      ok: false,
+      message: 'Invalid monochrome. Expected `true` or `false`.',
+      details: { field: 'monochrome' },
+    };
+  }
+
   const presetsRaw = presetsField(form);
   const presets
     = presetsRaw === null
@@ -131,7 +144,7 @@ export async function parseGenerateForm(
       background,
       padding,
       cornerRadius,
-      monochrome: GENERATE_OPTION_DEFAULTS.monochrome,
+      monochrome,
       presets,
     },
   };
@@ -163,6 +176,15 @@ function parseBackground(
     return 'transparent';
   if (HEX_BG.test(value))
     return value as `#${string}`;
+  return null;
+}
+
+/** Multipart literals `true` / `false` only — SPEC §3 `monochrome`. */
+function parseMonochrome(value: string): boolean | null {
+  if (value === 'true')
+    return true;
+  if (value === 'false')
+    return false;
   return null;
 }
 

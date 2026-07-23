@@ -94,6 +94,43 @@ describe('parseGenerateForm', () => {
     }
   });
 
+  it('parses monochrome literals true / false from multipart fields', async () => {
+    for (const [raw, expected] of [
+      ['true', true],
+      ['false', false],
+    ] as const) {
+      const form = await formWithFile({ monochrome: raw });
+      const parsed = await parseGenerateForm(form);
+      expect(parsed.ok).toBe(true);
+      if (!parsed.ok)
+        return;
+      expect(parsed.options.monochrome).toBe(expected);
+    }
+  });
+
+  it('defaults monochrome to false when omitted', async () => {
+    const form = await formWithFile();
+    const parsed = await parseGenerateForm(form);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok)
+      return;
+    expect(parsed.options.monochrome).toBe(false);
+  });
+
+  it('rejects invalid monochrome values', async () => {
+    for (const monochrome of ['True', '1', 'yes', '0', '']) {
+      const form = await formWithFile({ monochrome });
+      const parsed = await parseGenerateForm(form);
+      expect(parsed.ok).toBe(false);
+      if (parsed.ok)
+        continue;
+      expect(parsed.message).toBe(
+        'Invalid monochrome. Expected `true` or `false`.',
+      );
+      expect(parsed.details).toEqual({ field: 'monochrome' });
+    }
+  });
+
   it('accepts repeated presets fields (SPEC §2.5)', async () => {
     const form = await formWithFile();
     form.append('presets', 'favicon');

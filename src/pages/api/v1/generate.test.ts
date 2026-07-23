@@ -248,6 +248,50 @@ describe('post /api/v1/generate', () => {
       }
     });
 
+    it('returns 200 ZIP when monochrome=true (AC10 happy path)', async () => {
+      const png = await solidPng();
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(png)], 'logo.png', {
+          type: 'image/png',
+        }),
+        presets: 'favicon',
+        monochrome: 'true',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+      expect(response.headers.get('Content-Type')).toBe('application/zip');
+
+      const bytes = Buffer.from(await response.arrayBuffer());
+      expect(bytes.subarray(0, 2).toString('ascii')).toBe('PK');
+      expect(listZipEntryNames(bytes)).toEqual(
+        resolveMatrix(['favicon'], false).map((e) => e.name),
+      );
+    });
+
+    it('returns 400 VALIDATION_ERROR for invalid monochrome', async () => {
+      const png = await solidPng();
+      for (const monochrome of ['True', '1', 'yes']) {
+        const request = await multipartRequest({
+          file: new File([Uint8Array.from(png)], 'logo.png', {
+            type: 'image/png',
+          }),
+          monochrome,
+        });
+
+        const response = await POST(apiContext(request));
+        expect(response.status).toBe(400);
+        expect(response.headers.get('Content-Type')).toBe('application/json');
+
+        const body = await response.json();
+        expect(body).toEqual({
+          error: 'VALIDATION_ERROR',
+          message: 'Invalid monochrome. Expected `true` or `false`.',
+          details: { field: 'monochrome' },
+        });
+      }
+    });
+
     it('returns 500 PROCESSING_ERROR when Sharp cannot decode the image', async () => {
       const request = await multipartRequest({
         file: new File(
