@@ -79,14 +79,14 @@ SPEC §5.6 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
 
 ## Verification Shortcuts
 
-| AC  | How to verify                                                             |
-| --- | ------------------------------------------------------------------------- |
-| AC1 | PNG + `presets=all` → unzip; list matches §2 minus SVG                    |
-| AC2 | SVG upload → ZIP includes `favicon.svg`                                   |
-| AC3 | `.gif` or 11 MB file → `400 VALIDATION_ERROR`                             |
-| AC4 | `padding=20` → visual inset on PNGs                                       |
-| AC5 | Inspect `favicon.ico` layers 16/32/48                                     |
-| AC6 | UI download + copy snippet without reload                                 |
-| AC7 | No leftover files under OS temp after request                             |
-| AC8 | `cornerRadius=50` → circular square PNGs; `0` → square; bad value → `400` |
+| AC  | How to verify                                                               |
+| --- | --------------------------------------------------------------------------- |
+| AC1 | PNG + `presets=all` → unzip; list matches §2 minus SVG                      |
+| AC2 | SVG upload → ZIP includes `favicon.svg`                                     |
+| AC3 | `.gif` or 11 MB file → `400 VALIDATION_ERROR`                               |
+| AC4 | `padding=20` → visual inset on PNGs                                         |
+| AC5 | Inspect `favicon.ico` layers 16/32/48                                       |
+| AC6 | UI download + copy snippet without reload                                   |
+| AC7 | No leftover files under OS temp after request                               |
+| AC8 | `cornerRadius=50` → circular square PNGs; `0` → square; bad value → `400`   |
 | AC9 | View-source `/`: all §5.6 `public/` icons + absolute OG/Twitter + canonical |

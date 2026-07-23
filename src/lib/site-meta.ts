@@ -13,8 +13,8 @@ export const SITE_OG_IMAGE_HEIGHT = 630;
 export const SITE_OG_IMAGE_TYPE = 'image/png' as const;
 
 /** Shared by `og:image:alt` and `twitter:image:alt` (SPEC §5.6). */
-export const SITE_OG_IMAGE_ALT =
-  'Iconify — high-performance icon set generator preview' as const;
+export const SITE_OG_IMAGE_ALT
+  = 'Iconify — high-performance icon set generator preview' as const;
 
 export interface SiteOpenGraph {
   type: 'website';
