@@ -7,6 +7,16 @@ import { PRESET_IDS } from './icons/matrix';
 /** Max upload size — SPEC §3.2. */
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
+/** Option defaults from SPEC §3 `GenerateRequest`. */
+export const GENERATE_OPTION_DEFAULTS: GenerateOptions = {
+  background: 'transparent',
+  padding: 0,
+  presets: ['all'],
+  appName: 'App',
+  themeColor: '#ffffff',
+  backgroundColor: '#ffffff',
+};
+
 const ALLOWED_MIME = new Set([
   'image/svg+xml',
   'image/png',
@@ -83,7 +93,8 @@ export async function parseGenerateForm(
     };
   }
 
-  const backgroundRaw = stringField(form, 'background') ?? 'transparent';
+  const backgroundRaw
+    = stringField(form, 'background') ?? GENERATE_OPTION_DEFAULTS.background;
   const background = parseBackground(backgroundRaw);
   if (background === null) {
     return {
@@ -93,8 +104,11 @@ export async function parseGenerateForm(
     };
   }
 
-  const paddingRaw = stringField(form, 'padding') ?? '0';
-  const padding = Number(paddingRaw);
+  const paddingRaw = stringField(form, 'padding');
+  const padding
+    = paddingRaw === null
+      ? GENERATE_OPTION_DEFAULTS.padding
+      : Number(paddingRaw);
   if (!Number.isFinite(padding) || padding < 0 || padding > 50) {
     return {
       ok: false,
@@ -103,8 +117,11 @@ export async function parseGenerateForm(
     };
   }
 
-  const presetsRaw = stringField(form, 'presets') ?? 'all';
-  const presets = parsePresets(presetsRaw);
+  const presetsRaw = presetsField(form);
+  const presets
+    = presetsRaw === null
+      ? [...GENERATE_OPTION_DEFAULTS.presets]
+      : parsePresets(presetsRaw);
   if (presets === null) {
     return {
       ok: false,
@@ -113,7 +130,8 @@ export async function parseGenerateForm(
     };
   }
 
-  const appName = stringField(form, 'appName') ?? 'App';
+  const appName
+    = stringField(form, 'appName') ?? GENERATE_OPTION_DEFAULTS.appName;
   if (appName.length === 0 || appName.length > 64) {
     return {
       ok: false,
@@ -122,7 +140,8 @@ export async function parseGenerateForm(
     };
   }
 
-  const themeColor = stringField(form, 'themeColor') ?? '#ffffff';
+  const themeColor
+    = stringField(form, 'themeColor') ?? GENERATE_OPTION_DEFAULTS.themeColor;
   if (!HEX6.test(themeColor)) {
     return {
       ok: false,
@@ -131,7 +150,9 @@ export async function parseGenerateForm(
     };
   }
 
-  const backgroundColor = stringField(form, 'backgroundColor') ?? '#ffffff';
+  const backgroundColor
+    = stringField(form, 'backgroundColor')
+      ?? GENERATE_OPTION_DEFAULTS.backgroundColor;
   if (!HEX6.test(backgroundColor)) {
     return {
       ok: false,
@@ -162,6 +183,16 @@ function stringField(form: FormData, key: string): string | null {
   if (typeof value !== 'string')
     return null;
   return value;
+}
+
+/** Comma-separated or repeated `presets` fields — SPEC §2.5. */
+function presetsField(form: FormData): string | null {
+  const values = form
+    .getAll('presets')
+    .filter((v): v is string => typeof v === 'string' && v.length > 0);
+  if (values.length === 0)
+    return null;
+  return values.join(',');
 }
 
 function normalizeMime(type: string): string {
