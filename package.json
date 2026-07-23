@@ -1,7 +1,7 @@
 {
   "name": "iconify",
   "type": "module",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "⚡ High-performance icon set generator. Generate favicons, PWA icons, iOS, and Android assets in seconds.",
   "author": "Maximiliano Garcia Mortigliengo",
   "license": "ISC",

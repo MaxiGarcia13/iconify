@@ -3,7 +3,7 @@
 | Field        | Value                                                                       |
 | ------------ | --------------------------------------------------------------------------- |
 | **Product**  | Iconify                                                                     |
-| **Version**  | 1.0.16                                                                      |
+| **Version**  | 1.0.17                                                                      |
 | **Status**   | Accepted                                                                    |
 | **Stack**    | Astro · Node.js (Astro API routes) · Sharp · archiver                       |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -935,8 +935,24 @@ Applies to the product page document (`src/layouts/app.astro` on `/`). This is *
 | `apple-touch-icon-180x180.png` | `<link rel="apple-touch-icon" sizes="180x180" … />`      |
 | `android-chrome-192x192.png`   | `<link rel="icon" type="image/png" sizes="192x192" … />` |
 | `android-chrome-512x512.png`   | `<link rel="icon" type="image/png" sizes="512x512" … />` |
+| `site.webmanifest`             | `<link rel="manifest" href="/site.webmanifest" />`       |
 
-No `site.webmanifest` in v1 (see document history).
+#### Web app manifest (`public/site.webmanifest`)
+
+Static PWA manifest for the product page (not generated into the ZIP). Fields:
+
+| Field              | Value                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------ |
+| `name`             | Product display name (`Iconify`)                                                                       |
+| `short_name`       | `Iconify`                                                                                              |
+| `description`      | Product description (`package.json`)                                                                   |
+| `start_url`        | `/`                                                                                                    |
+| `display`          | `standalone`                                                                                           |
+| `background_color` | `#141826` (site dark canvas)                                                                           |
+| `theme_color`      | `#141826`                                                                                              |
+| `icons`            | `/android-chrome-192x192.png` (192×192) and `/android-chrome-512x512.png` (512×512), `type: image/png` |
+
+Also emit `<meta name="theme-color" content="#141826" />` so the browser chrome matches the manifest.
 
 #### Core SEO
 
@@ -998,7 +1014,7 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | AC6  | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                                                                                                                                                                                                 |
 | AC7  | No intermediate icon files persist on disk after the request completes                                                                                                                                                                                                                                                                                      |
 | AC8  | `cornerRadius=100` on a square PNG yield produces circular (fully rounded) raster icons; `cornerRadius=0` leaves square corners; invalid values (`-1`, `101`) return `400 VALIDATION_ERROR`                                                                                                                                                                 |
-| AC9  | Document head on `/` wires every §5.6 `public/` icon, absolute Open Graph + Twitter Card tags for `/og-image.png` (1200×630), and canonical / `og:url` from Astro `site`                                                                                                                                                                                    |
+| AC9  | Document head on `/` wires every §5.6 `public/` icon, `link[rel=manifest]` → `/site.webmanifest`, `theme-color` meta, absolute Open Graph + Twitter Card tags for `/og-image.png` (1200×630), and canonical / `og:url` from Astro `site`                                                                                                                    |
 | AC10 | `monochrome=true` yields greyscale raster PNG/ICO content (chroma ≈ 0); `monochrome=false` / omitted keeps source colors; invalid values return `400 VALIDATION_ERROR`; SVG passthrough unchanged                                                                                                                                                           |
 | AC11 | Omit `presets` (or UI defaults) → `all,original`; `presets=original` alone yields ZIP with only the upload basename at source width×height; padding / background / cornerRadius / monochrome still apply; explicit `presets=all` omits the original-size file; combining `original` with other presets adds the upload-named file alongside §2.1–2.4 assets |
 | AC12 | Missing `Origin`, or `Origin` ≠ request URL origin → `403` JSON `FORBIDDEN_ORIGIN`; matching same-origin `Origin` proceeds; response must not include `Access-Control-Allow-Origin`                                                                                                                                                                         |
@@ -1037,3 +1053,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.14  | 2026-07-23 | Default `all,original`; original ZIP name = upload basename; AC11          |
 | 1.0.15  | 2026-07-23 | `POST /api/v1/generate` same-origin only (`FORBIDDEN_ORIGIN`); AC12        |
 | 1.0.16  | 2026-07-23 | Status → Accepted; v1 release (package `1.0.16`, `CHANGELOG.md`)           |
+| 1.0.17  | 2026-07-24 | §5.6 site PWA: `public/site.webmanifest` + head `manifest` / `theme-color` |

@@ -60,10 +60,4 @@ describe('site icon links (SPEC §5.6)', () => {
       expect(actual).toMatchObject(expected);
     }
   });
-
-  it('does not include site.webmanifest (omitted in v1)', () => {
-    expect(
-      SITE_ICON_LINKS.some((link) => link.href.includes('webmanifest')),
-    ).toBe(false);
-  });
 });
