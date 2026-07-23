@@ -740,7 +740,7 @@ Applies to the product page document (`src/layouts/app.astro` on `/`). This is *
 #### Canonical origin
 
 - Set Astro `site` in `astro.config.js` to the canonical public origin.
-- Resolve from `process.env.SITE` when set (production deploy URL); otherwise `http://localhost:4321` (Astro default local origin) so absolute URLs resolve in development.
+- Resolve as `https://${process.env.VERCEL_URL}` when `VERCEL_URL` is set (Vercel deploy); otherwise `http://localhost:4321` (Astro default local origin) so absolute URLs resolve in development.
 - Resolve `og:url`, `link[rel=canonical]`, and all social image URLs as **absolute** URLs from that origin (relative `og:image` / `twitter:image` are invalid for crawlers).
 
 #### Favicons & touch icons (`public/`)
