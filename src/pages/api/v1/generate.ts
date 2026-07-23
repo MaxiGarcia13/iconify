@@ -37,7 +37,12 @@ function jsonError(
   message: string,
   details?: Record<string, unknown>,
 ) {
-  return new Response(JSON.stringify({ error, message, details }), {
+  const body
+    = details === undefined
+      ? { error, message }
+      : { error, message, details };
+
+  return new Response(JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json' },
   });
