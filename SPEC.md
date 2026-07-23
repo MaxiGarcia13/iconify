@@ -744,7 +744,7 @@ See also [`TASKS.md`](./TASKS.md) for the checklist form used during SDD impleme
 ### Milestone M0 — SDD & Project Foundation
 
 - [x] Author `SPEC.md`, `AGENTS.md`, Cursor rules
-- [ ] Confirm Astro SSR/server output mode for API routes
+- [x] Confirm Astro SSR/server output mode for API routes
 - [ ] Add `sharp`, `archiver`, ICO helper dependencies
 - [ ] Define `src/lib/icons/matrix.ts` from §2
 
