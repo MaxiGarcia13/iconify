@@ -61,8 +61,8 @@ SPEC §5.6 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
 - [x] Wire all §5.6 favicon / Apple Touch / Android Chrome links from `public/`
 - [x] Core SEO: `<title>`, meta description, `link[rel=canonical]` for `/`
 - [x] Open Graph: full §5.6 tag set with absolute `og:url` + `og:image` (`/og-image.png`, 1200×630)
-- [ ] Twitter Card: `summary_large_image` + title / description / absolute image + alt
-- [ ] Verify AC9 (view-source; optional Twitter/Facebook sharing debugger)
+- [x] Twitter Card: `summary_large_image` + title / description / absolute image + alt
+- [x] Verify AC9 (view-source; optional Twitter/Facebook sharing debugger)
 
 ## M4 — Hardening
 

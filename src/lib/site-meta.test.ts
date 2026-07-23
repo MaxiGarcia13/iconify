@@ -8,6 +8,7 @@ import {
   SITE_OG_IMAGE_TYPE,
   SITE_OG_IMAGE_WIDTH,
   siteOpenGraph,
+  siteTwitterCard,
 } from './site-meta';
 
 describe('site Open Graph (SPEC §5.6)', () => {
@@ -41,5 +42,29 @@ describe('site Open Graph (SPEC §5.6)', () => {
     expect(og.url.startsWith('http')).toBe(true);
     expect(og.image.startsWith('http')).toBe(true);
     expect(og.image.endsWith(SITE_OG_IMAGE_PATH)).toBe(true);
+  });
+});
+
+describe('site Twitter Card (SPEC §5.6)', () => {
+  const origin = 'http://localhost:4321';
+  const twitter = siteTwitterCard(origin);
+
+  it('includes the full §5.6 name set with absolute image', () => {
+    expect(twitter).toEqual({
+      card: 'summary_large_image',
+      title: name,
+      description,
+      image: 'http://localhost:4321/og-image.png',
+      imageAlt: SITE_OG_IMAGE_ALT,
+    });
+  });
+
+  it('shares image alt with og:image:alt', () => {
+    expect(twitter.imageAlt).toBe(siteOpenGraph(origin).imageAlt);
+  });
+
+  it('keeps twitter:image absolute (not path-only)', () => {
+    expect(twitter.image.startsWith('http')).toBe(true);
+    expect(twitter.image.endsWith(SITE_OG_IMAGE_PATH)).toBe(true);
   });
 });

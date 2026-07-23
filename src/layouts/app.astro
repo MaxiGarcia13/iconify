@@ -2,7 +2,7 @@
 import { description, name } from '../../package.json';
 import { siteCanonicalUrl } from '../lib/site';
 import { SITE_ICON_LINKS } from '../lib/site-icons';
-import { siteOpenGraph } from '../lib/site-meta';
+import { siteOpenGraph, siteTwitterCard } from '../lib/site-meta';
 import '../index.css';
 
 if (!Astro.site) {
@@ -11,6 +11,7 @@ if (!Astro.site) {
 
 const canonicalUrl = siteCanonicalUrl(Astro.site);
 const og = siteOpenGraph(Astro.site);
+const twitter = siteTwitterCard(Astro.site);
 ---
 
 <html lang="en">
@@ -47,6 +48,12 @@ const og = siteOpenGraph(Astro.site);
     <meta property="og:image:height" content={String(og.imageHeight)} />
     <meta property="og:image:type" content={og.imageType} />
     <meta property="og:image:alt" content={og.imageAlt} />
+
+    <meta name="twitter:card" content={twitter.card} />
+    <meta name="twitter:title" content={twitter.title} />
+    <meta name="twitter:description" content={twitter.description} />
+    <meta name="twitter:image" content={twitter.image} />
+    <meta name="twitter:image:alt" content={twitter.imageAlt} />
   </head>
 
   <body>

@@ -1,5 +1,5 @@
 /**
- * Document-head Open Graph tags for the product page (SPEC §5.6).
+ * Document-head Open Graph + Twitter Card tags for the product page (SPEC §5.6).
  */
 
 import { description, name } from '../../package.json';
@@ -43,6 +43,25 @@ export function siteOpenGraph(site: string | URL): SiteOpenGraph {
     imageWidth: SITE_OG_IMAGE_WIDTH,
     imageHeight: SITE_OG_IMAGE_HEIGHT,
     imageType: SITE_OG_IMAGE_TYPE,
+    imageAlt: SITE_OG_IMAGE_ALT,
+  };
+}
+
+export interface SiteTwitterCard {
+  card: 'summary_large_image';
+  title: string;
+  description: string;
+  image: string;
+  imageAlt: typeof SITE_OG_IMAGE_ALT;
+}
+
+/** Twitter Card name set — SPEC §5.6 table order. */
+export function siteTwitterCard(site: string | URL): SiteTwitterCard {
+  return {
+    card: 'summary_large_image',
+    title: name,
+    description,
+    image: absoluteSiteUrl(SITE_OG_IMAGE_PATH, site),
     imageAlt: SITE_OG_IMAGE_ALT,
   };
 }
