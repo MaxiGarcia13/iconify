@@ -78,7 +78,7 @@ export function GenerateButton({
           void onGenerate();
         }}
         className={[
-          'w-full border border-surface-border px-4 py-3 text-sm font-medium transition-colors',
+          'touch-manipulation w-full min-h-11 border border-surface-border px-4 py-3 text-sm font-medium transition-colors',
           'bg-accent text-accent-foreground',
           'hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
           'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-accent',

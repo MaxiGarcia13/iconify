@@ -4,7 +4,7 @@ import { useId } from 'react';
 
 import { clampPadding } from '../../lib/settings';
 import { Field } from './field';
-import { fieldHintClass, fieldInputClass } from './field-styles';
+import { fieldHintClass, fieldInputClass, fieldRangeClass } from './field-styles';
 
 export interface PaddingFieldProps {
   value: number;
@@ -41,7 +41,7 @@ export function PaddingField({ value, onChange, id }: PaddingFieldProps) {
         step={1}
         value={value}
         onChange={handleChange}
-        className="accent-accent w-full"
+        className={fieldRangeClass}
         aria-valuemin={0}
         aria-valuemax={50}
         aria-valuenow={value}

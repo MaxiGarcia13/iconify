@@ -59,12 +59,15 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: clip;
 }
 
 body {
   background-color: var(--palette-background);
   color: var(--palette-foreground);
   font-family: var(--font-sans);
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* Width of the scrollbar */

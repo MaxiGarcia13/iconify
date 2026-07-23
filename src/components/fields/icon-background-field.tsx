@@ -3,6 +3,7 @@ import type { ChangeEvent } from 'react';
 import { useId } from 'react';
 
 import { Field } from './field';
+import { fieldCheckRowClass } from './field-styles';
 import { HexColorInput } from './hex-color-input';
 
 export interface IconBackgroundFieldProps {
@@ -31,12 +32,13 @@ export function IconBackgroundField({
 
   return (
     <Field label="Background" labelId={labelId}>
-      <label className="flex items-center gap-2 text-sm">
+      <label className={fieldCheckRowClass}>
         <input
           type="checkbox"
           checked={transparent}
           onChange={onToggle}
           aria-describedby={labelId}
+          className="size-4 shrink-0"
         />
         Transparent
       </label>

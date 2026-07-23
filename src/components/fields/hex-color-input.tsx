@@ -58,7 +58,7 @@ export function HexColorInput({
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex min-w-0 flex-wrap items-center gap-2">
       <input
         id={id}
         type="color"
@@ -76,7 +76,7 @@ export function HexColorInput({
         onBlur={onTextBlur}
         disabled={disabled}
         spellCheck={false}
-        className={[fieldInputClass, 'max-w-36 font-mono'].join(' ')}
+        className={[fieldInputClass, 'min-w-0 flex-1 font-mono sm:max-w-36 sm:flex-none'].join(' ')}
         aria-label={textAriaLabel}
         placeholder="#ffffff"
       />

@@ -27,8 +27,8 @@ export function Generator() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="grid gap-8 md:grid-cols-2 md:gap-10">
+    <div className="flex min-w-0 flex-col gap-6 sm:gap-8">
+      <div className="grid min-w-0 gap-6 md:grid-cols-2 md:gap-10">
         <section aria-label="Upload source image" className="min-w-0">
           <h2 className="mb-3 text-sm font-medium tracking-wide uppercase">
             Dropzone

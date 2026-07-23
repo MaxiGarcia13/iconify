@@ -28,8 +28,8 @@ export function HtmlSnippet({ html }: HtmlSnippetProps) {
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+    <div className="flex min-w-0 flex-col gap-3">
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
         <h2 className="text-sm font-medium tracking-wide uppercase">
           HTML
           {' '}
@@ -45,7 +45,7 @@ export function HtmlSnippet({ html }: HtmlSnippetProps) {
             void onCopy();
           }}
           className={[
-            'border border-surface-border px-3 py-1.5 text-sm font-medium transition-colors',
+            'touch-manipulation inline-flex min-h-11 w-full items-center justify-center border border-surface-border px-3 py-2 text-sm font-medium transition-colors sm:w-auto',
             'bg-muted text-foreground',
             'hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
             'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-surface-border',
@@ -58,7 +58,7 @@ export function HtmlSnippet({ html }: HtmlSnippetProps) {
       <pre
         tabIndex={0}
         className={[
-          'max-h-64 overflow-auto border border-surface-border bg-muted/40 p-4',
+          'max-h-56 min-w-0 overflow-x-auto overflow-y-auto border border-surface-border bg-muted/40 p-3 sm:max-h-64 sm:p-4',
           'text-xs leading-relaxed text-foreground whitespace-pre-wrap break-all',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
         ].join(' ')}
