@@ -6,7 +6,7 @@ alwaysApply: true
 # SDD (Iconify)
 
 - Before implementing features, read [`SPEC.md`](../../SPEC.md) and [`AGENTS.md`](../../AGENTS.md).
-- Change requirements in `SPEC.md` first, then `TASKS.md`, then code.
+- Change requirements in `SPEC.md` first; update `TASKS.md` only for work-breakdown / checkboxes; then code.
 - Do not invent API fields, asset filenames, sizes, or status codes.
 - Prefer matching SPEC §2 matrix and §3 OpenAPI exactly.
 - After finishing a slice, update checkboxes in `TASKS.md`.

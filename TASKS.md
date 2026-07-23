@@ -1,6 +1,6 @@
 # Iconify — Implementation Tasks
 
-Derived from [`SPEC.md`](./SPEC.md) §6. Check items as they complete. Do not mark done unless acceptance criteria for that slice are met.
+Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md) §6). Check items as they complete. Do not mark done unless acceptance criteria in SPEC §7 for that slice are met.
 
 ## M0 — Foundation
 

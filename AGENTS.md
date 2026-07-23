@@ -9,7 +9,7 @@ Constitution for AI coding agents working in this repository.
 ## Source of Truth
 
 1. [`SPEC.md`](./SPEC.md) — product, API, asset matrix, processing, UI, acceptance criteria
-2. [`TASKS.md`](./TASKS.md) — implementation checklist derived from SPEC milestones
+2. [`TASKS.md`](./TASKS.md) — sole implementation checklist (milestones M0–M5)
 3. This file — durable engineering policy
 
 When SPEC and code disagree, treat it as a defect. Prefer aligning code to SPEC unless the user explicitly changes requirements (then update SPEC first).

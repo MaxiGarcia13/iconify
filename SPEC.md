@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | **Product** | Iconify |
-| **Version** | 1.0.0 |
+| **Version** | 1.0.1 |
 | **Status** | Draft |
 | **Stack** | Astro · Node.js (Astro API routes) · Sharp · archiver |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -739,48 +739,9 @@ const res = await fetch('/api/v1/generate', { method: 'POST', body });
 
 ## 6. Milestones & Task Breakdown
 
-See also [`TASKS.md`](./TASKS.md) for the checklist form used during SDD implementation.
+Implementation progress lives in one place: [`TASKS.md`](./TASKS.md) (M0–M5 checklist + verification shortcuts against §7).
 
-### Milestone M0 — SDD & Project Foundation
-
-- [x] Author `SPEC.md`, `AGENTS.md`, Cursor rules
-- [x] Confirm Astro SSR/server output mode for API routes
-- [x] Add `sharp`, `archiver`, ICO helper dependencies
-- [ ] Define `src/lib/icons/matrix.ts` from §2
-
-### Milestone M1 — Processing Core
-
-- [ ] Implement `renderIcon`, `renderOgImage`, `buildFaviconIco`
-- [ ] Implement manifest + `head.html` generators
-- [ ] Implement ZIP stream packager
-- [ ] Unit-test matrix coverage (one asset per size/name)
-
-### Milestone M2 — REST API
-
-- [ ] `POST /api/v1/generate` with multipart parsing
-- [ ] Validation (MIME, 10 MB, options schema)
-- [ ] Status codes 200 / 400 / 415 / 500 per §3
-- [ ] Manual curl verification of ZIP contents
-
-### Milestone M3 — Astro UI
-
-- [ ] Dropzone island
-- [ ] Settings panel (padding, background, presets)
-- [ ] Live preview grid
-- [ ] Generate → download + snippet copy
-
-### Milestone M4 — Hardening
-
-- [ ] Error UX polish + `aria-live`
-- [ ] Large SVG / transparent PNG edge cases
-- [ ] Performance check (512 + 1200 assets under a few seconds on reference hardware)
-- [ ] README usage docs aligned with SPEC
-
-### Milestone M5 — Release
-
-- [ ] SPEC status → Accepted
-- [ ] Version bump + changelog
-- [ ] Production deploy configuration (Node adapter if required)
+Do not duplicate milestone checklists here. When scope changes, update this SPEC (requirements) and adjust `TASKS.md` (work items) accordingly.
 
 ---
 
@@ -801,7 +762,7 @@ See also [`TASKS.md`](./TASKS.md) for the checklist form used during SDD impleme
 ## 8. SDD Governance
 
 1. **SPEC.md is the source of truth.** Implementation follows this document; code does not invent API fields or asset names.
-2. **Spec before code.** Requirement changes update SPEC (and OpenAPI section) first, then `TASKS.md`, then implementation.
+2. **Spec before code.** Requirement changes update SPEC (and OpenAPI section) first; adjust `TASKS.md` checkboxes if the work breakdown changes; then implement.
 3. **Drift is a defect.** If code and SPEC disagree, fix the drift in the same change set (prefer updating code to match SPEC unless the SPEC change is intentional).
 4. **Agents** must read `AGENTS.md` and `.cursor/rules/*` before implementing features.
 
@@ -812,3 +773,4 @@ See also [`TASKS.md`](./TASKS.md) for the checklist form used during SDD impleme
 | Version | Date | Notes |
 | --- | --- | --- |
 | 1.0.0 | 2026-07-23 | Initial technical specification |
+| 1.0.1 | 2026-07-23 | §6 milestones checklist moved solely to `TASKS.md` |
