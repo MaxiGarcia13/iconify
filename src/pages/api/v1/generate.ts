@@ -1,13 +1,21 @@
 import type { APIRoute } from 'astro';
 
 import { processIconPackage, zipToWebResponse } from '@/lib/icons/package';
+import { isSameOriginRequest } from '@/lib/same-origin';
 import { parseGenerateForm } from '@/lib/validate';
 
 export const prerender = false;
 
-/** `POST /api/v1/generate` — SPEC §3 / §4.7. */
+const FORBIDDEN_ORIGIN_MESSAGE
+  = 'This endpoint is only available from the Iconify UI (same origin).';
+
+/** `POST /api/v1/generate` — SPEC §3 / §3.3 / §4.7. */
 export const POST: APIRoute = async ({ request }) => {
   try {
+    if (!isSameOriginRequest(request)) {
+      return jsonError(403, 'FORBIDDEN_ORIGIN', FORBIDDEN_ORIGIN_MESSAGE);
+    }
+
     const contentType = request.headers.get('content-type') ?? '';
     if (!contentType.includes('multipart/form-data')) {
       return jsonError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Expected multipart/form-data.');

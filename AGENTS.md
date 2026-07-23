@@ -65,6 +65,7 @@ npm run test:unit # Vitest unit tests
 ## Security
 
 - Reject non-image uploads and oversize bodies
+- `POST /api/v1/generate` is same-origin only (require matching `Origin`; no CORS)
 - Do not execute or eval SVG; pass through Sharp / sanitize for storage-in-ZIP only
 - No secrets in repo; no logging of raw file contents
 

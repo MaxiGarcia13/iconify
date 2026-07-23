@@ -30,7 +30,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] Multipart parse + option defaults (SPEC §3)
 - [x] Validation: MIME, extension, ≤ 10 MB, padding 0–50, hex colors
 - [x] `200` streamed ZIP with `Content-Disposition`
-- [x] `400` / `415` / `500` JSON error contract
+- [x] `400` / `403` / `415` / `500` JSON error contract
 - [x] Curl (or equivalent) verification of ZIP membership
 
 ## M3 — Astro UI
@@ -93,7 +93,10 @@ SPEC §2.5 upload-basename / §2.6 preset `original` / §4.6 `renderOriginal` / 
 - [x] Transparent PNG + opaque background edge cases
 - [x] Large SVG performance sanity check
 - [x] Omit SVG links/files when source is raster
-- [ ] README aligned with SPEC usage
+- [x] README aligned with SPEC usage
+- [x] Same-origin guard on `POST /api/v1/generate` (SPEC §3.3 / AC12)
+- [x] Unit tests: matching `Origin` → proceeds; missing / cross-origin → `403 FORBIDDEN_ORIGIN`; no ACAO header
+- [x] Verify AC12
 
 ## M5 — Release
 
@@ -116,3 +119,4 @@ SPEC §2.5 upload-basename / §2.6 preset `original` / §4.6 `renderOriginal` / 
 | AC9  | View-source `/`: all §5.6 `public/` icons + absolute OG/Twitter + canonical  |
 | AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`     |
 | AC11 | Default/`original` → upload basename at source size; explicit `all` omits it |
+| AC12 | Missing/cross-origin `Origin` → `403 FORBIDDEN_ORIGIN`; same-origin OK       |

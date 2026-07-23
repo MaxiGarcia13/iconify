@@ -3,7 +3,7 @@
 | Field        | Value                                                                       |
 | ------------ | --------------------------------------------------------------------------- |
 | **Product**  | Iconify                                                                     |
-| **Version**  | 1.0.13                                                                      |
+| **Version**  | 1.0.15                                                                      |
 | **Status**   | Draft                                                                       |
 | **Stack**    | Astro · Node.js (Astro API routes) · Sharp · archiver                       |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -22,7 +22,7 @@ Processing runs server-side via Sharp. The API streams a ZIP archive back to the
 | --- | ------------------------------------------------------------------------------------------ |
 | G1  | Generate a complete favicon / PWA / iOS / Android / OG icon set from one upload in seconds |
 | G2  | Stream a ZIP response without writing intermediate files to persistent storage             |
-| G3  | Expose a versioned REST API (`/api/v1/*`) consumable by the Astro UI and third parties     |
+| G3  | Expose a versioned REST API (`/api/v1/*`) for the Astro UI only (same-origin; not public)  |
 | G4  | Provide a focused UI: dropzone → settings → download ZIP + HTML snippet                    |
 
 ### 1.2 Non-Goals (v1)
@@ -32,6 +32,7 @@ Processing runs server-side via Sharp. The API streams a ZIP archive back to the
 - User accounts or history
 - Custom per-size override editors
 - Animated GIF / WebP animation sources
+- Public / third-party consumption of `POST /api/v1/generate` (same-origin UI only)
 
 ### 1.3 Architecture Overview
 
@@ -94,6 +95,7 @@ src/
 │   │   ├── ico.ts                  # Multi-resolution ICO
 │   │   └── package.ts              # ZIP stream assembly
 │   ├── snippet.ts                  # HTML <head> generator (UI only)
+│   ├── same-origin.ts              # Same-origin Origin check (SPEC §3.3)
 │   ├── upload-constraints.ts       # Shared MIME / size checks
 │   ├── generate-defaults.ts        # Shared GenerateOptions defaults (client-safe)
 │   └── validate.ts                 # Multipart / option validation (server)
@@ -223,6 +225,9 @@ paths:
       description: |
         Accepts a multipart upload and processing options.
         Returns a streamed ZIP (`application/zip`) on success.
+        Private same-origin endpoint: `Origin` must equal the request URL origin
+        (Astro UI only). Cross-origin and missing `Origin` → `403 FORBIDDEN_ORIGIN`.
+        No `Access-Control-Allow-Origin` is emitted.
       requestBody:
         required: true
         content:
@@ -269,6 +274,15 @@ paths:
                     details:
                       field: file
                       maxBytes: 10485760
+        '403':
+          description: Cross-origin or missing Origin (same-origin UI only)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: FORBIDDEN_ORIGIN
+                message: This endpoint is only available from the Iconify UI (same origin).
         '415':
           description: Unsupported media type (non-multipart request)
           content:
@@ -352,6 +366,7 @@ components:
             - VALIDATION_ERROR
             - PROCESSING_ERROR
             - UNSUPPORTED_MEDIA_TYPE
+            - FORBIDDEN_ORIGIN
         message:
           type: string
         details:
@@ -365,6 +380,7 @@ components:
 | ----- | ------------------------------------------------ | -------------------- |
 | `200` | Assets generated; ZIP streaming                  | Binary ZIP           |
 | `400` | Missing file, bad MIME, >10MB, invalid options   | JSON `ErrorResponse` |
+| `403` | Missing or cross-origin `Origin` header          | JSON `ErrorResponse` |
 | `415` | Content-Type is not `multipart/form-data`        | JSON `ErrorResponse` |
 | `500` | Sharp failure, ICO build failure, ZIP pipe error | JSON `ErrorResponse` |
 
@@ -377,6 +393,22 @@ components:
 | Allowed extensions | `.svg`, `.png`, `.jpg`, `.jpeg`              |
 | Response mode      | Streamed ZIP (no persisted temp files in v1) |
 | API versioning     | Path prefix `/api/v1`                        |
+| Access             | Same-origin only (see §3.3)                  |
+
+### 3.3 Same-origin access (private endpoint)
+
+`POST /api/v1/generate` is **private**: intended only for the Iconify Astro UI on the same origin.
+
+| Rule              | Behavior                                                                 |
+| ----------------- | ------------------------------------------------------------------------ |
+| Require `Origin`  | Request must include an `Origin` header                                  |
+| Match request URL | `Origin` must equal `new URL(request.url).origin` (scheme + host + port) |
+| Reject otherwise  | `403` JSON `{ error: "FORBIDDEN_ORIGIN", message }`                      |
+| No CORS           | Do not set `Access-Control-Allow-Origin` (or other ACAO headers)         |
+
+Browser same-origin `fetch('/api/v1/generate', …)` from the UI sends a matching `Origin` and succeeds. Cross-site pages and tools that omit or spoof a foreign `Origin` are rejected. Note: matching `Origin` is browser abuse / CSRF mitigation, not authentication — non-browser clients can still forge the header.
+
+Helper: `isSameOriginRequest(request)` in `src/lib/same-origin.ts`.
 
 ---
 
@@ -709,12 +741,21 @@ export function zipToWebResponse(
 // src/pages/api/v1/generate.ts
 import type { APIRoute } from 'astro';
 import { processIconPackage, zipToWebResponse } from '../../../lib/icons/package';
+import { isSameOriginRequest } from '../../../lib/same-origin';
 import { parseGenerateForm } from '../../../lib/validate';
 
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request }) => {
   try {
+    if (!isSameOriginRequest(request)) {
+      return jsonError(
+        403,
+        'FORBIDDEN_ORIGIN',
+        'This endpoint is only available from the Iconify UI (same origin).',
+      );
+    }
+
     const contentType = request.headers.get('content-type') ?? '';
     if (!contentType.includes('multipart/form-data')) {
       return jsonError(415, 'UNSUPPORTED_MEDIA_TYPE', 'Expected multipart/form-data.');
@@ -946,6 +987,7 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | AC9  | Document head on `/` wires every §5.6 `public/` icon, absolute Open Graph + Twitter Card tags for `/og-image.png` (1200×630), and canonical / `og:url` from Astro `site`                                                                                                                                                                                    |
 | AC10 | `monochrome=true` yields greyscale raster PNG/ICO content (chroma ≈ 0); `monochrome=false` / omitted keeps source colors; invalid values return `400 VALIDATION_ERROR`; SVG passthrough unchanged                                                                                                                                                           |
 | AC11 | Omit `presets` (or UI defaults) → `all,original`; `presets=original` alone yields ZIP with only the upload basename at source width×height; padding / background / cornerRadius / monochrome still apply; explicit `presets=all` omits the original-size file; combining `original` with other presets adds the upload-named file alongside §2.1–2.4 assets |
+| AC12 | Missing `Origin`, or `Origin` ≠ request URL origin → `403` JSON `FORBIDDEN_ORIGIN`; matching same-origin `Origin` proceeds; response must not include `Access-Control-Allow-Origin`                                                                                                                                                                         |
 
 ---
 
@@ -979,3 +1021,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.12  | 2026-07-23 | `monochrome` option (Sharp greyscale); UI + API; AC10                      |
 | 1.0.13  | 2026-07-23 | Preset `original` → `original.png` at source size; AC11                    |
 | 1.0.14  | 2026-07-23 | Default `all,original`; original ZIP name = upload basename; AC11          |
+| 1.0.15  | 2026-07-23 | `POST /api/v1/generate` same-origin only (`FORBIDDEN_ORIGIN`); AC12        |

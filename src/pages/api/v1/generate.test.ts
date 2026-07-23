@@ -14,19 +14,28 @@ import {
 import { listZipEntryNames } from '@/test/zip';
 import { POST } from './generate';
 
+const GENERATE_URL = 'http://localhost/api/v1/generate';
+const SAME_ORIGIN = new URL(GENERATE_URL).origin;
+
 function apiContext(request: Request) {
   return { request } as Parameters<typeof POST>[0];
 }
 
 async function multipartRequest(
   fields: Record<string, string | File>,
+  options?: { origin?: string | null },
 ): Promise<Request> {
   const form = new FormData();
   for (const [key, value] of Object.entries(fields))
     form.set(key, value);
 
-  return new Request('http://localhost/api/v1/generate', {
+  const headers = new Headers();
+  if (options?.origin !== null)
+    headers.set('Origin', options?.origin ?? SAME_ORIGIN);
+
+  return new Request(GENERATE_URL, {
     method: 'POST',
+    headers,
     body: form,
   });
 }
@@ -201,11 +210,79 @@ describe('post /api/v1/generate', () => {
     });
   });
 
+  describe('same-origin access (SPEC §3.3 / AC12)', () => {
+    it('returns 403 FORBIDDEN_ORIGIN when Origin is missing', async () => {
+      const png = await solidPng();
+      const request = await multipartRequest(
+        {
+          file: new File([Uint8Array.from(png)], 'logo.png', {
+            type: 'image/png',
+          }),
+          presets: 'favicon',
+        },
+        { origin: null },
+      );
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(403);
+      expect(response.headers.get('Content-Type')).toBe('application/json');
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull();
+
+      const body = await response.json();
+      expect(body).toEqual({
+        error: 'FORBIDDEN_ORIGIN',
+        message:
+          'This endpoint is only available from the Iconify UI (same origin).',
+      });
+    });
+
+    it('returns 403 FORBIDDEN_ORIGIN when Origin is cross-origin', async () => {
+      const png = await solidPng();
+      const request = await multipartRequest(
+        {
+          file: new File([Uint8Array.from(png)], 'logo.png', {
+            type: 'image/png',
+          }),
+          presets: 'favicon',
+        },
+        { origin: 'https://evil.example' },
+      );
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(403);
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull();
+
+      const body = await response.json();
+      expect(body).toEqual({
+        error: 'FORBIDDEN_ORIGIN',
+        message:
+          'This endpoint is only available from the Iconify UI (same origin).',
+      });
+    });
+
+    it('does not emit Access-Control-Allow-Origin on success', async () => {
+      const png = await solidPng();
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(png)], 'logo.png', {
+          type: 'image/png',
+        }),
+        presets: 'favicon',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+      expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull();
+    });
+  });
+
   describe('jSON error contract (SPEC §3.1)', () => {
     it('returns 415 UNSUPPORTED_MEDIA_TYPE when Content-Type is not multipart', async () => {
-      const request = new Request('http://localhost/api/v1/generate', {
+      const request = new Request(GENERATE_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Origin': SAME_ORIGIN,
+        },
         body: '{}',
       });
 
