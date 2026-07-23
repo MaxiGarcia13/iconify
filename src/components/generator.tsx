@@ -3,17 +3,29 @@ import type { SettingsState } from '../lib/settings';
 import { useState } from 'react';
 
 import { SETTINGS_DEFAULTS } from '../lib/settings';
+import { buildHeadHtml } from '../lib/snippet';
+import { isSourceSvg } from '../lib/upload-constraints';
 import { Dropzone } from './dropzone';
 import { GenerateButton } from './generate-button';
+import { HtmlSnippet } from './html-snippet';
 import { SettingsPanel } from './settings-panel';
 
 /**
- * Client island composing dropzone, settings, and download — SPEC §5.1 / §5.2.
+ * Client island composing dropzone, settings, download, and snippet — SPEC §5.1 / §5.2.
  * Holds shared file + settings for generate.
  */
 export function Generator() {
   const [file, setFile] = useState<File | null>(null);
   const [settings, setSettings] = useState<SettingsState>(SETTINGS_DEFAULTS);
+  const [snippetHtml, setSnippetHtml] = useState<string | null>(null);
+
+  function onGenerateSuccess() {
+    if (!file)
+      return;
+    setSnippetHtml(
+      buildHeadHtml({ themeColor: settings.themeColor }, isSourceSvg(file)),
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8">
@@ -38,7 +50,15 @@ export function Generator() {
       </div>
 
       <section aria-label="Download package" className="min-w-0">
-        <GenerateButton file={file} settings={settings} />
+        <GenerateButton
+          file={file}
+          settings={settings}
+          onSuccess={onGenerateSuccess}
+        />
+      </section>
+
+      <section aria-label="HTML head snippet" className="min-w-0">
+        <HtmlSnippet html={snippetHtml} />
       </section>
     </div>
   );

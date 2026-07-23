@@ -39,6 +39,16 @@ export function extensionOf(filename: string): string {
 }
 
 /**
+ * Whether the upload should emit SVG assets / SVG `<link>` in the head snippet.
+ * Matches server `sourceIsSvg` — SPEC §4 / §5.3.
+ */
+export function isSourceSvg(file: { name: string; type: string }): boolean {
+  const mime = normalizeMime(file.type);
+  const ext = extensionOf(file.name);
+  return mime === 'image/svg+xml' || ext === '.svg';
+}
+
+/**
  * Client/server shared source-file checks — SPEC §3.2 / §5.3.
  * Rejects when MIME or extension is not allowed, or size exceeds 10 MB.
  */

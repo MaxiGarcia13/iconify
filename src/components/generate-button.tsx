@@ -10,13 +10,19 @@ import {
 export interface GenerateButtonProps {
   file: File | null;
   settings: SettingsState;
+  /** Called after a successful ZIP download trigger — SPEC §5.2 step 6. */
+  onSuccess?: () => void;
 }
 
 /**
  * Generate & Download ZIP — SPEC §5.1 / §5.2 steps 5–8 / §5.5.
  * Disabled until a valid file is present (§5.4).
  */
-export function GenerateButton({ file, settings }: GenerateButtonProps) {
+export function GenerateButton({
+  file,
+  settings,
+  onSuccess,
+}: GenerateButtonProps) {
   const errorId = useId();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +44,7 @@ export function GenerateButton({ file, settings }: GenerateButtonProps) {
     }
 
     triggerBlobDownload(result.blob, result.filename);
+    onSuccess?.();
     setPending(false);
   }
 

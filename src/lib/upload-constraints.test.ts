@@ -5,6 +5,7 @@ import {
   ALLOWED_MIME,
   DROPZONE_ACCEPT,
   extensionOf,
+  isSourceSvg,
   MAX_UPLOAD_BYTES,
   normalizeMime,
   validateSourceFile,
@@ -90,5 +91,12 @@ describe('upload-constraints', () => {
       ok: false,
       message: 'File exceeds maximum size of 10MB.',
     });
+  });
+
+  it('detects SVG sources for head snippet / matrix (SPEC §5.3)', () => {
+    expect(isSourceSvg({ name: 'mark.svg', type: 'image/svg+xml' })).toBe(true);
+    expect(isSourceSvg({ name: 'mark.SVG', type: '' })).toBe(true);
+    expect(isSourceSvg({ name: 'logo.png', type: 'image/png' })).toBe(false);
+    expect(isSourceSvg({ name: 'logo.png', type: 'image/svg+xml' })).toBe(true);
   });
 });
