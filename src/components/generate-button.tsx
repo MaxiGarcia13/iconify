@@ -1,60 +1,79 @@
 import type { SettingsState } from '../lib/settings';
 
-import { useId, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 
 import {
   postGenerateDownload,
   triggerBlobDownload,
 } from '../lib/generate-download';
+import {
+  generateButtonLabel,
+  generateLiveStatus,
+  isGenerateDisabled,
+} from '../lib/generate-ui';
 
 export interface GenerateButtonProps {
   file: File | null;
   settings: SettingsState;
   /** Called after a successful ZIP download trigger — SPEC §5.2 step 6. */
   onSuccess?: () => void;
+  /** Notifies parent when an in-flight generate starts/ends — SPEC §5.2 step 5. */
+  onPendingChange?: (pending: boolean) => void;
 }
 
 /**
  * Generate & Download ZIP — SPEC §5.1 / §5.2 steps 5–7 / §5.5.
- * Disabled until a valid file is present (§5.4).
+ * Disabled until a valid file is present; pending + aria-live errors (§5.4).
  */
 export function GenerateButton({
   file,
   settings,
   onSuccess,
+  onPendingChange,
 }: GenerateButtonProps) {
-  const errorId = useId();
+  const statusId = useId();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canGenerate = Boolean(file) && !pending;
+  const disabled = isGenerateDisabled(Boolean(file), pending);
+  const liveStatus = generateLiveStatus(pending, error);
+  const showError = Boolean(error) && !pending;
+
+  useEffect(() => {
+    setError(null);
+  }, [file]);
+
+  function setPendingState(next: boolean) {
+    setPending(next);
+    onPendingChange?.(next);
+  }
 
   async function onGenerate() {
     if (!file || pending)
       return;
 
-    setPending(true);
+    setPendingState(true);
     setError(null);
 
     const result = await postGenerateDownload(file, settings);
     if (!result.ok) {
       setError(result.message);
-      setPending(false);
+      setPendingState(false);
       return;
     }
 
     triggerBlobDownload(result.blob, result.filename);
     onSuccess?.();
-    setPending(false);
+    setPendingState(false);
   }
 
   return (
     <div className="flex flex-col gap-3">
       <button
         type="button"
-        disabled={!canGenerate}
+        disabled={disabled}
         aria-busy={pending}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={liveStatus ? statusId : undefined}
         onClick={() => {
           void onGenerate();
         }}
@@ -65,16 +84,20 @@ export function GenerateButton({
           'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-accent',
         ].join(' ')}
       >
-        {pending ? 'Generating…' : 'Generate & Download ZIP'}
+        {generateButtonLabel(pending)}
       </button>
 
       <p
-        id={errorId}
+        id={statusId}
         role="status"
         aria-live="polite"
-        className={error ? 'text-sm text-red-600 dark:text-red-400' : 'sr-only'}
+        className={
+          showError
+            ? 'text-sm text-red-600 dark:text-red-400'
+            : 'sr-only'
+        }
       >
-        {error ?? ''}
+        {liveStatus}
       </p>
     </div>
   );

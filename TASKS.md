@@ -39,7 +39,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] Settings: padding, background, presets
 - [x] Generate button → `FormData` POST → blob download
 - [x] HTML snippet panel + copy to clipboard
-- [ ] Loading / disabled / error states (`aria-live`)
+- [x] Loading / disabled / error states (`aria-live`)
 - [ ] Mobile support styles
 
 ## M4 — Hardening

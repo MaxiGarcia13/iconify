@@ -12,12 +12,13 @@ import { SettingsPanel } from './settings-panel';
 
 /**
  * Client island composing dropzone, settings, download, and snippet — SPEC §5.1 / §5.2.
- * Holds shared file + settings for generate.
+ * Holds shared file + settings for generate; disables controls while pending (§5.2 step 5).
  */
 export function Generator() {
   const [file, setFile] = useState<File | null>(null);
   const [settings, setSettings] = useState<SettingsState>(SETTINGS_DEFAULTS);
   const [snippetHtml, setSnippetHtml] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
   function onGenerateSuccess() {
     if (!file)
@@ -32,7 +33,7 @@ export function Generator() {
           <h2 className="mb-3 text-sm font-medium tracking-wide uppercase">
             Dropzone
           </h2>
-          <Dropzone onFileChange={setFile} />
+          <Dropzone onFileChange={setFile} disabled={pending} />
         </section>
 
         <section aria-label="Generation settings" className="min-w-0">
@@ -42,7 +43,7 @@ export function Generator() {
           <SettingsPanel
             value={settings}
             onChange={setSettings}
-            disabled={!file}
+            disabled={!file || pending}
           />
         </section>
       </div>
@@ -52,6 +53,7 @@ export function Generator() {
           file={file}
           settings={settings}
           onSuccess={onGenerateSuccess}
+          onPendingChange={setPending}
         />
       </section>
 

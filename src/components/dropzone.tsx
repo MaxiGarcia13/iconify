@@ -9,8 +9,10 @@ import {
 } from '../lib/upload-constraints';
 
 export interface DropzoneProps {
-  /** Selected file (or `null` when cleared / none). SPEC §5.3. */
+  /** Selected file (or `null` when cleared / none). SPEC section 5.3. */
   onFileChange?: (file: File | null) => void;
+  /** When true, reject interaction (e.g. generate in flight). SPEC section 5.2 step 5. */
+  disabled?: boolean;
 }
 
 type DropzoneState = 'idle' | 'dragging' | 'ready' | 'error';
@@ -24,10 +26,10 @@ function formatBytes(bytes: number): string {
 }
 
 /**
- * Source upload dropzone — SPEC §5.3.
+ * Source upload dropzone — SPEC section 5.3.
  * States: idle · dragging · ready · error.
  */
-export function Dropzone({ onFileChange }: DropzoneProps) {
+export function Dropzone({ onFileChange, disabled = false }: DropzoneProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<DropzoneState>('idle');
@@ -41,6 +43,9 @@ export function Dropzone({ onFileChange }: DropzoneProps) {
   }
 
   function applyCandidate(candidate: File) {
+    if (disabled)
+      return;
+
     const result = validateSourceFile(candidate);
     if (!result.ok) {
       setState('error');
@@ -54,6 +59,9 @@ export function Dropzone({ onFileChange }: DropzoneProps) {
   }
 
   function clearSelection() {
+    if (disabled)
+      return;
+
     setError(null);
     setState('idle');
     commitFile(null);
@@ -62,6 +70,8 @@ export function Dropzone({ onFileChange }: DropzoneProps) {
   }
 
   function openPicker() {
+    if (disabled)
+      return;
     inputRef.current?.click();
   }
 
@@ -75,6 +85,8 @@ export function Dropzone({ onFileChange }: DropzoneProps) {
   function onDragEnter(e: DragEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled)
+      return;
     dragDepthRef.current += 1;
     setState((prev) => (prev === 'ready' ? prev : 'dragging'));
   }
@@ -82,6 +94,8 @@ export function Dropzone({ onFileChange }: DropzoneProps) {
   function onDragLeave(e: DragEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (disabled)
+      return;
     dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
     if (dragDepthRef.current === 0)
       setState(file ? 'ready' : error ? 'error' : 'idle');
@@ -96,6 +110,10 @@ export function Dropzone({ onFileChange }: DropzoneProps) {
     e.preventDefault();
     e.stopPropagation();
     dragDepthRef.current = 0;
+    if (disabled) {
+      setState(file ? 'ready' : error ? 'error' : 'idle');
+      return;
+    }
     const dropped = e.dataTransfer.files?.[0];
     if (!dropped) {
       setState(file ? 'ready' : error ? 'error' : 'idle');
@@ -118,10 +136,12 @@ export function Dropzone({ onFileChange }: DropzoneProps) {
         onChange={onInputChange}
         tabIndex={-1}
         aria-hidden="true"
+        disabled={disabled}
       />
 
       <button
         type="button"
+        disabled={disabled}
         aria-controls={inputId}
         aria-describedby={error ? `${inputId}-error` : undefined}
         data-state={displayState}
@@ -129,6 +149,7 @@ export function Dropzone({ onFileChange }: DropzoneProps) {
           'flex w-full min-h-40 flex-col items-center justify-center gap-2 border border-dashed px-6 py-8 text-center transition-colors',
           'border-surface-border bg-muted/40 text-foreground',
           'hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
+          'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-surface-border',
           displayState === 'dragging' ? 'border-accent bg-muted' : '',
           displayState === 'error' ? 'border-red-500/70' : '',
           displayState === 'ready' ? 'border-solid' : '',
@@ -181,7 +202,8 @@ export function Dropzone({ onFileChange }: DropzoneProps) {
               </span>
               <button
                 type="button"
-                className="text-foreground focus-visible:outline-accent shrink-0 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2"
+                disabled={disabled}
+                className="text-foreground focus-visible:outline-accent shrink-0 underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
                 onClick={clearSelection}
               >
                 Clear
