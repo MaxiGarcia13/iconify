@@ -17,40 +17,66 @@
   --font-display: ui-sans-serif, system-ui, sans-serif;
 
   --color-background: var(--palette-background);
+  --color-background-secondary: var(--palette-background-secondary);
   --color-foreground: var(--palette-foreground);
   --color-muted: var(--palette-muted);
   --color-muted-foreground: var(--palette-muted-foreground);
   --color-surface: var(--palette-surface);
   --color-surface-border: var(--palette-surface-border);
+  --color-primary: var(--palette-primary);
+  --color-secondary: var(--palette-secondary);
   --color-accent: var(--palette-accent);
   --color-accent-foreground: var(--palette-accent-foreground);
   --color-accent-hover: var(--palette-accent-hover);
+  --color-accent-light: var(--palette-accent-light);
   --color-glow: var(--palette-glow);
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 
-  --palette-background: light-dark(#f3f0fa, #0c0a14);
-  --palette-foreground: light-dark(#100e18, #f5f1ff);
-  --palette-muted: light-dark(#e8e3f4, #1a1628);
-  --palette-muted-foreground: light-dark(#3f3655, #b8b0d0);
-  --palette-surface: light-dark(#ffffff, rgb(24 20 38 / 0.82));
-  --palette-surface-border: light-dark(#b8a8e0, rgb(183 159 255 / 0.32));
-  --palette-accent: #b794ff;
-  --palette-accent-foreground: #0c0a14;
-  --palette-accent-hover: #c9aeff;
-  --palette-glow: light-dark(rgb(183 159 255 / 0.35), rgb(183 159 255 / 0.42));
-}
+  --background: #141826;
+  --background-secondary: #232a3d;
+  --foreground: #f8fafc;
+  --primary: #2db7ff;
+  --secondary: #4a7dff;
+  --accent: #6c3cff;
+  --accent-light: #8a4dff;
+  --glow: #66d9ff;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    color-scheme: dark;
-  }
+  --palette-background: var(--background);
+  --palette-background-secondary: var(--background-secondary);
+  --palette-foreground: var(--foreground);
+  --palette-muted: var(--background-secondary);
+  --palette-muted-foreground: #a8b4c8;
+  --palette-surface: var(--background-secondary);
+  --palette-surface-border: rgb(45 183 255 / 0.28);
+  --palette-primary: var(--primary);
+  --palette-secondary: var(--secondary);
+  --palette-accent: var(--primary);
+  --palette-accent-foreground: var(--background);
+  --palette-accent-hover: var(--glow);
+  --palette-accent-light: var(--accent-light);
+  --palette-glow: rgb(102 217 255 / 0.42);
 }
 
 :root.light {
   color-scheme: light;
+
+  --background: #f4f7fb;
+  --background-secondary: #e8eef6;
+  --foreground: #141826;
+  --primary: #1a9fe0;
+  --secondary: #3a6aef;
+  --accent: #6c3cff;
+  --accent-light: #8a4dff;
+  --glow: #2db7ff;
+
+  --palette-muted-foreground: #4a5568;
+  --palette-surface: #ffffff;
+  --palette-surface-border: rgb(45 183 255 / 0.35);
+  --palette-accent-foreground: #ffffff;
+  --palette-glow: rgb(45 183 255 / 0.32);
 }
 
 :root.dark {
@@ -64,6 +90,11 @@ html {
 
 body {
   background-color: var(--palette-background);
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(108 60 255 / 0.18), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgb(45 183 255 / 0.12), transparent),
+    radial-gradient(ellipse 50% 30% at 0% 100%, rgb(74 125 255 / 0.1), transparent);
+  background-attachment: fixed;
   color: var(--palette-foreground);
   font-family: var(--font-sans);
   overflow-x: clip;
