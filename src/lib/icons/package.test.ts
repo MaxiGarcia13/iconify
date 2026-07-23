@@ -6,7 +6,7 @@ import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { solidPng, solidSvg } from '../../test/fixtures';
+import { complexSvg, hugeDimensionSvg, solidPng, solidSvg } from '../../test/fixtures';
 import { listZipEntryNames } from '../../test/zip';
 import { GENERATE_OPTION_DEFAULTS } from '../generate-defaults';
 import { resolveMatrix } from './matrix';
@@ -73,6 +73,49 @@ describe('processIconPackage', () => {
     expect(result.assets.map((a) => a.name)).toContain('favicon.svg');
     expect(result.assets.map((a) => a.name)).toContain('safari-pinned-tab.svg');
   });
+});
+
+describe('large SVG performance sanity (M4)', () => {
+  /** Generous CI budget — complex SVG full package should finish well under this. */
+  const PACKAGE_BUDGET_MS = 15_000;
+  /** Oversized SVG must hit Sharp’s pixel limit quickly (no hang). */
+  const FAIL_FAST_BUDGET_MS = 2_000;
+
+  it('complex multi-shape SVG completes presets=all under budget', async () => {
+    const input = complexSvg(800, 1024);
+    expect(input.byteLength).toBeLessThan(512 * 1024);
+
+    const t0 = performance.now();
+    const result = await processIconPackage(
+      input,
+      { ...packageDefaults, presets: ['all'] },
+      true,
+      'complex.svg',
+    );
+    const elapsed = performance.now() - t0;
+
+    expect(elapsed).toBeLessThan(PACKAGE_BUDGET_MS);
+    expect(result.assets.map((a) => a.name)).toEqual(
+      resolveMatrix(['all'], true).map((e) => e.name),
+    );
+    expect(result.assets.some((a) => a.name === 'favicon.svg')).toBe(true);
+  }, PACKAGE_BUDGET_MS + 5_000);
+
+  it('huge-dimension SVG fails fast (Sharp pixel limit, no hang)', async () => {
+    const input = hugeDimensionSvg(20_000);
+    const t0 = performance.now();
+
+    await expect(
+      processIconPackage(
+        input,
+        { ...packageDefaults, presets: ['favicon'] },
+        true,
+        'huge.svg',
+      ),
+    ).rejects.toThrow(/pixel limit/i);
+
+    expect(performance.now() - t0).toBeLessThan(FAIL_FAST_BUDGET_MS);
+  }, FAIL_FAST_BUDGET_MS + 5_000);
 });
 
 describe('aC11 original preset package outputs', () => {

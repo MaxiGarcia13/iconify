@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 import { resolveMatrix } from '../../../lib/icons/matrix';
 import { MAX_UPLOAD_BYTES } from '../../../lib/validate';
-import { solidPng, solidSvg } from '../../../test/fixtures';
+import { complexSvg, hugeDimensionSvg, solidPng, solidSvg } from '../../../test/fixtures';
 import { listZipEntryNames } from '../../../test/zip';
 import { POST } from './generate';
 
@@ -403,5 +403,50 @@ describe('post /api/v1/generate', () => {
       });
       expect(body).not.toHaveProperty('details');
     });
+
+    it('huge-dimension SVG returns 500 PROCESSING_ERROR quickly (M4)', async () => {
+      const svg = hugeDimensionSvg(20_000);
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(svg)], 'huge.svg', {
+          type: 'image/svg+xml',
+        }),
+        presets: 'favicon',
+      });
+
+      const t0 = performance.now();
+      const response = await POST(apiContext(request));
+      const elapsed = performance.now() - t0;
+
+      expect(response.status).toBe(500);
+      expect(await response.json()).toEqual({
+        error: 'PROCESSING_ERROR',
+        message: 'Failed to process image.',
+      });
+      expect(elapsed).toBeLessThan(2_000);
+    });
+  });
+
+  describe('large SVG performance (M4)', () => {
+    it('complex SVG presets=all returns 200 under budget', async () => {
+      const svg = complexSvg(800, 1024);
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(svg)], 'complex.svg', {
+          type: 'image/svg+xml',
+        }),
+        presets: 'all',
+      });
+
+      const t0 = performance.now();
+      const response = await POST(apiContext(request));
+      const elapsed = performance.now() - t0;
+
+      expect(response.status).toBe(200);
+      expect(elapsed).toBeLessThan(15_000);
+      const names = listZipEntryNames(
+        Buffer.from(await response.arrayBuffer()),
+      );
+      expect(names).toContain('favicon.svg');
+      expect(names).toEqual(resolveMatrix(['all'], true).map((e) => e.name));
+    }, 20_000);
   });
 });

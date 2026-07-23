@@ -87,3 +87,40 @@ export function solidSvg(size = 32): Buffer {
     'utf8',
   );
 }
+
+/**
+ * Dense multi-shape SVG for performance sanity checks (M4).
+ * Many draw calls; still a modest byte size (well under 10 MB).
+ */
+export function complexSvg(
+  pathCount = 800,
+  size = 1024,
+): Buffer {
+  const parts: string[] = [
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">`,
+  ];
+  for (let i = 0; i < pathCount; i++) {
+    const x = (i * 37) % size;
+    const y = (i * 53) % size;
+    const r = 4 + (i % 20);
+    const hue = i % 360;
+    parts.push(
+      `<circle cx="${x}" cy="${y}" r="${r}" fill="hsl(${hue} 70% 50%)"/>`,
+    );
+  }
+  parts.push('</svg>');
+  return Buffer.from(parts.join(''), 'utf8');
+}
+
+/**
+ * Pathological SVG with huge declared dimensions (triggers Sharp pixel-limit
+ * at density 300). Used to assert fail-fast — no hang (M4).
+ */
+export function hugeDimensionSvg(side = 20_000): Buffer {
+  return Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${side} ${side}" width="${side}" height="${side}">
+      <circle cx="${side / 2}" cy="${side / 2}" r="100" fill="#0af"/>
+    </svg>`,
+    'utf8',
+  );
+}

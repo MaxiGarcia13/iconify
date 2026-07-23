@@ -91,7 +91,7 @@ SPEC §2.5 upload-basename / §2.6 preset `original` / §4.6 `renderOriginal` / 
 ## M4 — Hardening
 
 - [x] Transparent PNG + opaque background edge cases
-- [ ] Large SVG performance sanity check
+- [x] Large SVG performance sanity check
 - [ ] Omit SVG links/files when source is raster
 - [ ] README aligned with SPEC usage
 
