@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | **Product** | Iconify |
-| **Version** | 1.0.1 |
+| **Version** | 1.0.4 |
 | **Status** | Draft |
 | **Stack** | Astro · Node.js (Astro API routes) · Sharp · archiver |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -88,10 +88,10 @@ src/
 │   ├── index.astro                 # Generator UI
 │   └── api/v1/generate.ts          # POST endpoint
 ├── components/
-│   ├── Dropzone.tsx                # Client island
-│   ├── SettingsPanel.tsx
-│   ├── PreviewGrid.tsx
-│   └── HtmlSnippet.tsx
+│   ├── dropzone.tsx                # Client island
+│   ├── settings-panel.tsx
+│   ├── preview-grid.tsx
+│   └── html-snippet.tsx
 ├── lib/
 │   ├── icons/
 │   │   ├── matrix.ts               # Asset matrix (sizes, names, presets)
@@ -100,10 +100,28 @@ src/
 │   │   └── package.ts              # ZIP stream assembly
 │   ├── manifest.ts                 # site.webmanifest builder
 │   ├── snippet.ts                  # HTML <head> generator
+│   ├── upload-constraints.ts       # Shared MIME / size checks
 │   └── validate.ts                 # Multipart / option validation
 └── layouts/
     └── app.astro
 ```
+
+### 1.6 Project file naming
+
+| Kind | Rule | Examples |
+| --- | --- | --- |
+| Source | lowercase kebab-case + extension | `dropzone.tsx`, `settings-panel.tsx`, `upload-constraints.ts` |
+| Tests | same basename + `.test` / `.spec` suffix | `upload-constraints.test.ts` |
+| Docs / markdown | **UPPERCASE** basename + `.md` | `SPEC.md`, `TASKS.md`, `AGENTS.md`, `README.md` |
+| Cursor rules | lowercase kebab-case | `.cursor/rules/sdd.mdc` |
+
+**Exceptions (do not rename to satisfy this rule):**
+
+- Generated ZIP / product asset names in §2 (`favicon.ico`, `apple-touch-icon.png`, …)
+- Toolchain or lockfiles required by npm / Node (`package.json`, `package-lock.json`, …)
+- Directory names that are framework conventions (e.g. `node_modules`)
+
+Exported TypeScript / React **symbols** may use PascalCase or camelCase (`Dropzone`, `validateSourceFile`); only **file paths** are constrained.
 
 ---
 
@@ -763,11 +781,12 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 
 ## 8. SDD Governance
 
-1. **SPEC.md is the source of truth.** Implementation follows this document; code does not invent API fields or asset names.
+1. **`SPEC.md` is the source of truth.** Implementation follows this document; code does not invent API fields or asset names.
 2. **Spec before code.** Requirement changes update SPEC (and OpenAPI section) first; adjust `TASKS.md` checkboxes if the work breakdown changes; then implement.
 3. **Drift is a defect.** If code and SPEC disagree, fix the drift in the same change set (prefer updating code to match SPEC unless the SPEC change is intentional).
 4. **Agents** must read `AGENTS.md` and `.cursor/rules/*` before implementing features.
 5. **Green tests before done.** A `TASKS.md` checkbox may be marked complete only when Vitest is green for the covered slice (`npm run test:unit` exit 0).
+6. **File naming.** Project-authored paths follow §1.6 (source: lowercase kebab-case; markdown: UPPERCASE).
 
 ---
 
@@ -778,3 +797,5 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.0 | 2026-07-23 | Initial technical specification |
 | 1.0.1 | 2026-07-23 | §6 milestones checklist moved solely to `TASKS.md` |
 | 1.0.2 | 2026-07-23 | §6 / §8: mark `TASKS.md` items done only when `npm run test:unit` is green |
+| 1.0.3 | 2026-07-23 | §1.6 lowercase kebab-case for source; layout paths updated |
+| 1.0.4 | 2026-07-23 | §1.6 markdown docs use UPPERCASE basenames (`SPEC.md`, …) |
