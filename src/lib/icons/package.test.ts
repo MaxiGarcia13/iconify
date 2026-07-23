@@ -3,10 +3,12 @@ import type { PassThrough } from 'node:stream';
 import type { AssetEntry } from './types';
 import { Buffer } from 'node:buffer';
 
+import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { solidPng } from '../../test/fixtures';
+import { solidPng, solidSvg } from '../../test/fixtures';
 import { listZipEntryNames } from '../../test/zip';
+import { GENERATE_OPTION_DEFAULTS } from '../generate-defaults';
 import { resolveMatrix } from './matrix';
 import { createZipStream, processIconPackage, zipToWebResponse } from './package';
 
@@ -69,6 +71,81 @@ describe('processIconPackage', () => {
 
     expect(result.assets.map((a) => a.name)).toContain('favicon.svg');
     expect(result.assets.map((a) => a.name)).toContain('safari-pinned-tab.svg');
+  });
+});
+
+describe('aC10 monochrome package outputs', () => {
+  async function centerChroma(png: Buffer): Promise<number> {
+    const { data, info } = await sharp(png)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const x = Math.floor(info.width / 2);
+    const y = Math.floor(info.height / 2);
+    const idx = (y * info.width + x) * info.channels;
+    const rgb = [data[idx]!, data[idx + 1]!, data[idx + 2]!] as const;
+    return Math.max(...rgb) - Math.min(...rgb);
+  }
+
+  it('monochrome=true yields greyscale PNG + distinct ICO vs color (chroma ≈ 0)', async () => {
+    const input = await solidPng();
+    const result = await processIconPackage(
+      input,
+      {
+        ...GENERATE_OPTION_DEFAULTS,
+        presets: ['favicon'],
+        monochrome: true,
+      },
+      false,
+    );
+
+    const png32 = result.assets.find((a) => a.name === 'favicon-32x32.png');
+    const ico = result.assets.find((a) => a.name === 'favicon.ico');
+    expect(png32).toBeDefined();
+    expect(ico).toBeDefined();
+    expect(await centerChroma(png32!.buffer)).toBe(0);
+
+    const color = await processIconPackage(
+      input,
+      {
+        ...GENERATE_OPTION_DEFAULTS,
+        presets: ['favicon'],
+        monochrome: false,
+      },
+      false,
+    );
+    const colorIco = color.assets.find((a) => a.name === 'favicon.ico')!;
+    expect(Buffer.compare(ico!.buffer, colorIco.buffer)).not.toBe(0);
+  });
+
+  it('monochrome=false keeps source colors on PNG', async () => {
+    const input = await solidPng();
+    const result = await processIconPackage(
+      input,
+      {
+        ...GENERATE_OPTION_DEFAULTS,
+        presets: ['favicon'],
+        monochrome: false,
+      },
+      false,
+    );
+    const png32 = result.assets.find((a) => a.name === 'favicon-32x32.png')!;
+    expect(await centerChroma(png32.buffer)).toBeGreaterThan(0);
+  });
+
+  it('sVG passthrough keeps color fills when monochrome=true', async () => {
+    const input = solidSvg();
+    const result = await processIconPackage(
+      input,
+      {
+        ...GENERATE_OPTION_DEFAULTS,
+        presets: ['favicon'],
+        monochrome: true,
+      },
+      true,
+    );
+    const svg = result.assets.find((a) => a.name === 'favicon.svg')!;
+    expect(svg.buffer.toString('utf8')).toContain('fill="#0080ff"');
   });
 });
 

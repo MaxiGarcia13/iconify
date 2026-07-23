@@ -1,3 +1,5 @@
+import { Buffer } from 'node:buffer';
+
 import { describe, expect, it } from 'vitest';
 
 import { solidPng } from '../../test/fixtures';
@@ -25,5 +27,19 @@ describe('buildFaviconIco', () => {
     }).sort((a, b) => a - b);
 
     expect(widths).toEqual([...ICO_SIZES]);
+  });
+
+  it('monochrome=true changes ICO bytes vs color (AC10 inherits renderIcon)', async () => {
+    const input = await solidPng();
+    const options = {
+      background: 'transparent' as const,
+      padding: 0,
+      cornerRadius: 0,
+    };
+
+    const color = await buildFaviconIco(input, { ...options, monochrome: false });
+    const grey = await buildFaviconIco(input, { ...options, monochrome: true });
+
+    expect(Buffer.compare(color, grey)).not.toBe(0);
   });
 });

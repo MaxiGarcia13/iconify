@@ -269,6 +269,39 @@ describe('post /api/v1/generate', () => {
       );
     });
 
+    it('returns 200 ZIP when monochrome=false (AC10 color path)', async () => {
+      const png = await solidPng();
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(png)], 'logo.png', {
+          type: 'image/png',
+        }),
+        presets: 'favicon',
+        monochrome: 'false',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+      expect(listZipEntryNames(Buffer.from(await response.arrayBuffer()))).toEqual(
+        resolveMatrix(['favicon'], false).map((e) => e.name),
+      );
+    });
+
+    it('returns 200 ZIP when monochrome is omitted (AC10 default color)', async () => {
+      const png = await solidPng();
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(png)], 'logo.png', {
+          type: 'image/png',
+        }),
+        presets: 'favicon',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(200);
+      expect(listZipEntryNames(Buffer.from(await response.arrayBuffer()))).toEqual(
+        resolveMatrix(['favicon'], false).map((e) => e.name),
+      );
+    });
+
     it('returns 400 VALIDATION_ERROR for invalid monochrome', async () => {
       const png = await solidPng();
       for (const monochrome of ['True', '1', 'yes']) {
