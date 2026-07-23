@@ -100,7 +100,7 @@ async function applyCornerRadius(
   height: number,
   cornerRadius: number,
 ): Promise<Buffer> {
-  const clamped = Math.min(Math.max(cornerRadius, 0), 50);
+  const clamped = Math.min(Math.max(cornerRadius, 0), 100);
   if (clamped === 0)
     return png;
   const r = Math.round((clamped / 100) * (Math.min(width, height) / 2));

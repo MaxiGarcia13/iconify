@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { SETTINGS_DEFAULTS } from '../lib/settings';
 import {
+  CornerRadiusField,
   IconBackgroundField,
   PaddingField,
   PresetsField,
@@ -19,7 +20,7 @@ export interface SettingsPanelProps {
 
 /**
  * Generator settings — SPEC §5.3.
- * Padding, background, presets.
+ * Padding, corner radius, background, presets.
  */
 export function SettingsPanel({
   value,
@@ -50,6 +51,11 @@ export function SettingsPanel({
       <PaddingField
         value={state.padding}
         onChange={(padding) => patch({ padding })}
+      />
+
+      <CornerRadiusField
+        value={state.cornerRadius}
+        onChange={(cornerRadius) => patch({ cornerRadius })}
       />
 
       <IconBackgroundField

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 import {
   appendSettingsToFormData,
+  clampCornerRadius,
   clampPadding,
   hasAllPreset,
   isPresetChecked,
@@ -18,8 +19,8 @@ describe('settings defaults', () => {
   });
 });
 
-describe('clampPadding', () => {
-  it('clamps to 0–50 and rounds', () => {
+describe('clampPadding / clampCornerRadius', () => {
+  it('clampPadding clamps to 0–50 and rounds', () => {
     expect(clampPadding(-1)).toBe(0);
     expect(clampPadding(0)).toBe(0);
     expect(clampPadding(20.4)).toBe(20);
@@ -27,6 +28,16 @@ describe('clampPadding', () => {
     expect(clampPadding(50)).toBe(50);
     expect(clampPadding(99)).toBe(50);
     expect(clampPadding(Number.NaN)).toBe(0);
+  });
+
+  it('clampCornerRadius clamps to 0–100 and rounds', () => {
+    expect(clampCornerRadius(-1)).toBe(0);
+    expect(clampCornerRadius(0)).toBe(0);
+    expect(clampCornerRadius(50.4)).toBe(50);
+    expect(clampCornerRadius(50.6)).toBe(51);
+    expect(clampCornerRadius(100)).toBe(100);
+    expect(clampCornerRadius(150)).toBe(100);
+    expect(clampCornerRadius(Number.NaN)).toBe(0);
   });
 });
 
@@ -99,12 +110,14 @@ describe('toGenerateOptions / appendSettingsToFormData', () => {
     appendSettingsToFormData(body, {
       ...SETTINGS_DEFAULTS,
       padding: 20,
+      cornerRadius: 35,
       transparent: false,
       backgroundHex: '#0a0a0a',
       presets: ['favicon', 'apple'],
     });
 
     expect(body.get('padding')).toBe('20');
+    expect(body.get('cornerRadius')).toBe('35');
     expect(body.get('background')).toBe('#0a0a0a');
     expect(body.get('presets')).toBe('favicon,apple');
   });

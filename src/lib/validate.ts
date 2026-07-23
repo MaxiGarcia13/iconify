@@ -102,10 +102,10 @@ export async function parseGenerateForm(
     = cornerRadiusRaw === null
       ? GENERATE_OPTION_DEFAULTS.cornerRadius
       : Number(cornerRadiusRaw);
-  if (!Number.isFinite(cornerRadius) || cornerRadius < 0 || cornerRadius > 50) {
+  if (!Number.isFinite(cornerRadius) || cornerRadius < 0 || cornerRadius > 100) {
     return {
       ok: false,
-      message: 'Invalid cornerRadius. Expected a number from 0 to 50.',
+      message: 'Invalid cornerRadius. Expected a number from 0 to 100.',
       details: { field: 'cornerRadius' },
     };
   }

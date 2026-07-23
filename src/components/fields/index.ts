@@ -1,3 +1,5 @@
+export { CornerRadiusField } from './corner-radius-field';
+export type { CornerRadiusFieldProps } from './corner-radius-field';
 export { Field } from './field';
 export type { FieldProps } from './field';
 export { colorSwatchClass, fieldHintClass, fieldInputClass, fieldLabelClass } from './field-styles';

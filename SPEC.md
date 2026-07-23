@@ -3,7 +3,7 @@
 | Field        | Value                                                                       |
 | ------------ | --------------------------------------------------------------------------- |
 | **Product**  | Iconify                                                                     |
-| **Version**  | 1.0.9                                                                       |
+| **Version**  | 1.0.11                                                                      |
 | **Status**   | Draft                                                                       |
 | **Stack**    | Astro · Node.js (Astro API routes) · Sharp · archiver                       |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -296,11 +296,11 @@ components:
         cornerRadius:
           type: number
           minimum: 0
-          maximum: 50
+          maximum: 100
           default: 0
           description: |
-            Outer corner radius as a percentage of half the shorter canvas side (0–50).
-            `0` = square corners; `50` = fully rounded (circle on square icons).
+            Outer corner radius as a percentage of half the shorter canvas side (0–100).
+            `0` = square corners; `100` = fully rounded (circle on square icons).
             Applied to raster outputs via an SVG rounded-rect alpha mask after pad/background.
             Does not alter SVG passthrough (`favicon.svg`).
         presets:
@@ -377,7 +377,7 @@ export type PresetId = 'favicon' | 'apple' | 'android' | 'og' | 'all';
 export interface GenerateOptions {
   background: 'transparent' | `#${string}`;
   padding: number; // 0–50
-  cornerRadius: number; // 0–50 (% of half the shorter canvas side)
+  cornerRadius: number; // 0–100 (% of half the shorter canvas side)
   presets: PresetId[];
 }
 
@@ -451,7 +451,7 @@ async function applyCornerRadius(
   height: number,
   cornerRadius: number,
 ): Promise<Buffer> {
-  const clamped = Math.min(Math.max(cornerRadius, 0), 50);
+  const clamped = Math.min(Math.max(cornerRadius, 0), 100);
   if (clamped === 0)
     return png;
   const r = Math.round((clamped / 100) * (Math.min(width, height) / 2));
@@ -677,7 +677,7 @@ Header brand mark uses an existing `public/` icon (e.g. `android-chrome-192x192.
 | ---- | ----- | ------------------------------------------------------------------------- |
 | 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                         |
 | 2    | UI    | Validates client-side; shows filename, size, MIME; enables settings       |
-| 3    | User  | Toggles presets, adjusts padding / corner radius (0–50), picks background |
+| 3    | User  | Toggles presets, adjusts padding (0–50) / corner radius (0–100), picks background |
 | 4    | User  | Clicks **Generate & Download ZIP**                                        |
 | 5    | UI    | `POST /api/v1/generate` with `FormData`; shows progress/disabled state    |
 | 6    | UI    | On 200: trigger browser download from blob URL; populate snippet panel    |
@@ -697,7 +697,7 @@ Header brand mark uses an existing `public/` icon (e.g. `android-chrome-192x192.
 | Control       | Type                         | Default     | Notes                                                              |
 | ------------- | ---------------------------- | ----------- | ------------------------------------------------------------------ |
 | Padding       | range / number               | `0`         | 0–50, step 1, suffix `%`                                           |
-| Corner radius | range / number               | `0`         | 0–50, step 1, suffix `%` of half shorter side; rounds outer canvas |
+| Corner radius | range / number               | `0`         | 0–100, step 1, suffix `%` of half shorter side; rounds outer canvas |
 | Background    | color + “transparent” toggle | transparent | Sends `transparent` or `#RRGGBB`                                   |
 | Presets       | checkbox group               | all         | Maps to `presets` form field                                       |
 
@@ -822,7 +822,7 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | AC5 | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                           |
 | AC6 | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                               |
 | AC7 | No intermediate icon files persist on disk after the request completes                                                                                                                    |
-| AC8 | `cornerRadius=50` on a square PNG yield produces circular (fully rounded) raster icons; `cornerRadius=0` leaves square corners; invalid values (`-1`, `51`) return `400 VALIDATION_ERROR` |
+| AC8 | `cornerRadius=100` on a square PNG yield produces circular (fully rounded) raster icons; `cornerRadius=0` leaves square corners; invalid values (`-1`, `101`) return `400 VALIDATION_ERROR` |
 | AC9 | Document head on `/` wires every §5.6 `public/` icon, absolute Open Graph + Twitter Card tags for `/og-image.png` (1200×630), and canonical / `og:url` from Astro `site`                  |
 
 ---
@@ -853,3 +853,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.8   | 2026-07-23 | Restore UI HTML `<head>` snippet (client-only; still omitted from ZIP)     |
 | 1.0.9   | 2026-07-23 | §5.6 site document head: SEO, Open Graph, Twitter Card via `public/`       |
 | 1.0.10  | 2026-07-23 | §5.1 header: `public/` brand icon + short product description              |
+| 1.0.11  | 2026-07-23 | `cornerRadius` range 0–100 (`100` = full circle); AC8 updated              |

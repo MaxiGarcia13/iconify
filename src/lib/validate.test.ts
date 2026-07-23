@@ -68,22 +68,22 @@ describe('parseGenerateForm', () => {
     expect(parsed.options.cornerRadius).toBe(25);
   });
 
-  it('rejects cornerRadius outside 0–50', async () => {
-    for (const cornerRadius of ['-1', '51', 'abc']) {
+  it('rejects cornerRadius outside 0–100', async () => {
+    for (const cornerRadius of ['-1', '101', 'abc']) {
       const form = await formWithFile({ cornerRadius });
       const parsed = await parseGenerateForm(form);
       expect(parsed.ok).toBe(false);
       if (parsed.ok)
         continue;
       expect(parsed.message).toBe(
-        'Invalid cornerRadius. Expected a number from 0 to 50.',
+        'Invalid cornerRadius. Expected a number from 0 to 100.',
       );
       expect(parsed.details).toEqual({ field: 'cornerRadius' });
     }
   });
 
-  it('accepts cornerRadius boundary values 0 and 50', async () => {
-    for (const cornerRadius of ['0', '50']) {
+  it('accepts cornerRadius boundary values 0 and 100', async () => {
+    for (const cornerRadius of ['0', '100']) {
       const form = await formWithFile({ cornerRadius });
       const parsed = await parseGenerateForm(form);
       expect(parsed.ok).toBe(true);

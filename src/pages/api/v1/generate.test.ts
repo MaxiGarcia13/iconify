@@ -210,7 +210,7 @@ describe('post /api/v1/generate', () => {
         file: new File([Uint8Array.from(png)], 'logo.png', {
           type: 'image/png',
         }),
-        cornerRadius: '51',
+        cornerRadius: '101',
       });
 
       const response = await POST(apiContext(request));
@@ -220,7 +220,7 @@ describe('post /api/v1/generate', () => {
       const body = await response.json();
       expect(body).toEqual({
         error: 'VALIDATION_ERROR',
-        message: 'Invalid cornerRadius. Expected a number from 0 to 50.',
+        message: 'Invalid cornerRadius. Expected a number from 0 to 100.',
         details: { field: 'cornerRadius' },
       });
     });

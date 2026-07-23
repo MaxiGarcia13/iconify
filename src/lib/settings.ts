@@ -18,6 +18,7 @@ export type SelectablePreset = (typeof SELECTABLE_PRESETS)[number];
  */
 export interface SettingsState {
   padding: number;
+  cornerRadius: number;
   transparent: boolean;
   /** Last opaque pad fill; used when `transparent` is off. */
   backgroundHex: `#${string}`;
@@ -26,6 +27,7 @@ export interface SettingsState {
 
 export const SETTINGS_DEFAULTS: SettingsState = {
   padding: GENERATE_OPTION_DEFAULTS.padding,
+  cornerRadius: GENERATE_OPTION_DEFAULTS.cornerRadius,
   transparent: GENERATE_OPTION_DEFAULTS.background === 'transparent',
   backgroundHex: '#ffffff',
   presets: [...GENERATE_OPTION_DEFAULTS.presets],
@@ -33,11 +35,28 @@ export const SETTINGS_DEFAULTS: SettingsState = {
 
 const HEX6 = /^#?[0-9a-f]{6}$/i;
 
-/** Clamp padding to SPEC §3 / §5.3 range (0–50, step 1). */
-export function clampPadding(value: number): number {
+/** Clamp 0–50 percent controls (padding) — SPEC §3 / §5.3. */
+function clampPercent0to50(value: number): number {
   if (!Number.isFinite(value))
     return 0;
   return Math.min(50, Math.max(0, Math.round(value)));
+}
+
+/** Clamp 0–100 percent controls (corner radius) — SPEC §3 / §5.3. */
+function clampPercent0to100(value: number): number {
+  if (!Number.isFinite(value))
+    return 0;
+  return Math.min(100, Math.max(0, Math.round(value)));
+}
+
+/** Clamp padding to SPEC §3 / §5.3 range (0–50, step 1). */
+export function clampPadding(value: number): number {
+  return clampPercent0to50(value);
+}
+
+/** Clamp corner radius to SPEC §3 / §5.3 range (0–100, step 1). */
+export function clampCornerRadius(value: number): number {
+  return clampPercent0to100(value);
 }
 
 /** Normalize user hex input to `#rrggbb`, or `null` if invalid. */
@@ -101,8 +120,8 @@ export function togglePreset(
 export function toGenerateOptions(state: SettingsState): GenerateOptions {
   return {
     padding: clampPadding(state.padding),
+    cornerRadius: clampCornerRadius(state.cornerRadius),
     background: state.transparent ? 'transparent' : state.backgroundHex,
-    cornerRadius: GENERATE_OPTION_DEFAULTS.cornerRadius,
     presets: state.presets.length > 0 ? [...state.presets] : ['all'],
   };
 }
@@ -114,6 +133,7 @@ export function appendSettingsToFormData(
 ): void {
   const options = toGenerateOptions(state);
   body.set('padding', String(options.padding));
+  body.set('cornerRadius', String(options.cornerRadius));
   body.set('background', options.background);
   body.set('presets', options.presets.join(','));
 }
