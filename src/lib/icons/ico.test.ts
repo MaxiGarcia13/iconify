@@ -11,6 +11,7 @@ describe('buildFaviconIco', () => {
     const ico = await buildFaviconIco(input, {
       background: 'transparent',
       padding: 0,
+      cornerRadius: 0,
     });
 
     expect(ico.subarray(0, 2).readUInt16LE(0)).toBe(0); // reserved

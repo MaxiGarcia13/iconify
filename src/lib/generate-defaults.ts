@@ -4,5 +4,6 @@ import type { GenerateOptions } from './icons/types';
 export const GENERATE_OPTION_DEFAULTS: GenerateOptions = {
   background: 'transparent',
   padding: 0,
+  cornerRadius: 0,
   presets: ['all'],
 };

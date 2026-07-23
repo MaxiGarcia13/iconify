@@ -54,8 +54,43 @@ describe('parseGenerateForm', () => {
     expect(parsed.options).toEqual({
       background: '#112233',
       padding: 20,
+      cornerRadius: 0,
       presets: ['favicon', 'apple'],
     });
+  });
+
+  it('parses cornerRadius from multipart fields', async () => {
+    const form = await formWithFile({ cornerRadius: '25' });
+    const parsed = await parseGenerateForm(form);
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok)
+      return;
+    expect(parsed.options.cornerRadius).toBe(25);
+  });
+
+  it('rejects cornerRadius outside 0–50', async () => {
+    for (const cornerRadius of ['-1', '51', 'abc']) {
+      const form = await formWithFile({ cornerRadius });
+      const parsed = await parseGenerateForm(form);
+      expect(parsed.ok).toBe(false);
+      if (parsed.ok)
+        continue;
+      expect(parsed.message).toBe(
+        'Invalid cornerRadius. Expected a number from 0 to 50.',
+      );
+      expect(parsed.details).toEqual({ field: 'cornerRadius' });
+    }
+  });
+
+  it('accepts cornerRadius boundary values 0 and 50', async () => {
+    for (const cornerRadius of ['0', '50']) {
+      const form = await formWithFile({ cornerRadius });
+      const parsed = await parseGenerateForm(form);
+      expect(parsed.ok).toBe(true);
+      if (!parsed.ok)
+        return;
+      expect(parsed.options.cornerRadius).toBe(Number(cornerRadius));
+    }
   });
 
   it('accepts repeated presets fields (SPEC §2.5)', async () => {

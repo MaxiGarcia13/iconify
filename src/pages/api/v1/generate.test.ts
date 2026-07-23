@@ -204,6 +204,27 @@ describe('post /api/v1/generate', () => {
       });
     });
 
+    it('returns 400 VALIDATION_ERROR for invalid cornerRadius', async () => {
+      const png = await solidPng();
+      const request = await multipartRequest({
+        file: new File([Uint8Array.from(png)], 'logo.png', {
+          type: 'image/png',
+        }),
+        cornerRadius: '51',
+      });
+
+      const response = await POST(apiContext(request));
+      expect(response.status).toBe(400);
+      expect(response.headers.get('Content-Type')).toBe('application/json');
+
+      const body = await response.json();
+      expect(body).toEqual({
+        error: 'VALIDATION_ERROR',
+        message: 'Invalid cornerRadius. Expected a number from 0 to 50.',
+        details: { field: 'cornerRadius' },
+      });
+    });
+
     it('returns 500 PROCESSING_ERROR when Sharp cannot decode the image', async () => {
       const request = await multipartRequest({
         file: new File(

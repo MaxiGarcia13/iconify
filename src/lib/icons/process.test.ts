@@ -24,6 +24,7 @@ describe('renderIcon', () => {
       const out = await renderIcon(input, px, {
         background: 'transparent',
         padding: 0,
+        cornerRadius: 0,
       });
 
       const meta = await sharp(out).metadata();
@@ -40,6 +41,7 @@ describe('renderOgImage', () => {
     const out = await renderOgImage(input, {
       background: 'transparent',
       padding: 10,
+      cornerRadius: 0,
     });
 
     const meta = await sharp(out).metadata();

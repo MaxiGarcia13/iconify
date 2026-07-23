@@ -8,6 +8,8 @@ export type { PresetId };
 export interface GenerateOptions {
   background: 'transparent' | `#${string}`;
   padding: number; // 0–50
+  /** Outer corner radius as % of half the shorter canvas side (0–50). */
+  cornerRadius: number; // 0–50
   presets: PresetId[];
 }
 

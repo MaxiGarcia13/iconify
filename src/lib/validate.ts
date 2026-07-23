@@ -97,6 +97,19 @@ export async function parseGenerateForm(
     };
   }
 
+  const cornerRadiusRaw = stringField(form, 'cornerRadius');
+  const cornerRadius
+    = cornerRadiusRaw === null
+      ? GENERATE_OPTION_DEFAULTS.cornerRadius
+      : Number(cornerRadiusRaw);
+  if (!Number.isFinite(cornerRadius) || cornerRadius < 0 || cornerRadius > 50) {
+    return {
+      ok: false,
+      message: 'Invalid cornerRadius. Expected a number from 0 to 50.',
+      details: { field: 'cornerRadius' },
+    };
+  }
+
   const presetsRaw = presetsField(form);
   const presets
     = presetsRaw === null
@@ -117,6 +130,7 @@ export async function parseGenerateForm(
     options: {
       background,
       padding,
+      cornerRadius,
       presets,
     },
   };

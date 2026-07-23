@@ -13,7 +13,7 @@ import { renderIcon } from './process';
  */
 export async function buildFaviconIco(
   input: Buffer,
-  options: Pick<GenerateOptions, 'background' | 'padding'>,
+  options: Pick<GenerateOptions, 'background' | 'padding' | 'cornerRadius'>,
 ): Promise<Buffer> {
   const layers = await Promise.all(
     ICO_SIZES.map((size) => renderIcon(input, size, options)),

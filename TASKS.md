@@ -46,9 +46,9 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 
 SPEC §3 `cornerRadius` / §4 `applyCornerRadius` / §5 settings / AC8.
 
-- [ ] Processing: `applyCornerRadius` SVG mask (`dest-in`) after pad/background in `renderIcon` + `renderOgImage` (ICO inherits via `renderIcon`); no-op at `0`; skip SVG passthrough
-- [ ] Types + defaults: `GenerateOptions.cornerRadius` (0–50, default `0`) in `types` / `generate-defaults`
-- [ ] API: accept multipart `cornerRadius`; validate 0–50 like padding; reject with `400 VALIDATION_ERROR` + `details.field: cornerRadius`
+- [x] Processing: `applyCornerRadius` SVG mask (`dest-in`) after pad/background in `renderIcon` + `renderOgImage` (ICO inherits via `renderIcon`); no-op at `0`; skip SVG passthrough
+- [x] Types + defaults: `GenerateOptions.cornerRadius` (0–50, default `0`) in `types` / `generate-defaults`
+- [x] API: accept multipart `cornerRadius`; validate 0–50 like padding; reject with `400 VALIDATION_ERROR` + `details.field: cornerRadius`
 - [ ] UI: settings control (range/number 0–50, `%`); wire into settings state + `FormData` (`cornerRadius`)
 - [ ] Unit tests: process mask math / no-op at 0; validate boundaries; API happy-path + invalid; settings → FormData mapping
 - [ ] Verify AC8

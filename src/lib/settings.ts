@@ -102,6 +102,7 @@ export function toGenerateOptions(state: SettingsState): GenerateOptions {
   return {
     padding: clampPadding(state.padding),
     background: state.transparent ? 'transparent' : state.backgroundHex,
+    cornerRadius: GENERATE_OPTION_DEFAULTS.cornerRadius,
     presets: state.presets.length > 0 ? [...state.presets] : ['all'],
   };
 }

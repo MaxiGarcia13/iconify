@@ -41,6 +41,7 @@ function makeAssets(): AssetEntry[] {
 const packageDefaults = {
   background: 'transparent' as const,
   padding: 0,
+  cornerRadius: 0,
   presets: ['all' as const],
 };
 
