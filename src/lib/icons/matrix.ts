@@ -5,15 +5,14 @@
 
 export type PresetId = 'favicon' | 'apple' | 'android' | 'og' | 'all';
 
-export type AssetFormat = 'ico' | 'png' | 'svg' | 'webmanifest' | 'html';
+export type AssetFormat = 'ico' | 'png' | 'svg';
 
 /** Square icon size in px, or width×height for non-square canvases. */
 export type AssetSize
   = | { kind: 'square'; px: number }
     | { kind: 'layers'; px: readonly number[] }
     | { kind: 'rect'; width: number; height: number }
-    | { kind: 'scalable' }
-    | { kind: 'none' };
+    | { kind: 'scalable' };
 
 export interface MatrixEntry {
   /** Path / filename inside the ZIP (§2.6). */
@@ -21,11 +20,8 @@ export interface MatrixEntry {
   size: AssetSize;
   format: AssetFormat;
   contentType: string;
-  /**
-   * Preset that owns this asset. Metadata always shipped with the package
-   * (`head.html`) uses `null` and is included regardless of preset selection.
-   */
-  preset: Exclude<PresetId, 'all'> | null;
+  /** Preset that owns this asset. */
+  preset: Exclude<PresetId, 'all'>;
   /** Omit unless the uploaded source is SVG (§2.1, AC1/AC2). */
   svgSourceOnly?: boolean;
 }
@@ -41,7 +37,7 @@ export const PRESET_IDS: readonly PresetId[] = [
   'all',
 ] as const;
 
-/** Full matrix: §2.1–§2.4 assets + §2.6 `head.html`. */
+/** Full matrix: §2.1–§2.4 assets. */
 export const ASSET_MATRIX: readonly MatrixEntry[] = [
   // §2.1 Modern Web / Favicons
   {
@@ -127,13 +123,6 @@ export const ASSET_MATRIX: readonly MatrixEntry[] = [
     contentType: 'image/png',
     preset: 'android',
   },
-  {
-    name: 'site.webmanifest',
-    size: { kind: 'none' },
-    format: 'webmanifest',
-    contentType: 'application/manifest+json',
-    preset: 'android',
-  },
 
   // §2.4 Open Graph / Social
   {
@@ -143,20 +132,11 @@ export const ASSET_MATRIX: readonly MatrixEntry[] = [
     contentType: 'image/png',
     preset: 'og',
   },
-
-  // §2.6 package metadata (always included)
-  {
-    name: 'head.html',
-    size: { kind: 'none' },
-    format: 'html',
-    contentType: 'text/html; charset=utf-8',
-    preset: null,
-  },
 ] as const;
 
 /**
  * Expand `presets` (§2.5) into concrete matrix rows.
- * `all` expands to every preset-owned asset; `head.html` is always kept.
+ * `all` expands to every preset-owned asset.
  * SVG-only rows are dropped when `sourceIsSvg` is false (AC1/AC2).
  */
 export function resolveMatrix(
@@ -179,8 +159,6 @@ export function resolveMatrix(
   return ASSET_MATRIX.filter((entry) => {
     if (entry.svgSourceOnly && !sourceIsSvg)
       return false;
-    if (entry.preset === null)
-      return true;
     return active.has(entry.preset);
   });
 }

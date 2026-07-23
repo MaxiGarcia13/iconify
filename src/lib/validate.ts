@@ -5,16 +5,14 @@ import { Buffer } from 'node:buffer';
 import { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 import { PRESET_IDS } from './icons/matrix';
 import {
-  extensionOf,
+  isSourceSvg,
   MAX_UPLOAD_BYTES,
-  normalizeMime,
   validateSourceFile,
 } from './upload-constraints';
 
 export { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 export { MAX_UPLOAD_BYTES } from './upload-constraints';
 
-const HEX6 = /^#[0-9a-f]{6}$/i;
 const HEX_BG = /^#(?:[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
 export type ParseGenerateFormResult
@@ -66,9 +64,6 @@ export async function parseGenerateForm(
     };
   }
 
-  const mime = normalizeMime(fileEntry.type);
-  const ext = extensionOf(fileEntry.name);
-
   const buffer = Buffer.from(await fileEntry.arrayBuffer());
   if (buffer.byteLength > MAX_UPLOAD_BYTES) {
     return {
@@ -115,48 +110,14 @@ export async function parseGenerateForm(
     };
   }
 
-  const appName
-    = stringField(form, 'appName') ?? GENERATE_OPTION_DEFAULTS.appName;
-  if (appName.length === 0 || appName.length > 64) {
-    return {
-      ok: false,
-      message: 'Invalid appName. Expected 1–64 characters.',
-      details: { field: 'appName' },
-    };
-  }
-
-  const themeColor
-    = stringField(form, 'themeColor') ?? GENERATE_OPTION_DEFAULTS.themeColor;
-  if (!HEX6.test(themeColor)) {
-    return {
-      ok: false,
-      message: 'Invalid themeColor. Expected #RRGGBB.',
-      details: { field: 'themeColor' },
-    };
-  }
-
-  const backgroundColor
-    = stringField(form, 'backgroundColor')
-      ?? GENERATE_OPTION_DEFAULTS.backgroundColor;
-  if (!HEX6.test(backgroundColor)) {
-    return {
-      ok: false,
-      message: 'Invalid backgroundColor. Expected #RRGGBB.',
-      details: { field: 'backgroundColor' },
-    };
-  }
-
   return {
     ok: true,
     file: buffer,
-    sourceIsSvg: mime === 'image/svg+xml' || ext === '.svg',
+    sourceIsSvg: isSourceSvg(fileEntry),
     options: {
       background,
       padding,
       presets,
-      appName,
-      themeColor,
-      backgroundColor,
     },
   };
 }

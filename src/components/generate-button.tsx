@@ -15,7 +15,7 @@ export interface GenerateButtonProps {
 }
 
 /**
- * Generate & Download ZIP — SPEC §5.1 / §5.2 steps 5–8 / §5.5.
+ * Generate & Download ZIP — SPEC §5.1 / §5.2 steps 5–7 / §5.5.
  * Disabled until a valid file is present (§5.4).
  */
 export function GenerateButton({

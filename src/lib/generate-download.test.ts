@@ -25,18 +25,12 @@ describe('buildGenerateFormData', () => {
       transparent: false,
       backgroundHex: '#abcdef',
       presets: ['favicon', 'og'],
-      appName: 'Demo',
-      themeColor: '#111111',
-      backgroundColor: '#222222',
     });
 
     expect(body.get('file')).toBe(file);
     expect(body.get('padding')).toBe('12');
     expect(body.get('background')).toBe('#abcdef');
     expect(body.get('presets')).toBe('favicon,og');
-    expect(body.get('appName')).toBe('Demo');
-    expect(body.get('themeColor')).toBe('#111111');
-    expect(body.get('backgroundColor')).toBe('#222222');
   });
 });
 
@@ -92,7 +86,7 @@ describe('postGenerateDownload', () => {
 
   it('returns ZIP blob and Content-Disposition filename on 200', async () => {
     const zipBytes = new Uint8Array([0x50, 0x4B, 0x03, 0x04]);
-    const fetchImpl = vi.fn(async () =>
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
       new Response(zipBytes, {
         status: 200,
         headers: {
@@ -105,7 +99,7 @@ describe('postGenerateDownload', () => {
     const result = await postGenerateDownload(
       pngFile(),
       SETTINGS_DEFAULTS,
-      fetchImpl as typeof fetch,
+      fetchImpl,
     );
 
     expect(fetchImpl).toHaveBeenCalledWith(
@@ -125,7 +119,7 @@ describe('postGenerateDownload', () => {
   });
 
   it('returns JSON message on 4xx', async () => {
-    const fetchImpl = vi.fn(async () =>
+    const fetchImpl = vi.fn<typeof fetch>(async () =>
       new Response(
         JSON.stringify({
           error: 'VALIDATION_ERROR',
@@ -138,7 +132,7 @@ describe('postGenerateDownload', () => {
     const result = await postGenerateDownload(
       pngFile(),
       SETTINGS_DEFAULTS,
-      fetchImpl as typeof fetch,
+      fetchImpl,
     );
 
     expect(result).toEqual({
@@ -148,14 +142,14 @@ describe('postGenerateDownload', () => {
   });
 
   it('returns network error when fetch throws', async () => {
-    const fetchImpl = vi.fn(async () => {
+    const fetchImpl = vi.fn<typeof fetch>(async () => {
       throw new TypeError('Failed to fetch');
     });
 
     const result = await postGenerateDownload(
       pngFile(),
       SETTINGS_DEFAULTS,
-      fetchImpl as typeof fetch,
+      fetchImpl,
     );
 
     expect(result.ok).toBe(false);

@@ -4,11 +4,9 @@ import { useState } from 'react';
 
 import { SETTINGS_DEFAULTS } from '../lib/settings';
 import {
-  HexColorField,
   IconBackgroundField,
   PaddingField,
   PresetsField,
-  TextField,
 } from './fields';
 
 export interface SettingsPanelProps {
@@ -21,7 +19,7 @@ export interface SettingsPanelProps {
 
 /**
  * Generator settings — SPEC §5.3.
- * Padding, background, presets, app name, theme / background colors.
+ * Padding, background, presets.
  */
 export function SettingsPanel({
   value,
@@ -39,14 +37,6 @@ export function SettingsPanel({
 
   function patch(partial: Partial<SettingsState>) {
     commit({ ...state, ...partial });
-  }
-
-  function onAppNameBlur() {
-    const trimmed = state.appName.trim();
-    if (!trimmed)
-      patch({ appName: SETTINGS_DEFAULTS.appName });
-    else if (trimmed !== state.appName)
-      patch({ appName: trimmed });
   }
 
   return (
@@ -73,31 +63,6 @@ export function SettingsPanel({
       <PresetsField
         value={state.presets}
         onChange={(presets) => patch({ presets })}
-      />
-
-      <TextField
-        label="App name"
-        value={state.appName}
-        onChange={(appName) => patch({ appName })}
-        onBlur={onAppNameBlur}
-        maxLength={64}
-      />
-
-      <HexColorField
-        label="Theme color"
-        value={state.themeColor}
-        onChange={(themeColor) => patch({ themeColor })}
-        colorAriaLabel="Theme color picker"
-        textAriaLabel="Theme color hex"
-      />
-
-      <HexColorField
-        label="Background color"
-        value={state.backgroundColor}
-        onChange={(backgroundColor) => patch({ backgroundColor })}
-        hint="Manifest page chrome (distinct from icon pad fill)"
-        colorAriaLabel="Manifest background color picker"
-        textAriaLabel="Manifest background color hex"
       />
     </fieldset>
   );

@@ -17,13 +17,11 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] `renderOgImage` — 1200×630
 - [x] `buildFaviconIco` — 16 / 32 / 48 layers
 - [x] SVG passthrough for `favicon.svg` when source is SVG
-- [x] `site.webmanifest` generator
-- [x] `head.html` / snippet generator
 - [x] ZIP stream packager (`createZipStream` / `zipToWebResponse`)
 - [x] Vitest setup: `"test:unit": "vitest"` in `package.json` scripts
 - [x] Vitest config (`vitest.config.ts`) targeting `src/**/*.{test,spec}.{ts,tsx}`
 - [x] Unit tests for processing core: one assertion per SPEC §2 matrix filename/size (`renderIcon`, `renderOgImage`, `buildFaviconIco`, SVG passthrough)
-- [x] Unit tests for `site.webmanifest` + `head.html` generators (content matches SPEC §5)
+- [x] Unit tests for UI `head` snippet generator (content matches SPEC §5.3)
 - [x] Unit test that ZIP membership matches the generated asset set (no partial/empty archive)
 
 ## M2 — REST API
@@ -38,7 +36,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 ## M3 — Astro UI
 
 - [x] Dropzone island (drag/drop, browse, type/size validation)
-- [x] Settings: padding, background, presets, app name, theme/background colors
+- [x] Settings: padding, background, presets
 - [x] Generate button → `FormData` POST → blob download
 - [x] HTML snippet panel + copy to clipboard
 - [ ] Loading / disabled / error states (`aria-live`)

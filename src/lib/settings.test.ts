@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 import {
   appendSettingsToFormData,
   clampPadding,
@@ -10,7 +11,6 @@ import {
   toGenerateOptions,
   togglePreset,
 } from './settings';
-import { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 
 describe('settings defaults', () => {
   it('matches SPEC §3 / §5.3 GenerateRequest defaults', () => {
@@ -102,16 +102,10 @@ describe('toGenerateOptions / appendSettingsToFormData', () => {
       transparent: false,
       backgroundHex: '#0a0a0a',
       presets: ['favicon', 'apple'],
-      appName: 'Iconify',
-      themeColor: '#111111',
-      backgroundColor: '#222222',
     });
 
     expect(body.get('padding')).toBe('20');
     expect(body.get('background')).toBe('#0a0a0a');
     expect(body.get('presets')).toBe('favicon,apple');
-    expect(body.get('appName')).toBe('Iconify');
-    expect(body.get('themeColor')).toBe('#111111');
-    expect(body.get('backgroundColor')).toBe('#222222');
   });
 });

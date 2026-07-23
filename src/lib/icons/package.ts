@@ -1,13 +1,11 @@
+import type { Buffer } from 'node:buffer';
 import type { MatrixEntry } from './matrix';
-import type { AssetEntry, GenerateOptions, ProcessResult } from './types';
 
-import { Buffer } from 'node:buffer';
+import type { AssetEntry, GenerateOptions, ProcessResult } from './types';
 import { PassThrough, Readable } from 'node:stream';
 
 import archiver from 'archiver';
 
-import { buildSiteWebmanifest } from '../manifest';
-import { buildHeadHtml } from '../snippet';
 import { buildFaviconIco } from './ico';
 import { resolveMatrix } from './matrix';
 import { passthroughFaviconSvg, renderIcon, renderOgImage } from './process';
@@ -33,10 +31,7 @@ export async function processIconPackage(
     });
   }
 
-  const headHtml = buildHeadHtml(options, sourceIsSvg);
-  const manifestJson = buildSiteWebmanifest(options);
-
-  return { assets, headHtml, manifestJson };
+  return { assets };
 }
 
 async function renderMatrixEntry(
@@ -60,10 +55,6 @@ async function renderMatrixEntry(
         throw new Error(`SVG asset ${entry.name} requested for non-SVG source`);
       return passthroughFaviconSvg(input);
     }
-    case 'webmanifest':
-      return Buffer.from(buildSiteWebmanifest(options), 'utf8');
-    case 'html':
-      return Buffer.from(buildHeadHtml(options, sourceIsSvg), 'utf8');
     default: {
       const _exhaustive: never = entry.format;
       throw new Error(`Unknown asset format: ${_exhaustive}`);

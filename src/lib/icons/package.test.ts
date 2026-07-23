@@ -26,14 +26,14 @@ function makeAssets(): AssetEntry[] {
       contentType: 'image/png',
     },
     {
-      name: 'site.webmanifest',
-      buffer: Buffer.from('{"name":"App"}'),
-      contentType: 'application/manifest+json',
+      name: 'android-chrome-192x192.png',
+      buffer: Buffer.from('png-192'),
+      contentType: 'image/png',
     },
     {
-      name: 'head.html',
-      buffer: Buffer.from('<link rel="icon" href="/favicon.ico" />\n'),
-      contentType: 'text/html; charset=utf-8',
+      name: 'og-image.png',
+      buffer: Buffer.from('png-og'),
+      contentType: 'image/png',
     },
   ];
 }
@@ -42,9 +42,6 @@ const packageDefaults = {
   background: 'transparent' as const,
   padding: 0,
   presets: ['all' as const],
-  appName: 'App',
-  themeColor: '#ffffff',
-  backgroundColor: '#ffffff',
 };
 
 describe('processIconPackage', () => {
@@ -55,8 +52,6 @@ describe('processIconPackage', () => {
 
     expect(result.assets.map((a) => a.name)).toEqual(expected);
     expect(result.assets.some((a) => a.name.endsWith('.svg'))).toBe(false);
-    expect(result.headHtml).toContain('favicon.ico');
-    expect(result.manifestJson).toContain('"name":"App"');
   });
 
   it('includes favicon.svg when source is SVG', async () => {
@@ -111,7 +106,7 @@ describe('zipToWebResponse', () => {
     );
     expect(response.headers.get('Cache-Control')).toBe('no-store');
     expect(response.headers.get('X-Iconify-Assets')).toBe(
-      'favicon-16x16.png,site.webmanifest,head.html',
+      'favicon-16x16.png,android-chrome-192x192.png,og-image.png',
     );
 
     const body = Buffer.from(await response.arrayBuffer());

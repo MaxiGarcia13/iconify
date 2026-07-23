@@ -22,9 +22,7 @@ export function Generator() {
   function onGenerateSuccess() {
     if (!file)
       return;
-    setSnippetHtml(
-      buildHeadHtml({ themeColor: settings.themeColor }, isSourceSvg(file)),
-    );
+    setSnippetHtml(buildHeadHtml(isSourceSvg(file)));
   }
 
   return (

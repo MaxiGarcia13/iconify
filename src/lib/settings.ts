@@ -22,9 +22,6 @@ export interface SettingsState {
   /** Last opaque pad fill; used when `transparent` is off. */
   backgroundHex: `#${string}`;
   presets: PresetId[];
-  appName: string;
-  themeColor: `#${string}`;
-  backgroundColor: `#${string}`;
 }
 
 export const SETTINGS_DEFAULTS: SettingsState = {
@@ -32,9 +29,6 @@ export const SETTINGS_DEFAULTS: SettingsState = {
   transparent: GENERATE_OPTION_DEFAULTS.background === 'transparent',
   backgroundHex: '#ffffff',
   presets: [...GENERATE_OPTION_DEFAULTS.presets],
-  appName: GENERATE_OPTION_DEFAULTS.appName,
-  themeColor: GENERATE_OPTION_DEFAULTS.themeColor as `#${string}`,
-  backgroundColor: GENERATE_OPTION_DEFAULTS.backgroundColor as `#${string}`,
 };
 
 const HEX6 = /^#?[0-9a-f]{6}$/i;
@@ -109,9 +103,6 @@ export function toGenerateOptions(state: SettingsState): GenerateOptions {
     padding: clampPadding(state.padding),
     background: state.transparent ? 'transparent' : state.backgroundHex,
     presets: state.presets.length > 0 ? [...state.presets] : ['all'],
-    appName: state.appName.trim() || GENERATE_OPTION_DEFAULTS.appName,
-    themeColor: state.themeColor,
-    backgroundColor: state.backgroundColor,
   };
 }
 
@@ -124,7 +115,4 @@ export function appendSettingsToFormData(
   body.set('padding', String(options.padding));
   body.set('background', options.background);
   body.set('presets', options.presets.join(','));
-  body.set('appName', options.appName);
-  body.set('themeColor', options.themeColor);
-  body.set('backgroundColor', options.backgroundColor);
 }

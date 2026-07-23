@@ -9,9 +9,6 @@ export interface GenerateOptions {
   background: 'transparent' | `#${string}`;
   padding: number; // 0–50
   presets: PresetId[];
-  appName: string;
-  themeColor: string;
-  backgroundColor: string;
 }
 
 export interface AssetEntry {
@@ -23,6 +20,4 @@ export interface AssetEntry {
 
 export interface ProcessResult {
   assets: AssetEntry[];
-  headHtml: string;
-  manifestJson: string;
 }

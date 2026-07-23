@@ -4,7 +4,7 @@ Constitution for AI coding agents working in this repository.
 
 ## Product
 
-**Iconify** — high-performance icon set generator (Astro + Sharp). One upload → favicons, PWA/Android, iOS, OG assets, `site.webmanifest`, and HTML snippets packaged as a streamed ZIP.
+**Iconify** — high-performance icon set generator (Astro + Sharp). One upload → favicons, PWA/Android, iOS, OG assets packaged as a streamed ZIP, plus a UI HTML `<head>` snippet.
 
 ## Source of Truth
 

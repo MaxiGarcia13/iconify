@@ -16,7 +16,7 @@ async function formWithFile(
   form.set(
     'file',
     file
-      ?? new File([Uint8Array.from(png)], 'logo.png', { type: 'image/png' }),
+    ?? new File([Uint8Array.from(png)], 'logo.png', { type: 'image/png' }),
   );
   if (overrides) {
     for (const [key, value] of Object.entries(overrides))
@@ -44,9 +44,6 @@ describe('parseGenerateForm', () => {
       background: '#112233',
       padding: '20',
       presets: 'favicon,apple',
-      appName: 'Iconify',
-      themeColor: '#0a0a0a',
-      backgroundColor: '#f5f5f5',
     });
 
     const parsed = await parseGenerateForm(form);
@@ -58,9 +55,6 @@ describe('parseGenerateForm', () => {
       background: '#112233',
       padding: 20,
       presets: ['favicon', 'apple'],
-      appName: 'Iconify',
-      themeColor: '#0a0a0a',
-      backgroundColor: '#f5f5f5',
     });
   });
 
@@ -167,7 +161,7 @@ describe('parseGenerateForm', () => {
     }
   });
 
-  it('rejects invalid hex colors for background / theme / backgroundColor', async () => {
+  it('rejects invalid hex colors for background', async () => {
     const cases: Array<{ field: string; value: string; message: string }> = [
       {
         field: 'background',
@@ -180,21 +174,6 @@ describe('parseGenerateForm', () => {
         value: '#fff',
         message:
           'Invalid background. Use `transparent` or #RRGGBB / #RRGGBBAA.',
-      },
-      {
-        field: 'themeColor',
-        value: '#ffffffaa',
-        message: 'Invalid themeColor. Expected #RRGGBB.',
-      },
-      {
-        field: 'themeColor',
-        value: 'ffffff',
-        message: 'Invalid themeColor. Expected #RRGGBB.',
-      },
-      {
-        field: 'backgroundColor',
-        value: 'red',
-        message: 'Invalid backgroundColor. Expected #RRGGBB.',
       },
     ];
 

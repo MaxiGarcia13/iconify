@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | **Product** | Iconify |
-| **Version** | 1.0.6 |
+| **Version** | 1.0.8 |
 | **Status** | Draft |
 | **Stack** | Astro · Node.js (Astro API routes) · Sharp · archiver |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -12,7 +12,7 @@
 
 ## 1. Executive Summary
 
-Iconify is a high-performance icon set generator that accepts a single source image (SVG, PNG, or JPG) and produces a complete icon package for the modern web: favicons, Apple Touch icons, Android/PWA assets, Open Graph images, a `site.webmanifest`, and copy-paste HTML `<head>` snippets.
+Iconify is a high-performance icon set generator that accepts a single source image (SVG, PNG, or JPG) and produces a complete icon package for the modern web: favicons, Apple Touch icons, Android/PWA assets, Open Graph images, and a copy-paste HTML `<head>` snippet in the UI.
 
 Processing runs server-side via Sharp. The API streams a ZIP archive back to the client so large multi-asset packages never materialize fully on disk.
 
@@ -23,7 +23,7 @@ Processing runs server-side via Sharp. The API streams a ZIP archive back to the
 | G1 | Generate a complete favicon / PWA / iOS / Android / OG icon set from one upload in seconds |
 | G2 | Stream a ZIP response without writing intermediate files to persistent storage |
 | G3 | Expose a versioned REST API (`/api/v1/*`) consumable by the Astro UI and third parties |
-| G4 | Provide a focused UI: dropzone → settings → download + HTML snippet |
+| G4 | Provide a focused UI: dropzone → settings → download ZIP + HTML snippet |
 
 ### 1.2 Non-Goals (v1)
 
@@ -51,7 +51,6 @@ flowchart LR
   subgraph Core["Processing Core"]
     SH[Sharp Pipeline]
     ICO[ICO Multi-layer Builder]
-    MAN[Manifest + HTML Generator]
     ZIP[ZIP Stream Packager]
   end
 
@@ -59,12 +58,10 @@ flowchart LR
   SET --> EP
   EP --> VAL --> SH
   SH --> ICO
-  SH --> MAN
   SH --> ZIP
   ICO --> ZIP
-  MAN --> ZIP
   ZIP -->|application/zip stream| Client
-  MAN --> SNIP
+  Client --> SNIP
 ```
 
 ### 1.4 Request Lifecycle
@@ -73,10 +70,10 @@ flowchart LR
 2. Client sends `multipart/form-data` to `POST /api/v1/generate`.
 3. API validates MIME type, size (≤ 10 MB), and option fields.
 4. Sharp normalizes the buffer (decode → optional pad/background → resize per target).
-5. Specialized builders emit `.ico`, `.png`, optional `.svg`, `site.webmanifest`, and `head.html`.
+5. Specialized builders emit `.ico`, `.png`, and optional `.svg` assets.
 6. Packager pipes all entries into an `archiver` ZIP stream.
 7. Response headers set `Content-Type: application/zip` and `Content-Disposition: attachment`.
-8. UI offers download; snippet panel shows the generated `<head>` markup for copy.
+8. UI offers download of the ZIP package and shows a copy-paste `<head>` snippet (client-side; not included in the ZIP).
 
 ### 1.5 Proposed Source Layout
 
@@ -86,7 +83,7 @@ src/
 │   ├── index.astro                 # Generator UI
 │   └── api/v1/generate.ts          # POST endpoint
 ├── components/
-│   ├── generator.tsx               # Client island: dropzone + settings + download
+│   ├── generator.tsx               # Client island: dropzone + settings + download + snippet
 │   ├── dropzone.tsx
 │   ├── settings-panel.tsx
 │   └── html-snippet.tsx
@@ -96,8 +93,7 @@ src/
 │   │   ├── process.ts              # Sharp pipeline
 │   │   ├── ico.ts                  # Multi-resolution ICO
 │   │   └── package.ts              # ZIP stream assembly
-│   ├── manifest.ts                 # site.webmanifest builder
-│   ├── snippet.ts                  # HTML <head> generator
+│   ├── snippet.ts                  # HTML <head> generator (UI only)
 │   ├── upload-constraints.ts       # Shared MIME / size checks
 │   ├── generate-defaults.ts        # Shared GenerateOptions defaults (client-safe)
 │   └── validate.ts                 # Multipart / option validation (server)
@@ -126,7 +122,7 @@ Exported TypeScript / React **symbols** may use PascalCase or camelCase (`Dropzo
 
 ## 2. Icon Assets Matrix
 
-All raster outputs are PNG unless noted. Dimensions are width × height in pixels. Naming is fixed so HTML snippets and the manifest stay deterministic.
+All raster outputs are PNG unless noted. Dimensions are width × height in pixels. Naming is fixed so ZIP membership stays deterministic.
 
 ### 2.1 Modern Web / Favicons
 
@@ -153,33 +149,6 @@ All raster outputs are PNG unless noted. Dimensions are width × height in pixel
 | --- | --- | --- | --- |
 | `android-chrome-192x192.png` | 192×192 | `.png` | Android home screen / PWA |
 | `android-chrome-512x512.png` | 512×512 | `.png` | Splash / maskable base |
-| `site.webmanifest` | — | `.webmanifest` (JSON) | PWA install metadata |
-
-**`site.webmanifest` shape (generated):**
-
-```json
-{
-  "name": "App",
-  "short_name": "App",
-  "icons": [
-    {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/android-chrome-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
-  "display": "standalone"
-}
-```
-
-`name`, `short_name`, `theme_color`, and `background_color` are overridable via API form fields (see §3).
 
 ### 2.4 Open Graph / Social
 
@@ -195,7 +164,7 @@ Clients may request subsets via the `presets` form field (comma-separated or rep
 | --- | --- |
 | `favicon` | §2.1 |
 | `apple` | §2.2 |
-| `android` | §2.3 (icons + manifest) |
+| `android` | §2.3 |
 | `og` | §2.4 |
 | `all` | Everything above (default) |
 
@@ -213,9 +182,7 @@ iconify-package/
 ├── apple-touch-icon-180x180.png
 ├── android-chrome-192x192.png
 ├── android-chrome-512x512.png
-├── og-image.png
-├── site.webmanifest
-└── head.html                      # copy-paste <head> fragment
+└── og-image.png
 ```
 
 ---
@@ -332,20 +299,6 @@ components:
           description: |
             Comma-separated preset IDs: favicon, apple, android, og, all.
           example: favicon,apple,android
-        appName:
-          type: string
-          maxLength: 64
-          default: App
-          description: Manifest `name` / `short_name` base.
-        themeColor:
-          type: string
-          pattern: '^#[0-9A-Fa-f]{6}$'
-          default: '#ffffff'
-        backgroundColor:
-          type: string
-          pattern: '^#[0-9A-Fa-f]{6}$'
-          default: '#ffffff'
-          description: Manifest background_color (distinct from icon pad fill).
 
     ErrorResponse:
       type: object
@@ -413,9 +366,6 @@ export interface GenerateOptions {
   background: 'transparent' | `#${string}`;
   padding: number; // 0–50
   presets: PresetId[];
-  appName: string;
-  themeColor: string;
-  backgroundColor: string;
 }
 
 export interface AssetEntry {
@@ -426,8 +376,6 @@ export interface AssetEntry {
 
 export interface ProcessResult {
   assets: AssetEntry[];
-  headHtml: string;
-  manifestJson: string;
 }
 ```
 
@@ -662,7 +610,6 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 │  • drag & drop             │  • padding %                │
 │  • click to browse         │  • background color         │
 │  • file meta + clear       │  • presets (checkboxes)     │
-│                            │  • app name / theme colors  │
 ├────────────────────────────┴────────────────────────────┤
 │  [ Generate & Download ZIP ]                             │
 ├─────────────────────────────────────────────────────────┤
@@ -698,13 +645,10 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 | Padding | range / number | `0` | 0–50, step 1, suffix `%` |
 | Background | color + “transparent” toggle | transparent | Sends `transparent` or `#RRGGBB` |
 | Presets | checkbox group | all | Maps to `presets` form field |
-| App name | text | `App` | Manifest only |
-| Theme color | color | `#ffffff` | Manifest |
-| Background color | color | `#ffffff` | Manifest (page chrome) |
 
 #### HTML Snippet
 
-Generated markup (also written to `head.html` in the ZIP):
+UI-only copy-paste markup (not written into the ZIP). Generated client-side after a successful generate:
 
 ```html
 <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -712,12 +656,10 @@ Generated markup (also written to `head.html` in the ZIP):
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-<link rel="manifest" href="/site.webmanifest" />
-<meta name="theme-color" content="#ffffff" />
 <meta property="og:image" content="/og-image.png" />
 ```
 
-Omit SVG `<link>` when source was not SVG. **Copy** button uses `navigator.clipboard.writeText`.
+Omit the SVG `<link>` when source was not SVG. **Copy** button uses `navigator.clipboard.writeText`.
 
 ### 5.4 Accessibility & UX Rules
 
@@ -735,9 +677,6 @@ body.set('file', file);
 body.set('padding', String(padding));
 body.set('background', transparent ? 'transparent' : backgroundHex);
 body.set('presets', selectedPresets.join(','));
-body.set('appName', appName);
-body.set('themeColor', themeColor);
-body.set('backgroundColor', backgroundColor);
 
 const res = await fetch('/api/v1/generate', { method: 'POST', body });
 ```
@@ -790,3 +729,5 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.4 | 2026-07-23 | §1.6 markdown docs use UPPERCASE basenames (`SPEC.md`, …) |
 | 1.0.5 | 2026-07-23 | §1.5 layout: `generator.tsx` island + `preview.ts` client approx. |
 | 1.0.6 | 2026-07-23 | Remove live preview grid from UI (§1.1 G4, §1.3, §1.5, §5) |
+| 1.0.7 | 2026-07-23 | Remove `site.webmanifest` and `head.html` from package + UI |
+| 1.0.8 | 2026-07-23 | Restore UI HTML `<head>` snippet (client-only; still omitted from ZIP) |
