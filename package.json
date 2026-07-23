@@ -54,6 +54,6 @@
     "pre-commit": "npx lint-staged"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx}": "npm run lint:fix"
+    "*.{js,jsx,ts,tsx,md,astro}": "npm run lint:fix"
   }
 }
