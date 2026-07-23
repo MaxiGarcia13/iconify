@@ -3,7 +3,12 @@ import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { solidPng } from '../../test/fixtures';
+import {
+  alphaPng,
+  emptyTransparentPng,
+  halfTransparentPng,
+  solidPng,
+} from '../../test/fixtures';
 import { ASSET_MATRIX } from './matrix';
 import {
   passthroughFaviconSvg,
@@ -311,6 +316,166 @@ describe('monochrome greyscale via renderIcon / renderOgImage (SPEC §4 / AC10)'
 
     const rgb = await centerRgb(out);
     expect(chroma(rgb)).toBeGreaterThan(0);
+  });
+});
+
+describe('transparent PNG + opaque background (SPEC §4.9)', () => {
+  const size = 64;
+  const opaqueBg = '#00ff00' as const;
+  const optionsBase = {
+    padding: 0,
+    cornerRadius: 0,
+    monochrome: false,
+  };
+
+  async function rgbaAt(
+    png: Buffer,
+    x: number,
+    y: number,
+  ): Promise<readonly [number, number, number, number]> {
+    const { data, info } = await sharp(png)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const idx = (y * info.width + x) * info.channels;
+    return [data[idx]!, data[idx + 1]!, data[idx + 2]!, data[idx + 3]!];
+  }
+
+  it('renderIcon: opaque bg fills transparent source pixels (pad zone + holes)', async () => {
+    const input = await halfTransparentPng(size);
+    const out = await renderIcon(input, size, {
+      ...optionsBase,
+      background: opaqueBg,
+      padding: 20,
+    });
+
+    // Pad corner → solid green
+    expect(await rgbaAt(out, 0, 0)).toEqual([0, 255, 0, 255]);
+    // Content left half → red
+    expect(await rgbaAt(out, Math.floor(size / 4), Math.floor(size / 2))).toEqual([
+      255,
+      0,
+      0,
+      255,
+    ]);
+    // Content right half was transparent → green canvas
+    expect(await rgbaAt(out, Math.floor((3 * size) / 4), Math.floor(size / 2))).toEqual([
+      0,
+      255,
+      0,
+      255,
+    ]);
+  });
+
+  it('renderIcon: transparent bg preserves alpha holes (PNG stays alpha)', async () => {
+    const input = await halfTransparentPng(size);
+    const out = await renderIcon(input, size, {
+      ...optionsBase,
+      background: 'transparent',
+    });
+
+    expect(await rgbaAt(out, Math.floor(size / 4), Math.floor(size / 2))).toEqual([
+      255,
+      0,
+      0,
+      255,
+    ]);
+    // Right half of source is transparent → stays alpha 0 (incl. top-right corner)
+    expect((await rgbaAt(out, Math.floor((3 * size) / 4), Math.floor(size / 2)))[3]).toBe(
+      0,
+    );
+    expect((await rgbaAt(out, size - 1, 0))[3]).toBe(0);
+  });
+
+  it('renderIcon: fully transparent source + opaque bg → solid fill', async () => {
+    const input = await emptyTransparentPng(size);
+    const out = await renderIcon(input, size, {
+      ...optionsBase,
+      background: '#ff0000',
+    });
+
+    expect(await rgbaAt(out, 0, 0)).toEqual([255, 0, 0, 255]);
+    expect(await rgbaAt(out, size / 2, size / 2)).toEqual([255, 0, 0, 255]);
+  });
+
+  it('renderIcon: semi-transparent content composites over opaque bg', async () => {
+    const input = await alphaPng(0.5, size);
+    const out = await renderIcon(input, size, {
+      ...optionsBase,
+      background: '#ffffff',
+    });
+
+    const [r, g, b, a] = await rgbaAt(out, size / 2, size / 2);
+    // #0080ff @ 0.5 over white ≈ (127, 191, 255)
+    expect(a).toBe(255);
+    expect(r).toBeGreaterThan(100);
+    expect(r).toBeLessThan(140);
+    expect(g).toBeGreaterThan(170);
+    expect(g).toBeLessThan(210);
+    expect(b).toBe(255);
+  });
+
+  it('renderIcon: non-square transparent source letterboxes with opaque bg', async () => {
+    // Wide strip: opaque blue band, transparent above/below via SVG → PNG
+    const svg = Buffer.from(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="80" height="40">
+        <rect x="10" y="5" width="60" height="30" fill="#0000ff"/>
+      </svg>`,
+    );
+    const input = await sharp(svg).png().toBuffer();
+    const out = await renderIcon(input, size, {
+      ...optionsBase,
+      background: '#112233',
+    });
+
+    expect(await rgbaAt(out, size / 2, 0)).toEqual([17, 34, 51, 255]);
+    expect(await rgbaAt(out, size / 2, size / 2)).toEqual([0, 0, 255, 255]);
+  });
+
+  it('renderIcon: opaque bg + cornerRadius still punches corners to alpha 0', async () => {
+    const input = await halfTransparentPng(size);
+    const out = await renderIcon(input, size, {
+      ...optionsBase,
+      background: opaqueBg,
+      cornerRadius: 100,
+    });
+
+    expect((await rgbaAt(out, 0, 0))[3]).toBe(0);
+    // Left half of source is opaque red (x < size/2)
+    expect(await rgbaAt(out, Math.floor(size / 4), Math.floor(size / 2))).toEqual([
+      255,
+      0,
+      0,
+      255,
+    ]);
+  });
+
+  it('renderOgImage: opaque bg fills transparent regions', async () => {
+    const input = await halfTransparentPng(200);
+    const out = await renderOgImage(input, {
+      ...optionsBase,
+      background: opaqueBg,
+      padding: 10,
+    });
+
+    expect(await rgbaAt(out, 0, 0)).toEqual([0, 255, 0, 255]);
+    // Left half of centered content → red
+    const [r, g, b, a] = await rgbaAt(out, 400, 315);
+    expect([r, g, b, a]).toEqual([255, 0, 0, 255]);
+  });
+
+  it('renderOriginal: opaque bg + padding fills transparent pad zone', async () => {
+    const input = await halfTransparentPng(100, 50);
+    const out = await renderOriginal(input, {
+      ...optionsBase,
+      background: '#ffffff',
+      padding: 20,
+    });
+
+    const meta = await sharp(out).metadata();
+    expect(meta.width).toBe(100);
+    expect(meta.height).toBe(50);
+    expect(await rgbaAt(out, 0, 0)).toEqual([255, 255, 255, 255]);
   });
 });
 
