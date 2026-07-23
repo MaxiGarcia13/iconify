@@ -673,15 +673,15 @@ Header brand mark uses an existing `public/` icon (e.g. `android-chrome-192x192.
 
 ### 5.2 Workflow
 
-| Step | Actor | Behavior                                                                  |
-| ---- | ----- | ------------------------------------------------------------------------- |
-| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                         |
-| 2    | UI    | Validates client-side; shows filename, size, MIME; enables settings       |
+| Step | Actor | Behavior                                                                          |
+| ---- | ----- | --------------------------------------------------------------------------------- |
+| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                                 |
+| 2    | UI    | Validates client-side; shows filename, size, MIME; enables settings               |
 | 3    | User  | Toggles presets, adjusts padding (0–50) / corner radius (0–100), picks background |
-| 4    | User  | Clicks **Generate & Download ZIP**                                        |
-| 5    | UI    | `POST /api/v1/generate` with `FormData`; shows progress/disabled state    |
-| 6    | UI    | On 200: trigger browser download from blob URL; populate snippet panel    |
-| 7    | UI    | On 4xx/5xx: show inline error from JSON `message`                         |
+| 4    | User  | Clicks **Generate & Download ZIP**                                                |
+| 5    | UI    | `POST /api/v1/generate` with `FormData`; shows progress/disabled state            |
+| 6    | UI    | On 200: trigger browser download from blob URL; populate snippet panel            |
+| 7    | UI    | On 4xx/5xx: show inline error from JSON `message`                                 |
 
 ### 5.3 Component Contracts
 
@@ -694,12 +694,12 @@ Header brand mark uses an existing `public/` icon (e.g. `android-chrome-192x192.
 
 #### Settings Panel
 
-| Control       | Type                         | Default     | Notes                                                              |
-| ------------- | ---------------------------- | ----------- | ------------------------------------------------------------------ |
-| Padding       | range / number               | `0`         | 0–50, step 1, suffix `%`                                           |
+| Control       | Type                         | Default     | Notes                                                               |
+| ------------- | ---------------------------- | ----------- | ------------------------------------------------------------------- |
+| Padding       | range / number               | `0`         | 0–50, step 1, suffix `%`                                            |
 | Corner radius | range / number               | `0`         | 0–100, step 1, suffix `%` of half shorter side; rounds outer canvas |
-| Background    | color + “transparent” toggle | transparent | Sends `transparent` or `#RRGGBB`                                   |
-| Presets       | checkbox group               | all         | Maps to `presets` form field                                       |
+| Background    | color + “transparent” toggle | transparent | Sends `transparent` or `#RRGGBB`                                    |
+| Presets       | checkbox group               | all         | Maps to `presets` form field                                        |
 
 #### HTML Snippet
 
@@ -813,17 +813,17 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 
 ## 7. Acceptance Criteria
 
-| ID  | Criterion                                                                                                                                                                                 |
-| --- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AC1 | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded)                                                                                    |
-| AC2 | Upload SVG returns ZIP that also includes `favicon.svg`                                                                                                                                   |
-| AC3 | Invalid MIME or >10 MB returns `400` JSON with `VALIDATION_ERROR`                                                                                                                         |
-| AC4 | `padding=20` visibly insets icon content in generated PNG assets                                                                                                                          |
-| AC5 | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                           |
-| AC6 | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                               |
-| AC7 | No intermediate icon files persist on disk after the request completes                                                                                                                    |
+| ID  | Criterion                                                                                                                                                                                   |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC1 | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded)                                                                                      |
+| AC2 | Upload SVG returns ZIP that also includes `favicon.svg`                                                                                                                                     |
+| AC3 | Invalid MIME or >10 MB returns `400` JSON with `VALIDATION_ERROR`                                                                                                                           |
+| AC4 | `padding=20` visibly insets icon content in generated PNG assets                                                                                                                            |
+| AC5 | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                             |
+| AC6 | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                                 |
+| AC7 | No intermediate icon files persist on disk after the request completes                                                                                                                      |
 | AC8 | `cornerRadius=100` on a square PNG yield produces circular (fully rounded) raster icons; `cornerRadius=0` leaves square corners; invalid values (`-1`, `101`) return `400 VALIDATION_ERROR` |
-| AC9 | Document head on `/` wires every §5.6 `public/` icon, absolute Open Graph + Twitter Card tags for `/og-image.png` (1200×630), and canonical / `og:url` from Astro `site`                  |
+| AC9 | Document head on `/` wires every §5.6 `public/` icon, absolute Open Graph + Twitter Card tags for `/og-image.png` (1200×630), and canonical / `og:url` from Astro `site`                    |
 
 ---
 

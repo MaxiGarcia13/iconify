@@ -88,5 +88,5 @@ SPEC §5.6 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
 | AC5 | Inspect `favicon.ico` layers 16/32/48                                       |
 | AC6 | UI download + copy snippet without reload                                   |
 | AC7 | No leftover files under OS temp after request                               |
-| AC8 | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400` |
+| AC8 | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400`  |
 | AC9 | View-source `/`: all §5.6 `public/` icons + absolute OG/Twitter + canonical |
