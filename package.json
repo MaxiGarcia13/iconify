@@ -16,12 +16,21 @@
   "main": "index.js",
   "scripts": {
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "clean": "rm -rf dist node_modules .astro"
   },
   "devDependencies": {
     "@eslint-react/eslint-plugin": "^3.0.0",
     "@maxigarcia/eslint-config": "^1.8.0",
+    "@tailwindcss/vite": "^4.3.3",
     "eslint-plugin-astro": "^1.7.0",
-    "eslint-plugin-react-refresh": "^0.5.3"
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "tailwindcss": "^4.3.3"
+  },
+  "dependencies": {
+    "astro": "^7.1.3"
   }
 }

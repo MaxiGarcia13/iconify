@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+@custom-variant dark {
+  &:where(.dark, .dark *) {
+    @slot;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    &:where(:not(.light, .light *)) {
+      @slot;
+    }
+  }
+}
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, sans-serif, 'Segoe UI', Roboto, sans-serif;
+  --font-display: ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: var(--palette-background);
+  --color-foreground: var(--palette-foreground);
+  --color-muted: var(--palette-muted);
+  --color-muted-foreground: var(--palette-muted-foreground);
+  --color-surface: var(--palette-surface);
+  --color-surface-border: var(--palette-surface-border);
+  --color-accent: var(--palette-accent);
+  --color-accent-foreground: var(--palette-accent-foreground);
+  --color-accent-hover: var(--palette-accent-hover);
+  --color-glow: var(--palette-glow);
+}
+
+:root {
+  color-scheme: light;
+
+  --palette-background: light-dark(#f3f0fa, #0c0a14);
+  --palette-foreground: light-dark(#100e18, #f5f1ff);
+  --palette-muted: light-dark(#e8e3f4, #1a1628);
+  --palette-muted-foreground: light-dark(#3f3655, #b8b0d0);
+  --palette-surface: light-dark(#ffffff, rgb(24 20 38 / 0.82));
+  --palette-surface-border: light-dark(#b8a8e0, rgb(183 159 255 / 0.32));
+  --palette-accent: #b794ff;
+  --palette-accent-foreground: #0c0a14;
+  --palette-accent-hover: #c9aeff;
+  --palette-glow: light-dark(rgb(183 159 255 / 0.35), rgb(183 159 255 / 0.42));
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+:root.light {
+  color-scheme: light;
+}
+
+:root.dark {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--palette-background);
+  color: var(--palette-foreground);
+  font-family: var(--font-sans);
+}
+
+/* Width of the scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+/* Track (the background) */
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* Handle (the part you grab) */
+::-webkit-scrollbar-thumb {
+  background: var(--palette-glow);
+  border-radius: 0;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--palette-accent);
+}
