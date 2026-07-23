@@ -13,7 +13,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 
 ## M1 — Processing Core
 
-- [ ] `renderIcon` — resize, padding, background/transparency
+- [x] `renderIcon` — resize, padding, background/transparency
 - [ ] `renderOgImage` — 1200×630
 - [ ] `buildFaviconIco` — 16 / 32 / 48 layers
 - [ ] SVG passthrough for `favicon.svg` when source is SVG
