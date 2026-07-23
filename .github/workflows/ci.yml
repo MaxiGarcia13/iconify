@@ -34,7 +34,7 @@ jobs:
         run: npm run test:unit
 
   deploy:
-    needs: bump
+    needs: lint-and-test
     uses: MaxiGarcia13/gh-actions/.github/workflows/deploy-to-vercel.yml@main
     secrets: inherit
     with:
