@@ -2,7 +2,7 @@
   "name": "iconify",
   "type": "module",
   "version": "0.0.0",
-  "description": "⚡ High-performance icon set generator built with Astro and Sharp. Generate favicons, PWA icons, iOS, and Android assets in seconds.",
+  "description": "⚡ High-performance icon set generator. Generate favicons, PWA icons, iOS, and Android assets in seconds.",
   "author": "Maximiliano Garcia Mortigliengo",
   "license": "ISC",
   "homepage": "https://github.com/MaxiGarcia13/iconify#readme",
