@@ -1,7 +1,7 @@
 import type { APIRoute } from 'astro';
 
-import { processIconPackage, zipToWebResponse } from '../../../lib/icons/package';
-import { parseGenerateForm } from '../../../lib/validate';
+import { processIconPackage, zipToWebResponse } from '@/lib/icons/package';
+import { parseGenerateForm } from '@/lib/validate';
 
 export const prerender = false;
 

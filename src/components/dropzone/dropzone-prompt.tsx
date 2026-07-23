@@ -1,6 +1,6 @@
 import type { DropzoneState } from './types';
 
-import { MAX_UPLOAD_BYTES } from '../../lib/upload-constraints';
+import { MAX_UPLOAD_BYTES } from '@/lib/upload-constraints';
 import { formatBytes } from './format-bytes';
 
 export interface DropzonePromptProps {

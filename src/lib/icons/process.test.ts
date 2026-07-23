@@ -8,7 +8,7 @@ import {
   emptyTransparentPng,
   halfTransparentPng,
   solidPng,
-} from '../../test/fixtures';
+} from '@/test/fixtures';
 import { ASSET_MATRIX } from './matrix';
 import {
   passthroughFaviconSvg,

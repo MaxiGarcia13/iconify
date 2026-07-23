@@ -1,8 +1,8 @@
-import type { SettingsState } from '../lib/settings';
+import type { SettingsState } from '@/lib/settings';
 
 import { useState } from 'react';
 
-import { SETTINGS_DEFAULTS } from '../lib/settings';
+import { SETTINGS_DEFAULTS } from '@/lib/settings';
 import {
   CornerRadiusField,
   IconBackgroundField,

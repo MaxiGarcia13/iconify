@@ -1,10 +1,10 @@
-import type { SettingsState } from '../lib/settings';
+import type { SettingsState } from '@/lib/settings';
 
 import { useState } from 'react';
 
-import { SETTINGS_DEFAULTS } from '../lib/settings';
-import { buildHeadHtml } from '../lib/snippet';
-import { isSourceSvg } from '../lib/upload-constraints';
+import { SETTINGS_DEFAULTS } from '@/lib/settings';
+import { buildHeadHtml } from '@/lib/snippet';
+import { isSourceSvg } from '@/lib/upload-constraints';
 import { Dropzone } from './dropzone';
 import { GenerateButton } from './generate-button';
 import { HtmlSnippet } from './html-snippet';

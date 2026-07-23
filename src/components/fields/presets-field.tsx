@@ -1,12 +1,12 @@
-import type { PresetId } from '../../lib/icons/types';
+import type { PresetId } from '@/lib/icons/types';
 
-import type { SelectablePreset } from '../../lib/settings';
+import type { SelectablePreset } from '@/lib/settings';
 import {
   isPresetChecked,
   SELECTABLE_PRESETS,
 
   togglePreset,
-} from '../../lib/settings';
+} from '@/lib/settings';
 import { fieldCheckRowClass, fieldLabelClass } from './field-styles';
 
 export interface PresetsFieldProps {

@@ -6,15 +6,15 @@ import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
+import { GENERATE_OPTION_DEFAULTS } from '@/lib/generate-defaults';
 import {
   complexSvg,
   hugeDimensionSvg,
   solidJpeg,
   solidPng,
   solidSvg,
-} from '../../test/fixtures';
-import { listZipEntryNames } from '../../test/zip';
-import { GENERATE_OPTION_DEFAULTS } from '../generate-defaults';
+} from '@/test/fixtures';
+import { listZipEntryNames } from '@/test/zip';
 import { resolveMatrix } from './matrix';
 import { createZipStream, processIconPackage, zipToWebResponse } from './package';
 

@@ -1,4 +1,4 @@
-import { normalizeMime } from '../../lib/upload-constraints';
+import { normalizeMime } from '@/lib/upload-constraints';
 
 import { formatBytes } from './format-bytes';
 

@@ -2,7 +2,7 @@ import type { ChangeEvent } from 'react';
 
 import { useId } from 'react';
 
-import { clampPadding } from '../../lib/settings';
+import { clampPadding } from '@/lib/settings';
 import { Field } from './field';
 import { fieldHintClass, fieldInputClass, fieldRangeClass } from './field-styles';
 

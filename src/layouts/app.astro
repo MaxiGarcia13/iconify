@@ -1,9 +1,9 @@
 ---
+import { siteCanonicalUrl } from '@/lib/site';
+import { SITE_ICON_LINKS } from '@/lib/site-icons';
+import { siteOpenGraph, siteTwitterCard } from '@/lib/site-meta';
 import { description, name } from '../../package.json';
-import { siteCanonicalUrl } from '../lib/site';
-import { SITE_ICON_LINKS } from '../lib/site-icons';
-import { siteOpenGraph, siteTwitterCard } from '../lib/site-meta';
-import '../index.css';
+import '@/index.css';
 
 if (!Astro.site) {
   throw new Error('Astro `site` must be set (SPEC §5.6)');

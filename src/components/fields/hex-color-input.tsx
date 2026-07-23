@@ -2,7 +2,7 @@ import type { ChangeEvent } from 'react';
 
 import { useEffect, useState } from 'react';
 
-import { normalizeHex6 } from '../../lib/settings';
+import { normalizeHex6 } from '@/lib/settings';
 import { colorSwatchClass, fieldInputClass } from './field-styles';
 
 export interface HexColorInputProps {

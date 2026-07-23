@@ -2,16 +2,16 @@ import { Buffer } from 'node:buffer';
 
 import { describe, expect, it } from 'vitest';
 
-import { resolveMatrix } from '../../../lib/icons/matrix';
-import { MAX_UPLOAD_BYTES } from '../../../lib/validate';
+import { resolveMatrix } from '@/lib/icons/matrix';
+import { MAX_UPLOAD_BYTES } from '@/lib/validate';
 import {
   complexSvg,
   hugeDimensionSvg,
   solidJpeg,
   solidPng,
   solidSvg,
-} from '../../../test/fixtures';
-import { listZipEntryNames } from '../../../test/zip';
+} from '@/test/fixtures';
+import { listZipEntryNames } from '@/test/zip';
 import { POST } from './generate';
 
 function apiContext(request: Request) {

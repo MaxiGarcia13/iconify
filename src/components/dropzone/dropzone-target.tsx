@@ -2,7 +2,7 @@ import type { ChangeEvent, DragEvent, RefObject } from 'react';
 
 import type { DropzoneState } from './types';
 
-import { DROPZONE_ACCEPT } from '../../lib/upload-constraints';
+import { DROPZONE_ACCEPT } from '@/lib/upload-constraints';
 import { DropzoneFilePreview } from './dropzone-file-preview';
 import { DropzonePrompt } from './dropzone-prompt';
 

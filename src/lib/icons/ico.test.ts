@@ -2,7 +2,7 @@ import { Buffer } from 'node:buffer';
 
 import { describe, expect, it } from 'vitest';
 
-import { solidPng } from '../../test/fixtures';
+import { solidPng } from '@/test/fixtures';
 import { buildFaviconIco } from './ico';
 import { ICO_SIZES } from './matrix';
 

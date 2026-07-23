@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { solidPng } from '../test/fixtures';
+import { solidPng } from '@/test/fixtures';
 import {
   GENERATE_OPTION_DEFAULTS,
   MAX_UPLOAD_BYTES,

@@ -1,16 +1,16 @@
-import type { SettingsState } from '../lib/settings';
+import type { SettingsState } from '@/lib/settings';
 
 import { useEffect, useId, useState } from 'react';
 
 import {
   postGenerateDownload,
   triggerBlobDownload,
-} from '../lib/generate-download';
+} from '@/lib/generate-download';
 import {
   generateButtonLabel,
   generateLiveStatus,
   isGenerateDisabled,
-} from '../lib/generate-ui';
+} from '@/lib/generate-ui';
 
 export interface GenerateButtonProps {
   file: File | null;
