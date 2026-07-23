@@ -1,7 +1,9 @@
+import { Buffer } from 'node:buffer';
+
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { renderOgImage } from './process';
+import { passthroughFaviconSvg, renderOgImage } from './process';
 
 describe('renderOgImage', () => {
   it('returns a 1200×630 PNG (SPEC §2.4 / §4.5)', async () => {
@@ -25,5 +27,35 @@ describe('renderOgImage', () => {
     expect(meta.format).toBe('png');
     expect(meta.width).toBe(1200);
     expect(meta.height).toBe(630);
+  });
+});
+
+describe('passthroughFaviconSvg', () => {
+  it('preserves SVG markup for favicon.svg (SPEC §2.1 / §4.8 / AC2)', () => {
+    const source = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="12" fill="#0af"/></svg>',
+      'utf8',
+    );
+
+    const out = passthroughFaviconSvg(source);
+    const text = out.toString('utf8');
+
+    expect(text).toContain('<svg');
+    expect(text).toContain('viewBox="0 0 32 32"');
+    expect(text).toContain('<circle');
+    expect(text).not.toMatch(/^\x89PNG/);
+  });
+
+  it('strips script and event handlers before ZIP storage', () => {
+    const source = Buffer.from(
+      '<svg xmlns="http://www.w3.org/2000/svg" onclick="alert(1)"><script>alert(2)</script><rect width="10" height="10"/></svg>',
+      'utf8',
+    );
+
+    const text = passthroughFaviconSvg(source).toString('utf8');
+
+    expect(text).not.toContain('<script');
+    expect(text).not.toContain('onclick');
+    expect(text).toContain('<rect');
   });
 });

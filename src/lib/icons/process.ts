@@ -1,6 +1,6 @@
-import type { Buffer } from 'node:buffer';
-
 import type { GenerateOptions } from './types';
+
+import { Buffer } from 'node:buffer';
 
 import sharp from 'sharp';
 
@@ -82,6 +82,29 @@ export async function renderOgImage(
     .composite([{ input: logo, left, top }])
     .png()
     .toBuffer();
+}
+
+/**
+ * Preserve source SVG as `favicon.svg` for ZIP packaging.
+ * Does not rasterize; lightly sanitizes for storage-in-ZIP only
+ * (SPEC §2.1 / §4.8 / AC2). Caller must only invoke when source is SVG.
+ */
+export function passthroughFaviconSvg(input: Buffer): Buffer {
+  const sanitized = sanitizeSvgForZip(input.toString('utf8'));
+  return Buffer.from(sanitized, 'utf8');
+}
+
+/**
+ * Strip executable / active content before storing SVG in the ZIP.
+ * Not a full SVG security sanitizer — no eval, no DOM execution.
+ */
+function sanitizeSvgForZip(svg: string): string {
+  return svg
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<script\b[^>]*\/>/gi, '')
+    .replace(/\son[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/\shref\s*=\s*(?:"\s*javascript:[^"]*"|'\s*javascript:[^']*')/gi, '')
+    .replace(/\sxlink:href\s*=\s*(?:"\s*javascript:[^"]*"|'\s*javascript:[^']*')/gi, '');
 }
 
 function parseBackground(value: GenerateOptions['background']) {
