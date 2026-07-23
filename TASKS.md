@@ -64,6 +64,17 @@ SPEC §5.6 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
 - [x] Twitter Card: `summary_large_image` + title / description / absolute image + alt
 - [x] Verify AC9 (view-source; optional Twitter/Facebook sharing debugger)
 
+## M3d — Monochrome
+
+SPEC §3 `monochrome` / §4 greyscale in `renderIcon` + `renderOgImage` / §5 settings / AC10.
+
+- [ ] Processing: Sharp `.greyscale()` on upload content when `monochrome` is true (before background composite) in `renderIcon` + `renderOgImage` (ICO inherits); no-op when false; skip SVG passthrough
+- [ ] Types + defaults: `GenerateOptions.monochrome` (`boolean`, default `false`) in `types` / `generate-defaults`
+- [ ] API: accept multipart `monochrome` as literals `true` / `false` (omit → `false`); reject other values with `400 VALIDATION_ERROR` + `details.field: monochrome`
+- [ ] UI: settings checkbox/switch; wire into settings state + `FormData` (`monochrome=true|false`)
+- [ ] Unit tests: process greyscale on / off; validate accept/reject; API happy-path + invalid; settings → FormData mapping
+- [ ] Verify AC10
+
 ## M4 — Hardening
 
 - [ ] Transparent PNG + opaque background edge cases
@@ -79,14 +90,15 @@ SPEC §5.6 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
 
 ## Verification Shortcuts
 
-| AC  | How to verify                                                               |
-| --- | --------------------------------------------------------------------------- |
-| AC1 | PNG + `presets=all` → unzip; list matches §2 minus SVG                      |
-| AC2 | SVG upload → ZIP includes `favicon.svg`                                     |
-| AC3 | `.gif` or 11 MB file → `400 VALIDATION_ERROR`                               |
-| AC4 | `padding=20` → visual inset on PNGs                                         |
-| AC5 | Inspect `favicon.ico` layers 16/32/48                                       |
-| AC6 | UI download + copy snippet without reload                                   |
-| AC7 | No leftover files under OS temp after request                               |
-| AC8 | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400`  |
-| AC9 | View-source `/`: all §5.6 `public/` icons + absolute OG/Twitter + canonical |
+| AC   | How to verify                                                               |
+| ---- | --------------------------------------------------------------------------- |
+| AC1  | PNG + `presets=all` → unzip; list matches §2 minus SVG                      |
+| AC2  | SVG upload → ZIP includes `favicon.svg`                                     |
+| AC3  | `.gif` or 11 MB file → `400 VALIDATION_ERROR`                               |
+| AC4  | `padding=20` → visual inset on PNGs                                         |
+| AC5  | Inspect `favicon.ico` layers 16/32/48                                       |
+| AC6  | UI download + copy snippet without reload                                   |
+| AC7  | No leftover files under OS temp after request                               |
+| AC8  | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400`  |
+| AC9  | View-source `/`: all §5.6 `public/` icons + absolute OG/Twitter + canonical |
+| AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`    |
