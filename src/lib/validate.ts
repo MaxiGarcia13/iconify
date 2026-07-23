@@ -2,6 +2,7 @@ import type { GenerateOptions, PresetId } from './icons/types';
 
 import { Buffer } from 'node:buffer';
 
+import { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 import { PRESET_IDS } from './icons/matrix';
 import {
   extensionOf,
@@ -10,17 +11,8 @@ import {
   validateSourceFile,
 } from './upload-constraints';
 
+export { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 export { MAX_UPLOAD_BYTES } from './upload-constraints';
-
-/** Option defaults from SPEC §3 `GenerateRequest`. */
-export const GENERATE_OPTION_DEFAULTS: GenerateOptions = {
-  background: 'transparent',
-  padding: 0,
-  presets: ['all'],
-  appName: 'App',
-  themeColor: '#ffffff',
-  backgroundColor: '#ffffff',
-};
 
 const HEX6 = /^#[0-9a-f]{6}$/i;
 const HEX_BG = /^#(?:[0-9a-f]{6}|[0-9a-f]{8})$/i;

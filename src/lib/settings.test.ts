@@ -10,7 +10,7 @@ import {
   toGenerateOptions,
   togglePreset,
 } from './settings';
-import { GENERATE_OPTION_DEFAULTS } from './validate';
+import { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 
 describe('settings defaults', () => {
   it('matches SPEC §3 / §5.3 GenerateRequest defaults', () => {

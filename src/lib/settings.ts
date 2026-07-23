@@ -1,6 +1,6 @@
 import type { GenerateOptions, PresetId } from './icons/types';
 
-import { GENERATE_OPTION_DEFAULTS } from './validate';
+import { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 
 /** Individual preset checkboxes (excludes `all`) — SPEC §2.5 / §5.3. */
 export const SELECTABLE_PRESETS = [

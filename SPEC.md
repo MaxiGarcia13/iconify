@@ -103,7 +103,8 @@ src/
 │   ├── manifest.ts                 # site.webmanifest builder
 │   ├── snippet.ts                  # HTML <head> generator
 │   ├── upload-constraints.ts       # Shared MIME / size checks
-│   └── validate.ts                 # Multipart / option validation
+│   ├── generate-defaults.ts        # Shared GenerateOptions defaults (client-safe)
+│   └── validate.ts                 # Multipart / option validation (server)
 └── layouts/
     └── app.astro
 ```
