@@ -3,7 +3,7 @@
 | Field | Value |
 | --- | --- |
 | **Product** | Iconify |
-| **Version** | 1.0.5 |
+| **Version** | 1.0.6 |
 | **Status** | Draft |
 | **Stack** | Astro · Node.js (Astro API routes) · Sharp · archiver |
 | **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
@@ -23,7 +23,7 @@ Processing runs server-side via Sharp. The API streams a ZIP archive back to the
 | G1 | Generate a complete favicon / PWA / iOS / Android / OG icon set from one upload in seconds |
 | G2 | Stream a ZIP response without writing intermediate files to persistent storage |
 | G3 | Expose a versioned REST API (`/api/v1/*`) consumable by the Astro UI and third parties |
-| G4 | Provide a focused UI: dropzone → settings → live preview → download + HTML snippet |
+| G4 | Provide a focused UI: dropzone → settings → download + HTML snippet |
 
 ### 1.2 Non-Goals (v1)
 
@@ -40,7 +40,6 @@ flowchart LR
   subgraph Client["Astro UI (SSR + Client Islands)"]
     DZ[Dropzone]
     SET[Settings Panel]
-    PV[Live Previews]
     SNIP[HTML Snippet]
   end
 
@@ -66,7 +65,6 @@ flowchart LR
   MAN --> ZIP
   ZIP -->|application/zip stream| Client
   MAN --> SNIP
-  SH --> PV
 ```
 
 ### 1.4 Request Lifecycle
@@ -88,10 +86,9 @@ src/
 │   ├── index.astro                 # Generator UI
 │   └── api/v1/generate.ts          # POST endpoint
 ├── components/
-│   ├── generator.tsx               # Client island: dropzone + settings + preview
+│   ├── generator.tsx               # Client island: dropzone + settings + download
 │   ├── dropzone.tsx
 │   ├── settings-panel.tsx
-│   ├── preview-grid.tsx
 │   └── html-snippet.tsx
 ├── lib/
 │   ├── icons/
@@ -99,7 +96,6 @@ src/
 │   │   ├── process.ts              # Sharp pipeline
 │   │   ├── ico.ts                  # Multi-resolution ICO
 │   │   └── package.ts              # ZIP stream assembly
-│   ├── preview.ts                  # Client preview geometry (Canvas approx.)
 │   ├── manifest.ts                 # site.webmanifest builder
 │   ├── snippet.ts                  # HTML <head> generator
 │   ├── upload-constraints.ts       # Shared MIME / size checks
@@ -668,9 +664,6 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 │  • file meta + clear       │  • presets (checkboxes)     │
 │                            │  • app name / theme colors  │
 ├────────────────────────────┴────────────────────────────┤
-│  Live Preview Grid                                       │
-│  favicon 16 · 32 · apple 180 · android 192/512 · OG     │
-├─────────────────────────────────────────────────────────┤
 │  [ Generate & Download ZIP ]                             │
 ├─────────────────────────────────────────────────────────┤
 │  HTML <head> snippet                    [ Copy ]         │
@@ -683,12 +676,11 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 | --- | --- | --- |
 | 1 | User | Drops/selects SVG/PNG/JPG ≤ 10 MB |
 | 2 | UI | Validates client-side; shows filename, size, MIME; enables settings |
-| 3 | UI | Updates live previews client-side (Canvas or `createImageBitmap`) when padding/background change |
-| 4 | User | Toggles presets, adjusts padding (0–50), picks background |
-| 5 | User | Clicks **Generate & Download ZIP** |
-| 6 | UI | `POST /api/v1/generate` with `FormData`; shows progress/disabled state |
-| 7 | UI | On 200: trigger browser download from blob URL; populate snippet panel |
-| 8 | UI | On 4xx/5xx: show inline error from JSON `message` |
+| 3 | User | Toggles presets, adjusts padding (0–50), picks background |
+| 4 | User | Clicks **Generate & Download ZIP** |
+| 5 | UI | `POST /api/v1/generate` with `FormData`; shows progress/disabled state |
+| 6 | UI | On 200: trigger browser download from blob URL; populate snippet panel |
+| 7 | UI | On 4xx/5xx: show inline error from JSON `message` |
 
 ### 5.3 Component Contracts
 
@@ -709,12 +701,6 @@ Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
 | App name | text | `App` | Manifest only |
 | Theme color | color | `#ffffff` | Manifest |
 | Background color | color | `#ffffff` | Manifest (page chrome) |
-
-#### Preview Grid
-
-- Render approximate previews for: 16, 32, 180, 192, 512, 1200×630
-- Previews are **client approximations**; server Sharp output is authoritative
-- Debounce re-render (≥ 50 ms) on slider input
 
 #### HTML Snippet
 
@@ -775,7 +761,7 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | AC1 | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded) |
 | AC2 | Upload SVG returns ZIP that also includes `favicon.svg` |
 | AC3 | Invalid MIME or >10 MB returns `400` JSON with `VALIDATION_ERROR` |
-| AC4 | `padding=20` visibly insets icon content in PNG previews |
+| AC4 | `padding=20` visibly insets icon content in generated PNG assets |
 | AC5 | `favicon.ico` contains 16, 32, and 48 px layers |
 | AC6 | UI can download ZIP and copy `<head>` snippet in one session without reload |
 | AC7 | No intermediate icon files persist on disk after the request completes |
@@ -803,3 +789,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.3 | 2026-07-23 | §1.6 lowercase kebab-case for source; layout paths updated |
 | 1.0.4 | 2026-07-23 | §1.6 markdown docs use UPPERCASE basenames (`SPEC.md`, …) |
 | 1.0.5 | 2026-07-23 | §1.5 layout: `generator.tsx` island + `preview.ts` client approx. |
+| 1.0.6 | 2026-07-23 | Remove live preview grid from UI (§1.1 G4, §1.3, §1.5, §5) |

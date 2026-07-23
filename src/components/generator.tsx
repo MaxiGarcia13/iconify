@@ -2,16 +2,14 @@ import type { SettingsState } from '../lib/settings';
 
 import { useState } from 'react';
 
-import { previewBackgroundFromSettings } from '../lib/preview';
 import { SETTINGS_DEFAULTS } from '../lib/settings';
 import { Dropzone } from './dropzone';
 import { GenerateButton } from './generate-button';
-import { PreviewGrid } from './preview-grid';
 import { SettingsPanel } from './settings-panel';
 
 /**
- * Client island composing dropzone, settings, preview, and download — SPEC §5.1 / §5.2.
- * Holds shared file + settings so previews update when padding / background change.
+ * Client island composing dropzone, settings, and download — SPEC §5.1 / §5.2.
+ * Holds shared file + settings for generate.
  */
 export function Generator() {
   const [file, setFile] = useState<File | null>(null);
@@ -38,17 +36,6 @@ export function Generator() {
           />
         </section>
       </div>
-
-      <section aria-label="Live preview" className="min-w-0">
-        <h2 className="mb-3 text-sm font-medium tracking-wide uppercase">
-          Live Preview
-        </h2>
-        <PreviewGrid
-          file={file}
-          padding={settings.padding}
-          background={previewBackgroundFromSettings(settings)}
-        />
-      </section>
 
       <section aria-label="Download package" className="min-w-0">
         <GenerateButton file={file} settings={settings} />
