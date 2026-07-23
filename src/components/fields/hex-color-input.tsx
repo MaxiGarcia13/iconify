@@ -1,5 +1,6 @@
 import type { ChangeEvent } from 'react';
 
+import { cn } from '@maxigarcia/js-utils';
 import { useEffect, useState } from 'react';
 
 import { normalizeHex6 } from '@/lib/settings';
@@ -76,7 +77,7 @@ export function HexColorInput({
         onBlur={onTextBlur}
         disabled={disabled}
         spellCheck={false}
-        className={[fieldInputClass, 'min-w-0 flex-1 font-mono sm:max-w-36 sm:flex-none'].join(' ')}
+        className={cn(fieldInputClass, 'min-w-0 flex-1 font-mono sm:max-w-36 sm:flex-none')}
         aria-label={textAriaLabel}
         placeholder="#ffffff"
       />

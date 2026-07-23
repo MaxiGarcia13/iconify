@@ -1,5 +1,6 @@
 import type { ChangeEvent } from 'react';
 
+import { cn } from '@maxigarcia/js-utils';
 import { useId } from 'react';
 
 import { clampCornerRadius } from '@/lib/settings';
@@ -60,7 +61,7 @@ export function CornerRadiusField({
           step={1}
           value={value}
           onChange={handleChange}
-          className={[fieldInputClass, 'max-w-24'].join(' ')}
+          className={cn(fieldInputClass, 'max-w-24')}
           aria-label="Corner radius percent"
         />
         <span className={fieldHintClass}>%</span>

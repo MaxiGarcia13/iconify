@@ -1,5 +1,6 @@
 import type { SettingsState } from '@/lib/settings';
 
+import { cn } from '@maxigarcia/js-utils';
 import { useEffect, useId, useState } from 'react';
 
 import {
@@ -77,12 +78,12 @@ export function GenerateButton({
         onClick={() => {
           void onGenerate();
         }}
-        className={[
+        className={cn(
           'touch-manipulation w-full min-h-11 border border-surface-border px-4 py-3 text-sm font-medium transition-colors',
           'bg-accent text-accent-foreground',
           'hover:bg-accent-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
           'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-accent',
-        ].join(' ')}
+        )}
       >
         {generateButtonLabel(pending)}
       </button>

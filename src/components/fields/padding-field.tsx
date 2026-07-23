@@ -1,5 +1,6 @@
 import type { ChangeEvent } from 'react';
 
+import { cn } from '@maxigarcia/js-utils';
 import { useId } from 'react';
 
 import { clampPadding } from '@/lib/settings';
@@ -56,7 +57,7 @@ export function PaddingField({ value, onChange, id }: PaddingFieldProps) {
           step={1}
           value={value}
           onChange={handleChange}
-          className={[fieldInputClass, 'max-w-24'].join(' ')}
+          className={cn(fieldInputClass, 'max-w-24')}
           aria-label="Padding percent"
         />
         <span className={fieldHintClass}>%</span>

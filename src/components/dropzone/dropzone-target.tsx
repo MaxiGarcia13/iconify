@@ -2,6 +2,8 @@ import type { ChangeEvent, DragEvent, RefObject } from 'react';
 
 import type { DropzoneState } from './types';
 
+import { cn } from '@maxigarcia/js-utils';
+
 import { DROPZONE_ACCEPT } from '@/lib/upload-constraints';
 import { DropzoneFilePreview } from './dropzone-file-preview';
 import { DropzonePrompt } from './dropzone-prompt';
@@ -36,18 +38,16 @@ export function DropzoneTarget({
   onDragOver,
   onDrop,
 }: DropzoneTargetProps) {
-  const buttonClassName = [
+  const buttonClassName = cn(
     'flex w-full min-h-36 min-w-0 flex-col items-center justify-center gap-2 border border-dashed px-4 py-6 text-center transition-colors sm:min-h-40 sm:px-6 sm:py-8',
     'border-surface-border bg-muted/40 text-foreground',
     'hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
     'disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:border-surface-border',
     'touch-manipulation',
-    displayState === 'dragging' ? 'border-accent bg-muted' : '',
-    displayState === 'error' ? 'border-red-500/70' : '',
-    displayState === 'ready' ? 'border-solid' : '',
-  ]
-    .filter(Boolean)
-    .join(' ');
+    displayState === 'dragging' && 'border-accent bg-muted',
+    displayState === 'error' && 'border-red-500/70',
+    displayState === 'ready' && 'border-solid',
+  );
 
   return (
     <>

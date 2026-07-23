@@ -1,3 +1,4 @@
+import { cn } from '@maxigarcia/js-utils';
 import { useId, useState } from 'react';
 
 export interface HtmlSnippetProps {
@@ -44,12 +45,12 @@ export function HtmlSnippet({ html }: HtmlSnippetProps) {
           onClick={() => {
             void onCopy();
           }}
-          className={[
+          className={cn(
             'touch-manipulation inline-flex min-h-11 w-full items-center justify-center border border-surface-border px-3 py-2 text-sm font-medium transition-colors sm:w-auto',
             'bg-muted text-foreground',
             'hover:border-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
             'disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:border-surface-border',
-          ].join(' ')}
+          )}
         >
           Copy
         </button>
@@ -57,11 +58,11 @@ export function HtmlSnippet({ html }: HtmlSnippetProps) {
 
       <pre
         tabIndex={0}
-        className={[
+        className={cn(
           'max-h-56 min-w-0 overflow-x-auto overflow-y-auto border border-surface-border bg-muted/40 p-3 sm:max-h-64 sm:p-4',
           'text-xs leading-relaxed text-foreground whitespace-pre-wrap break-all',
           'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent',
-        ].join(' ')}
+        )}
         aria-label="Generated HTML head snippet"
       >
         {html ?? 'Generate a package to see the <head> snippet here.'}
