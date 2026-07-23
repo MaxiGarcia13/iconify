@@ -57,8 +57,8 @@ SPEC §3 `cornerRadius` / §4 `applyCornerRadius` / §5 settings / AC8.
 
 SPEC §5.6 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
 
-- [ ] Configure Astro `site` (canonical public origin) so social URLs can be absolute
-- [ ] Wire all §5.6 favicon / Apple Touch / Android Chrome links from `public/`
+- [x] Configure Astro `site` (canonical public origin) so social URLs can be absolute
+- [x] Wire all §5.6 favicon / Apple Touch / Android Chrome links from `public/`
 - [ ] Core SEO: `<title>`, meta description, `link[rel=canonical]` for `/`
 - [ ] Open Graph: full §5.6 tag set with absolute `og:url` + `og:image` (`/og-image.png`, 1200×630)
 - [ ] Twitter Card: `summary_large_image` + title / description / absolute image + alt

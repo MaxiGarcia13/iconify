@@ -1,5 +1,6 @@
 ---
 import { description, name } from '../../package.json';
+import { SITE_ICON_LINKS } from '../lib/site-icons';
 import '../index.css';
 ---
 
@@ -14,10 +15,16 @@ import '../index.css';
     <title>{name}</title>
     <meta name="description" content={description} />
 
-    <link rel="icon" href="/favicon.ico" sizes="any" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    {
+      SITE_ICON_LINKS.map((icon) => (
+        <link
+          rel={icon.rel}
+          href={icon.href}
+          sizes={icon.sizes}
+          type={icon.type}
+        />
+      ))
+    }
 
     <meta property="og:image" content="/og-image.png" />
     <meta property="og:title" content={name} />
