@@ -22,9 +22,9 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] ZIP stream packager (`createZipStream` / `zipToWebResponse`)
 - [x] Vitest setup: `"test:unit": "vitest"` in `package.json` scripts
 - [x] Vitest config (`vitest.config.ts`) targeting `src/**/*.{test,spec}.{ts,tsx}`
-- [ ] Unit tests for processing core: one assertion per SPEC §2 matrix filename/size (`renderIcon`, `renderOgImage`, `buildFaviconIco`, SVG passthrough)
-- [ ] Unit tests for `site.webmanifest` + `head.html` generators (content matches SPEC §5)
-- [ ] Unit test that ZIP membership matches the generated asset set (no partial/empty archive)
+- [x] Unit tests for processing core: one assertion per SPEC §2 matrix filename/size (`renderIcon`, `renderOgImage`, `buildFaviconIco`, SVG passthrough)
+- [x] Unit tests for `site.webmanifest` + `head.html` generators (content matches SPEC §5)
+- [x] Unit test that ZIP membership matches the generated asset set (no partial/empty archive)
 
 ## M2 — REST API
 
