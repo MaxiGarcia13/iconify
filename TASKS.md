@@ -53,6 +53,17 @@ SPEC §3 `cornerRadius` / §4 `applyCornerRadius` / §5 settings / AC8.
 - [ ] Unit tests: process mask math / no-op at 0; validate boundaries; API happy-path + invalid; settings → FormData mapping
 - [ ] Verify AC8
 
+## M3c — Site SEO & social meta
+
+SPEC §5.6 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
+
+- [ ] Configure Astro `site` (canonical public origin) so social URLs can be absolute
+- [ ] Wire all §5.6 favicon / Apple Touch / Android Chrome links from `public/`
+- [ ] Core SEO: `<title>`, meta description, `link[rel=canonical]` for `/`
+- [ ] Open Graph: full §5.6 tag set with absolute `og:url` + `og:image` (`/og-image.png`, 1200×630)
+- [ ] Twitter Card: `summary_large_image` + title / description / absolute image + alt
+- [ ] Verify AC9 (view-source; optional Twitter/Facebook sharing debugger)
+
 ## M4 — Hardening
 
 - [ ] Transparent PNG + opaque background edge cases
@@ -78,3 +89,4 @@ SPEC §3 `cornerRadius` / §4 `applyCornerRadius` / §5 settings / AC8.
 | AC6 | UI download + copy snippet without reload                                 |
 | AC7 | No leftover files under OS temp after request                             |
 | AC8 | `cornerRadius=50` → circular square PNGs; `0` → square; bad value → `400` |
+| AC9 | View-source `/`: all §5.6 `public/` icons + absolute OG/Twitter + canonical |
