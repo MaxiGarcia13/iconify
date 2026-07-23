@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
 const SITE_URL = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
+  ? `https://icon-sets-generator.vercel.app`
   : 'http://localhost:4321';
 
 export default defineConfig({
