@@ -1,0 +1,14 @@
+---
+description: Astro UI islands for the icon generator workflow
+globs: src/components/**/*.{tsx,ts,astro,jsx,js}
+alwaysApply: false
+---
+
+# Generator UI
+
+- Workflow: dropzone → settings → live previews → generate ZIP → copy `<head>` snippet.
+- Client islands only where interactivity needs it (dropzone, settings, previews, snippet).
+- Validate type/size on the client; server validation remains authoritative.
+- Map form fields to SPEC §3: `file`, `padding`, `background`, `presets`, `appName`, `themeColor`, `backgroundColor`.
+- Snippet markup must match SPEC §5.3; omit SVG `<link>` for raster sources.
+- Generate disabled until a valid file is selected; surface API errors via `aria-live`.

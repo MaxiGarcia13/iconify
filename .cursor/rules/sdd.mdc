@@ -1,0 +1,13 @@
+---
+description: Spec-Driven Development — SPEC.md is source of truth
+alwaysApply: true
+---
+
+# SDD (Iconify)
+
+- Before implementing features, read [`SPEC.md`](../../SPEC.md) and [`AGENTS.md`](../../AGENTS.md).
+- Change requirements in `SPEC.md` first, then `TASKS.md`, then code.
+- Do not invent API fields, asset filenames, sizes, or status codes.
+- Prefer matching SPEC §2 matrix and §3 OpenAPI exactly.
+- After finishing a slice, update checkboxes in `TASKS.md`.
+- Keep diffs scoped to the active milestone; no unrelated refactors.

@@ -1,0 +1,15 @@
+---
+description: Sharp icon processing and ZIP packaging rules
+globs: src/lib/icons/**/*.{ts,js}
+alwaysApply: false
+---
+
+# Icon Processing
+
+- Asset names/sizes come from SPEC §2 / `matrix.ts` — do not rename ad hoc.
+- Use Sharp for decode, pad, resize; preserve alpha when background is `transparent`.
+- Padding is % of shorter side (icons) or canvas (OG); content uses `fit: 'contain'`.
+- `favicon.ico` must include 16, 32, and 48 px layers.
+- Include `favicon.svg` only when the source upload is SVG.
+- Package via archiver ZIP stream; no persistent temp icon files.
+- OG target is exactly 1200×630 PNG (`og-image.png`).
