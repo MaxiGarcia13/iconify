@@ -13,6 +13,19 @@
   "bugs": {
     "url": "https://github.com/MaxiGarcia13/iconify/issues"
   },
+  "keywords": [
+    "favicon",
+    "favicon generator",
+    "icon generator",
+    "icon set generator",
+    "icon set",
+    "pwa icons",
+    "ios icons",
+    "android icons",
+    "apple touch icon",
+    "og image",
+    "web icons"
+  ],
   "main": "index.js",
   "scripts": {
     "prepare": "simple-git-hooks",

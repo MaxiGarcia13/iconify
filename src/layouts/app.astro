@@ -1,6 +1,6 @@
 ---
 import { capitalize } from '@maxigarcia/js-utils';
-import { description, name } from '../../package.json';
+import { description, keywords, name } from '../../package.json';
 import '@/index.css';
 
 if (!Astro.site) {
@@ -89,6 +89,7 @@ const title = capitalize(name);
 
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="keywords" content={keywords.join(', ')} />
     <meta name="theme-color" content={themeColor} />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="manifest" href={webManifestHref} />

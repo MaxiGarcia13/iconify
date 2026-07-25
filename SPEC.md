@@ -961,11 +961,12 @@ Also emit `<meta name="theme-color" content="#141826" />` so the browser chrome 
 
 #### Core SEO
 
-| Tag                         | Value                                |
-| --------------------------- | ------------------------------------ |
-| `<title>`                   | Product name (`package.json` `name`) |
-| `<meta name="description">` | Product description (`package.json`) |
-| `<link rel="canonical">`    | Absolute URL of `/`                  |
+| Tag                         | Value                                     |
+| --------------------------- | ----------------------------------------- |
+| `<title>`                   | Product name (`package.json` `name`)      |
+| `<meta name="description">` | Product description (`package.json`)      |
+| `<meta name="keywords">`    | Comma-separated `package.json` `keywords` |
+| `<link rel="canonical">`    | Absolute URL of `/`                       |
 
 #### Open Graph
 
@@ -1060,3 +1061,4 @@ Do not duplicate milestone checklists here. When scope changes, update this SPEC
 | 1.0.16  | 2026-07-23 | Status → Accepted; v1 release (package `1.0.16`, `CHANGELOG.md`)           |
 | 1.0.17  | 2026-07-24 | §5.6 site PWA: `public/site.webmanifest` + head `manifest` / `theme-color` |
 | 1.0.18  | 2026-07-24 | §5.1 footer: GitHub repository link with `github.astro` icon               |
+| 1.0.19  | 2026-07-25 | §5.6 Core SEO: `<meta name="keywords">` from `package.json` `keywords`     |
