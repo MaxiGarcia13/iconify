@@ -7,6 +7,13 @@ export const REMOVE_BACKGROUND_ERROR_UNSUPPORTED
 export const REMOVE_BACKGROUND_ERROR_FAILED
   = 'Background removal failed. Try again with a different image.';
 
+export interface RemoveBackgroundSourceState {
+  file: File;
+  error: string | null;
+  /** Pre-removal source when Undo is available; otherwise `null`. */
+  undoFile: File | null;
+}
+
 /**
  * Label from library progress (`current` / `total`).
  * Used for aria-live while model download / inference runs.
@@ -36,14 +43,31 @@ export function removeBackgroundLiveStatus(
 }
 
 /**
- * Apply a removal result to source state: replace file on success;
- * on failure keep the prior file and expose the message for inline / aria-live.
+ * Apply a removal result: success replaces the file and stores the prior file for Undo;
+ * failure keeps the prior file and error message (undo buffer unchanged).
  */
 export function applyRemoveBackgroundResult(
   previous: File,
   result: { ok: true; file: File } | { ok: false; message: string },
-): { file: File; error: string | null } {
+  previousUndo: File | null = null,
+): RemoveBackgroundSourceState {
   if (result.ok)
-    return { file: result.file, error: null };
-  return { file: previous, error: result.message };
+    return { file: result.file, error: null, undoFile: previous };
+  return { file: previous, error: result.message, undoFile: previousUndo };
+}
+
+/** Restore the pre-removal file and clear the undo buffer. No-op when none. */
+export function undoRemoveBackground(
+  state: RemoveBackgroundSourceState,
+): RemoveBackgroundSourceState {
+  if (!state.undoFile)
+    return state;
+  return { file: state.undoFile, error: null, undoFile: null };
+}
+
+/** Drop the undo buffer (Clear or replace source). */
+export function discardRemoveBackgroundUndo(
+  state: Pick<RemoveBackgroundSourceState, 'file' | 'error'>,
+): RemoveBackgroundSourceState {
+  return { file: state.file, error: state.error, undoFile: null };
 }
