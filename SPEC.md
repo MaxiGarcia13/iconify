@@ -275,7 +275,7 @@ Preview does not write ZIP assets. Generate remains a separate action (§3.2).
 
 ### 5.3.2 Remove background (dropzone)
 
-Optional **client-side** action on the dropzone (alongside Clear) — **not** in Settings and **not** an API option. Runs in the browser (e.g. `@imgly/background-removal`); the cutout becomes the new source `File`. Generate and preview then process that file with the existing §3 / §4 contract (no `removeBackground` multipart field).
+Optional **client-side** action on the dropzone (alongside Clear) — **not** in Settings and **not** an API option. Runs entirely in the browser with `@imgly/background-removal` (browser package only; not the Node package). The cutout becomes the new source `File`. Generate and preview then process that file with the existing §3 / §4 contract (no `removeBackground` multipart field).
 
 | Rule            | Behavior                                                                                                                                                   |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |

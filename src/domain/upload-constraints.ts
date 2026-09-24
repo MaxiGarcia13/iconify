@@ -38,6 +38,24 @@ export function isSourceSvg(file: { name: string; type: string }): boolean {
   return mime === 'image/svg+xml' || ext === '.svg';
 }
 
+/**
+ * Raster PNG/JPG source eligible for client background removal.
+ * SVG is never eligible.
+ */
+export function isRasterSource(file: { name: string; type: string }): boolean {
+  if (isSourceSvg(file))
+    return false;
+  const mime = normalizeMime(file.type);
+  const ext = extensionOf(file.name);
+  return (
+    mime === 'image/png'
+    || mime === 'image/jpeg'
+    || ext === '.png'
+    || ext === '.jpg'
+    || ext === '.jpeg'
+  );
+}
+
 /** Rejects when MIME or extension is not allowed, or size exceeds 10 MB. */
 export function validateSourceFile(file: {
   name: string;

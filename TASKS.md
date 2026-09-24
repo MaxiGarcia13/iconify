@@ -117,7 +117,7 @@ SPEC §3.3 / §5.2–§5.3.1 / AC13. Preview via `POST /api/v1/preview` (same Sh
 
 ## M3g — Remove background (client)
 
-SPEC §5.3.2 / AC14. Client-side cutout via `@imgly/background-removal` (browser WASM/ONNX). **Not** a settings control and **not** a generate/preview API field — mutates the source `File`, then existing preview/generate pipelines apply.
+SPEC §5.3.2 / AC14. Browser-only cutout via `@imgly/background-removal` (not the Node package). **Not** a settings control and **not** a generate/preview API field — mutates the source `File`, then existing preview/generate pipelines apply.
 
 ### Spec
 
@@ -127,13 +127,13 @@ SPEC §5.3.2 / AC14. Client-side cutout via `@imgly/background-removal` (browser
 
 ### Deps & assets
 
-- [ ] Add `@imgly/background-removal` + required `onnxruntime-web` peer (exact versions per package docs)
+- [x] Add `@imgly/background-removal` (browser). Do **not** add `@imgly/background-removal-node`. Add `onnxruntime-web` only if the package peer actually requires an explicit install
 - [ ] Lazy-load the library (dynamic `import`) on first use — do not inflate the initial island bundle
 - [ ] Configure `publicPath` for model/WASM assets (self-host under `public/` for production; CDN OK for local/dev)
 
 ### Client
 
-- [ ] Service helper: run removal on a `File`/`Blob` → PNG `Blob`/`File` with alpha; sensible basename (e.g. preserve stem + `.png`, or `-nobg.png`)
+- [x] Service helper: run removal on a `File`/`Blob` → PNG `Blob`/`File` with alpha; sensible basename (e.g. preserve stem + `.png`, or `-nobg.png`)
 - [ ] Progress callback wiring for model download + inference (surface to UI)
 - [ ] Error mapping: failure → inline / `aria-live` message; do not clear the current file
 - [ ] Optional **Undo**: keep pre-removal `File` in memory until clear / replace / another remove; restore on Undo

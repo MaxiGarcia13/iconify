@@ -9,6 +9,7 @@ alwaysApply: true
 - Change product requirements in `SPEC.md` first; update `TASKS.md` only for work-breakdown / checkboxes; then code.
 - Do not invent API fields, asset filenames, sizes, or status codes.
 - Prefer matching SPEC §2 asset matrix and §3 API contract exactly.
+- Do **not** cite `SPEC`, section numbers (`§…`), or AC IDs in source or test comments / JSDoc / `it(…)` titles — keep those refs in `SPEC.md` / `TASKS.md` only.
 - After finishing a slice, update checkboxes in `TASKS.md`.
 - Keep diffs scoped to the active milestone; no unrelated refactors.
 - TypeScript strict; match existing file style; do not add dependencies unless required by SPEC or explicitly requested.

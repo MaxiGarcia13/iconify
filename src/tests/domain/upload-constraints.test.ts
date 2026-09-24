@@ -5,6 +5,7 @@ import {
   ALLOWED_MIME,
   DROPZONE_ACCEPT,
   extensionOf,
+  isRasterSource,
   isSourceSvg,
   MAX_UPLOAD_BYTES,
   normalizeMime,
@@ -100,5 +101,13 @@ describe('upload-constraints', () => {
     expect(isSourceSvg({ name: 'photo.jpg', type: 'image/jpeg' })).toBe(false);
     expect(isSourceSvg({ name: 'photo.JPEG', type: 'image/jpeg' })).toBe(false);
     expect(isSourceSvg({ name: 'logo.png', type: 'image/svg+xml' })).toBe(true);
+  });
+
+  it('detects raster sources eligible for background removal', () => {
+    expect(isRasterSource({ name: 'logo.png', type: 'image/png' })).toBe(true);
+    expect(isRasterSource({ name: 'photo.jpg', type: 'image/jpeg' })).toBe(true);
+    expect(isRasterSource({ name: 'photo.JPEG', type: '' })).toBe(true);
+    expect(isRasterSource({ name: 'mark.svg', type: 'image/svg+xml' })).toBe(false);
+    expect(isRasterSource({ name: 'anim.gif', type: 'image/gif' })).toBe(false);
   });
 });
