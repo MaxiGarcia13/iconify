@@ -1,155 +1,58 @@
-import type { ChangeEvent, DragEvent } from 'react';
-import type { DropzoneProps, DropzoneState } from './types';
+import type { DropzoneProps } from './types';
 
-import { useId, useRef, useState } from 'react';
-
-import { isRemoveBackgroundDisabled } from '@/domain/remove-background-ui';
-import { validateSourceFile } from '@/domain/upload-constraints';
 import { DropzoneClearBar } from './dropzone-clear-bar';
 import { DropzoneStatus } from './dropzone-status';
 import { DropzoneTarget } from './dropzone-target';
+import { useDropzone } from './use-dropzone';
 
 export function Dropzone({
   onFileChange,
-  onRemoveBackground,
   disabled = false,
-  removeBackgroundPending = false,
   previewUrl = null,
   previewPending = false,
 }: DropzoneProps) {
-  const inputId = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
-  const [state, setState] = useState<DropzoneState>('idle');
-  const [file, setFile] = useState<File | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const dragDepthRef = useRef(0);
-
-  function commitFile(next: File | null) {
-    setFile(next);
-    onFileChange?.(next);
-  }
-
-  function applyCandidate(candidate: File) {
-    if (disabled)
-      return;
-
-    const result = validateSourceFile(candidate);
-    if (!result.ok) {
-      setState('error');
-      setError(result.message);
-      return;
-    }
-
-    setError(null);
-    setState('ready');
-    commitFile(candidate);
-  }
-
-  function clearSelection() {
-    if (disabled)
-      return;
-
-    setError(null);
-    setState('idle');
-    commitFile(null);
-    if (inputRef.current)
-      inputRef.current.value = '';
-  }
-
-  function openPicker() {
-    if (disabled)
-      return;
-    inputRef.current?.click();
-  }
-
-  function onInputChange(e: ChangeEvent<HTMLInputElement>) {
-    const selected = e.target.files?.[0];
-    if (!selected)
-      return;
-    applyCandidate(selected);
-  }
-
-  function onDragEnter(e: DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (disabled)
-      return;
-    dragDepthRef.current += 1;
-    setState((prev) => (prev === 'ready' ? prev : 'dragging'));
-  }
-
-  function onDragLeave(e: DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    if (disabled)
-      return;
-    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
-    if (dragDepthRef.current === 0)
-      setState(file ? 'ready' : error ? 'error' : 'idle');
-  }
-
-  function onDragOver(e: DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  function onDrop(e: DragEvent) {
-    e.preventDefault();
-    e.stopPropagation();
-    dragDepthRef.current = 0;
-    if (disabled) {
-      setState(file ? 'ready' : error ? 'error' : 'idle');
-      return;
-    }
-    const dropped = e.dataTransfer.files?.[0];
-    if (!dropped) {
-      setState(file ? 'ready' : error ? 'error' : 'idle');
-      return;
-    }
-    applyCandidate(dropped);
-  }
-
-  const displayState = state === 'dragging' ? 'dragging' : file ? 'ready' : state;
+  const dz = useDropzone({
+    onFileChange,
+    disabled,
+    previewPending,
+  });
 
   return (
     <div className="flex flex-col gap-3">
       <DropzoneTarget
-        inputId={inputId}
-        inputRef={inputRef}
+        inputId={dz.inputId}
+        inputRef={dz.inputRef}
         disabled={disabled}
-        displayState={displayState}
-        file={file}
-        error={error}
+        displayState={dz.displayState}
+        file={dz.file}
+        error={dz.error}
         previewUrl={previewUrl}
         previewPending={previewPending}
-        onInputChange={onInputChange}
-        onOpenPicker={openPicker}
-        onDragEnter={onDragEnter}
-        onDragLeave={onDragLeave}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
+        onInputChange={dz.onInputChange}
+        onOpenPicker={dz.openPicker}
+        onDragEnter={dz.onDragEnter}
+        onDragLeave={dz.onDragLeave}
+        onDragOver={dz.onDragOver}
+        onDrop={dz.onDrop}
       />
 
-      {file
+      {dz.file
         ? (
             <DropzoneClearBar
-              fileName={file.name}
+              fileName={dz.file.name}
               disabled={disabled}
-              removeBackgroundDisabled={
-                isRemoveBackgroundDisabled({
-                  file,
-                  removalPending: removeBackgroundPending,
-                  generatePending: disabled,
-                  previewPending,
-                }) || !onRemoveBackground
-              }
-              onClear={clearSelection}
-              onRemoveBackground={() => onRemoveBackground?.()}
+              removeBackgroundDisabled={dz.removeBackgroundDisabled}
+              onClear={dz.clearSelection}
+              onRemoveBackground={dz.onRemoveBackground}
             />
           )
         : null}
 
-      <DropzoneStatus inputId={inputId} error={error} />
+      <DropzoneStatus
+        inputId={dz.inputId}
+        liveStatus={dz.liveStatus}
+        errorTone={dz.errorTone}
+      />
     </div>
   );
 }
