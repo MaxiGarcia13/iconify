@@ -134,7 +134,7 @@ SPEC §5.3.2 / AC14. Browser-only cutout via `@imgly/background-removal` (not th
 ### Client
 
 - [x] Service helper: run removal on a `File`/`Blob` → PNG `Blob`/`File` with alpha; sensible basename (e.g. preserve stem + `.png`, or `-nobg.png`)
-- [ ] Progress callback wiring for model download + inference (surface to UI)
+- [x] Progress callback wiring for model download + inference (surface to UI)
 - [ ] Error mapping: failure → inline / `aria-live` message; do not clear the current file
 - [ ] Optional **Undo**: keep pre-removal `File` in memory until clear / replace / another remove; restore on Undo
 
