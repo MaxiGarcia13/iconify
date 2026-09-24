@@ -1,11 +1,12 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { SettingsState } from '@/domain/settings';
+import type { PreviewResult } from '@/services/preview';
 
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { SETTINGS_DEFAULTS, visualPreviewKey } from '@/domain/settings';
 import {
   createLivePreviewController,
   PREVIEW_DEBOUNCE_MS,
 } from '@/services/live-preview';
-import type { PreviewResult } from '@/services/preview';
 
 function pngFile(name = 'logo.png'): File {
   return new File([new Uint8Array([137, 80, 78, 71])], name, {
@@ -63,6 +64,7 @@ describe('createLivePreviewController', () => {
   function setup() {
     const urls: Array<string | null> = [];
     const errors: Array<string | null> = [];
+    const pendingFlags: boolean[] = [];
     const postPreviewFn = vi.fn<
       (
         file: File,
@@ -86,6 +88,9 @@ describe('createLivePreviewController', () => {
         onError: (message) => {
           errors.push(message);
         },
+        onPending: (pending) => {
+          pendingFlags.push(pending);
+        },
       },
       {
         postPreviewFn,
@@ -100,6 +105,7 @@ describe('createLivePreviewController', () => {
       postPreviewFn,
       urls,
       errors,
+      pendingFlags,
       createObjectURL,
       revokeObjectURL,
     };
@@ -231,7 +237,7 @@ describe('createLivePreviewController', () => {
     const { controller, postPreviewFn } = setup();
     const first = pngFile('a.png');
     const second = pngFile('b.png');
-    const settings = {
+    const settings: SettingsState = {
       ...SETTINGS_DEFAULTS,
       padding: 20,
       cornerRadius: 40,
@@ -248,5 +254,45 @@ describe('createLivePreviewController', () => {
     expect(postPreviewFn).toHaveBeenCalledTimes(2);
     expect(postPreviewFn.mock.calls[1]?.[0]).toBe(second);
     expect(postPreviewFn.mock.calls[1]?.[1]).toEqual(settings);
+  });
+
+  it('sets pending true while fetching and false when done', async () => {
+    const { controller, pendingFlags, postPreviewFn } = setup();
+    const file = pngFile();
+
+    let resolveFetch!: (value: PreviewResult) => void;
+    postPreviewFn.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveFetch = resolve;
+        }),
+    );
+
+    controller.requestImmediate(file, SETTINGS_DEFAULTS);
+    await Promise.resolve();
+    expect(pendingFlags).toEqual([true]);
+
+    resolveFetch({
+      ok: true,
+      blob: new Blob([new Uint8Array([1])], { type: 'image/png' }),
+    });
+    await Promise.resolve();
+    expect(pendingFlags).toEqual([true, false]);
+  });
+
+  it('clears pending on clear', async () => {
+    const { controller, pendingFlags, postPreviewFn } = setup();
+    const file = pngFile();
+
+    postPreviewFn.mockImplementationOnce(
+      () => new Promise(() => {}),
+    );
+
+    controller.requestImmediate(file, SETTINGS_DEFAULTS);
+    await Promise.resolve();
+    expect(pendingFlags.at(-1)).toBe(true);
+
+    controller.clear();
+    expect(pendingFlags.at(-1)).toBe(false);
   });
 });

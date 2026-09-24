@@ -35,6 +35,7 @@ export function Generator() {
             onFileChange={setFile}
             disabled={pending}
             previewUrl={preview.url}
+            previewPending={preview.pending}
           />
         </section>
 

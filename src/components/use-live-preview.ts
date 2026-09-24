@@ -5,10 +5,11 @@ import { useEffect, useRef, useState } from 'react';
 import { visualPreviewKey } from '@/domain/settings';
 import { createLivePreviewController } from '@/services/live-preview';
 
-export type LivePreviewState = {
+export interface LivePreviewState {
   url: string | null;
   error: string | null;
-};
+  pending: boolean;
+}
 
 /**
  * Live dropzone preview from `POST /api/v1/preview` (SPEC §5.3.1).
@@ -20,6 +21,7 @@ export function useLivePreview(
 ): LivePreviewState {
   const [url, setUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
   const controllerRef = useRef<ReturnType<typeof createLivePreviewController> | null>(null);
   const fileRef = useRef<File | null>(null);
@@ -29,6 +31,7 @@ export function useLivePreview(
     const controller = createLivePreviewController({
       onUrl: setUrl,
       onError: setError,
+      onPending: setPending,
     });
     controllerRef.current = controller;
     return () => {
@@ -63,5 +66,5 @@ export function useLivePreview(
       controller.requestDebounced(file, settings);
   }, [file, visualKey, settings]);
 
-  return { url, error };
+  return { url, error, pending };
 }

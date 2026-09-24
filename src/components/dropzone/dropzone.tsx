@@ -12,6 +12,7 @@ export function Dropzone({
   onFileChange,
   disabled = false,
   previewUrl = null,
+  previewPending = false,
 }: DropzoneProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -117,6 +118,7 @@ export function Dropzone({
         file={file}
         error={error}
         previewUrl={previewUrl}
+        previewPending={previewPending}
         onInputChange={onInputChange}
         onOpenPicker={openPicker}
         onDragEnter={onDragEnter}

@@ -7,20 +7,21 @@ import { postPreview } from './preview';
 /** Debounce delay for visual settings → preview (SPEC §5.3.1). */
 export const PREVIEW_DEBOUNCE_MS = 250;
 
-export type LivePreviewCallbacks = {
+export interface LivePreviewCallbacks {
   onUrl: (url: string | null) => void;
   onError?: (message: string | null) => void;
-};
+  onPending?: (pending: boolean) => void;
+}
 
-export type LivePreviewControllerDeps = {
+export interface LivePreviewControllerDeps {
   postPreviewFn?: typeof postPreview;
   debounceMs?: number;
   debounceFn?: typeof debounce;
   createObjectURL?: (blob: Blob) => string;
   revokeObjectURL?: (url: string) => void;
-};
+}
 
-export type LivePreviewController = {
+export interface LivePreviewController {
   /** File select / replace — abort prior, fetch immediately. */
   requestImmediate: (file: File, settings: SettingsState) => void;
   /** Visual option change — abort prior, debounce next fetch. */
@@ -28,7 +29,7 @@ export type LivePreviewController = {
   /** Clear file — abort pending, hide preview. */
   clear: () => void;
   dispose: () => void;
-};
+}
 
 /**
  * Orchestrates debounced preview fetches and AbortController cancellation
@@ -79,6 +80,12 @@ export function createLivePreviewController(
     callbacks.onError?.(message);
   }
 
+  function setPending(pending: boolean) {
+    if (disposed)
+      return;
+    callbacks.onPending?.(pending);
+  }
+
   async function runFetch(
     file: File,
     settings: SettingsState,
@@ -90,20 +97,27 @@ export function createLivePreviewController(
     abortInFlight();
     const ac = new AbortController();
     inFlight = ac;
+    setPending(true);
 
     const result = await postPreviewFn(file, settings, { signal: ac.signal });
 
     if (inFlight === ac)
       inFlight = null;
 
-    if (disposed || gen !== generation || result.aborted)
+    // Superseded: a newer request owns pending, or clear/dispose reset it.
+    if (disposed || gen !== generation)
       return;
 
+    // Aborted responses must not clear pending or update the UI.
     if (!result.ok) {
+      if (result.aborted)
+        return;
+      setPending(false);
       setError(result.message);
       return;
     }
 
+    setPending(false);
     revokeCurrentUrl();
     const url = createObjectURL(result.blob);
     objectUrl = url;
@@ -142,6 +156,7 @@ export function createLivePreviewController(
         return;
       bumpGeneration();
       revokeCurrentUrl();
+      setPending(false);
       setError(null);
       setUrl(null);
     },

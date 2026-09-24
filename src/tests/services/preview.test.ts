@@ -3,8 +3,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { SETTINGS_DEFAULTS } from '@/domain/settings';
 import {
   buildPreviewFormData,
-  PREVIEW_ENDPOINT,
   postPreview,
+  PREVIEW_ENDPOINT,
 } from '@/services/preview';
 
 function pngFile(name = 'logo.png'): File {
