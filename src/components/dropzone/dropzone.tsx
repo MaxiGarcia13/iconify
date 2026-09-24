@@ -8,10 +8,6 @@ import { DropzoneClearBar } from './dropzone-clear-bar';
 import { DropzoneStatus } from './dropzone-status';
 import { DropzoneTarget } from './dropzone-target';
 
-/**
- * Source upload dropzone — SPEC section 5.3.
- * States: idle · dragging · ready · error.
- */
 export function Dropzone({ onFileChange, disabled = false }: DropzoneProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);

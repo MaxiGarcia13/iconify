@@ -1,13 +1,7 @@
-/**
- * Generate-button UX helpers — SPEC §5.2 steps 5–7 / §5.4.
- * Loading, disabled, and aria-live status copy (client-safe).
- */
-
 export const GENERATE_BUTTON_IDLE_LABEL = 'Generate & Download ZIP';
 export const GENERATE_BUTTON_PENDING_LABEL = 'Generating…';
 export const GENERATE_LIVE_PENDING = 'Generating package…';
 
-/** Button label for idle vs in-flight generate. */
 export function generateButtonLabel(pending: boolean): string {
   return pending ? GENERATE_BUTTON_PENDING_LABEL : GENERATE_BUTTON_IDLE_LABEL;
 }

@@ -4,7 +4,6 @@ import type { PresetId } from './matrix';
 
 export type { PresetId };
 
-/** Processing / API options — SPEC §4.2. */
 export interface GenerateOptions {
   background: 'transparent' | `#${string}`;
   padding: number; // 0–50

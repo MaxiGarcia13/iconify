@@ -20,7 +20,6 @@ export type ParseGenerateFormResult
     ok: true;
     file: Buffer;
     sourceIsSvg: boolean;
-    /** Upload basename for §2.5 original ZIP naming. */
     sourceFilename: string;
     options: GenerateOptions;
   }
@@ -30,10 +29,6 @@ export type ParseGenerateFormResult
     details?: Record<string, unknown>;
   };
 
-/**
- * Parse multipart `FormData` for `POST /api/v1/generate`.
- * Applies SPEC §3 defaults and validates MIME, size, and option fields.
- */
 export async function parseGenerateForm(
   form: FormData,
 ): Promise<ParseGenerateFormResult> {
@@ -163,7 +158,7 @@ function stringField(form: FormData, key: string): string | null {
   return value;
 }
 
-/** Comma-separated or repeated `presets` fields — SPEC §2.5. */
+/** Comma-separated or repeated `presets` fields. */
 function presetsField(form: FormData): string | null {
   const values = form
     .getAll('presets')
@@ -183,7 +178,7 @@ function parseBackground(
   return null;
 }
 
-/** Multipart literals `true` / `false` only — SPEC §3 `monochrome`. */
+/** Multipart literals `true` / `false` only. */
 function parseMonochrome(value: string): boolean | null {
   if (value === 'true')
     return true;

@@ -6,7 +6,6 @@ export interface DropzoneFilePreviewProps {
   file: File;
 }
 
-/** Ready-state file summary inside the drop target. */
 export function DropzoneFilePreview({ file }: DropzoneFilePreviewProps) {
   const mimeLabel = normalizeMime(file.type) || 'unknown';
 

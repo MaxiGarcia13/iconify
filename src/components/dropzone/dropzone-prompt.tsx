@@ -7,7 +7,6 @@ export interface DropzonePromptProps {
   displayState: DropzoneState;
 }
 
-/** Idle / dragging copy inside the drop target. */
 export function DropzonePrompt({ displayState }: DropzonePromptProps) {
   const label = displayState === 'dragging'
     ? 'Drop image to upload'

@@ -4,7 +4,6 @@ export interface DropzoneClearBarProps {
   onClear: () => void;
 }
 
-/** Ready-state row with filename and Clear action. */
 export function DropzoneClearBar({ fileName, disabled, onClear }: DropzoneClearBarProps) {
   return (
     <div className="flex min-w-0 items-center justify-between gap-3 text-sm">

@@ -21,7 +21,7 @@ export async function solidPng(
 
 /**
  * PNG with alpha: left half opaque `#ff0000`, right half fully transparent.
- * Used for transparent-source + background compositing edge cases (SPEC §4.9).
+ * Used for transparent-source + background compositing edge cases.
  */
 export async function halfTransparentPng(
   width = 64,
@@ -80,7 +80,7 @@ export async function alphaPng(
     .toBuffer();
 }
 
-/** Solid JPEG for raster omission tests (SPEC §4.9 / AC1). */
+/** Solid JPEG for raster omission tests. */
 export async function solidJpeg(
   width = 64,
   height = width,
@@ -97,7 +97,7 @@ export async function solidJpeg(
     .toBuffer();
 }
 
-/** Minimal valid SVG source for API / packaging tests (AC2). */
+/** Minimal valid SVG source for API / packaging tests. */
 export function solidSvg(size = 32): Buffer {
   return Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}"><rect width="${size}" height="${size}" fill="#0080ff"/></svg>`,

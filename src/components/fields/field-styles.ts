@@ -1,4 +1,3 @@
-/** Shared control styles for settings / form fields. */
 export const fieldInputClass
   = 'min-h-11 w-full border border-surface-border bg-background px-3 py-2 text-sm text-foreground touch-manipulation disabled:opacity-50';
 

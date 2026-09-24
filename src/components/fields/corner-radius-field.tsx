@@ -13,7 +13,6 @@ export interface CornerRadiusFieldProps {
   id?: string;
 }
 
-/** Corner radius % range + number — SPEC §5.3 (0–100). */
 export function CornerRadiusField({
   value,
   onChange,

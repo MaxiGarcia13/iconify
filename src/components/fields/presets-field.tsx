@@ -22,7 +22,6 @@ const PRESET_LABELS: Record<SelectablePreset, string> = {
   original: 'Original',
 };
 
-/** Preset checkbox group — SPEC §5.3. */
 export function PresetsField({ value, onChange }: PresetsFieldProps) {
   function onToggle(id: SelectablePreset, checked: boolean) {
     onChange(togglePreset(value, id, checked));

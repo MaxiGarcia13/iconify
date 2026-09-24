@@ -13,7 +13,6 @@ export interface PaddingFieldProps {
   id?: string;
 }
 
-/** Padding % range + number — SPEC §5.3 (0–50). */
 export function PaddingField({ value, onChange, id }: PaddingFieldProps) {
   const autoId = useId();
   const rangeId = id ?? `${autoId}-padding`;

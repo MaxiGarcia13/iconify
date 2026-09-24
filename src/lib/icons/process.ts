@@ -14,7 +14,6 @@ import sharp from 'sharp';
  *
  * Corner rounding: when `cornerRadius > 0`, composite an SVG rounded-rect mask
  * with blend `dest-in`. Radius px = round((cornerRadius / 100) * (min(w,h) / 2)).
- * SPEC §4.3.
  */
 export async function renderIcon(
   input: Buffer,
@@ -63,7 +62,7 @@ export async function renderIcon(
 /**
  * Decode source, optionally greyscale, apply padding + background, optionally
  * round outer corners, return a 1200×630 PNG suitable for Open Graph / social
- * previews. SPEC §4.5.
+ * previews.
  */
 export async function renderOgImage(
   input: Buffer,
@@ -113,7 +112,6 @@ export async function renderOgImage(
  * Same pad / background / corner-radius / monochrome pipeline as `renderOgImage`,
  * but canvas width×height = source metadata (no fixed target resize).
  * Content is fitted with `contain` into the padded inner box; aspect ratio preserved.
- * SPEC §4.6 / AC11.
  */
 export async function renderOriginal(
   input: Buffer,
@@ -164,7 +162,7 @@ export async function renderOriginal(
   return applyCornerRadius(png, width, height, options.cornerRadius);
 }
 
-/** Apply outer rounded-rect alpha mask; no-op when radius is 0. SPEC §4.3. */
+/** Apply outer rounded-rect alpha mask; no-op when radius is 0. */
 async function applyCornerRadius(
   png: Buffer,
   width: number,
@@ -188,8 +186,8 @@ async function applyCornerRadius(
 
 /**
  * Preserve source SVG as `favicon.svg` for ZIP packaging.
- * Does not rasterize; lightly sanitizes for storage-in-ZIP only
- * (SPEC §2.1 / §4.8 / AC2). Caller must only invoke when source is SVG.
+ * Does not rasterize; lightly sanitizes for storage-in-ZIP only.
+ * Caller must only invoke when source is SVG.
  * Corner radius and monochrome are not applied to SVG passthrough.
  */
 export function passthroughFaviconSvg(input: Buffer): Buffer {

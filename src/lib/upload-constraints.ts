@@ -1,14 +1,11 @@
-/** Max upload size — SPEC §3.2. */
 export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 
-/** Allowed MIME types — SPEC §3.2 / §5.3. */
 export const ALLOWED_MIME = new Set([
   'image/svg+xml',
   'image/png',
   'image/jpeg',
 ]);
 
-/** Allowed extensions — SPEC §3.2 / §5.3. */
 export const ALLOWED_EXTENSIONS = new Set([
   '.svg',
   '.png',
@@ -16,10 +13,6 @@ export const ALLOWED_EXTENSIONS = new Set([
   '.jpeg',
 ]);
 
-/**
- * `<input accept>` value — SPEC §5.3 Dropzone.
- * Extensions + matching MIME list.
- */
 export const DROPZONE_ACCEPT
   = '.svg,.png,.jpg,.jpeg,image/svg+xml,image/png,image/jpeg';
 
@@ -38,20 +31,14 @@ export function extensionOf(filename: string): string {
   return filename.slice(i).toLowerCase();
 }
 
-/**
- * Whether the upload should emit SVG assets / SVG `<link>` in the head snippet.
- * Matches server `sourceIsSvg` — SPEC §4 / §5.3.
- */
+/** Whether the upload should emit SVG assets and an SVG `<link>` in the head snippet. */
 export function isSourceSvg(file: { name: string; type: string }): boolean {
   const mime = normalizeMime(file.type);
   const ext = extensionOf(file.name);
   return mime === 'image/svg+xml' || ext === '.svg';
 }
 
-/**
- * Client/server shared source-file checks — SPEC §3.2 / §5.3.
- * Rejects when MIME or extension is not allowed, or size exceeds 10 MB.
- */
+/** Rejects when MIME or extension is not allowed, or size exceeds 10 MB. */
 export function validateSourceFile(file: {
   name: string;
   type: string;

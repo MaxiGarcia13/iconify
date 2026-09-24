@@ -9,7 +9,6 @@ export const prerender = false;
 const FORBIDDEN_ORIGIN_MESSAGE
   = 'This endpoint is only available from the Iconify UI (same origin).';
 
-/** `POST /api/v1/generate` — SPEC §3 / §3.3 / §4.7. */
 export const POST: APIRoute = async ({ request }) => {
   try {
     if (!isSameOriginRequest(request)) {

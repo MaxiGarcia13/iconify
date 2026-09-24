@@ -2,14 +2,9 @@ import { cn } from '@maxigarcia/js-utils';
 import { useId, useState } from 'react';
 
 export interface HtmlSnippetProps {
-  /** Generated `<head>` markup, or `null` before first successful generate. */
   html: string | null;
 }
 
-/**
- * HTML `<head>` snippet panel + copy — SPEC §5.1 / §5.3.
- * Copy uses `navigator.clipboard.writeText`.
- */
 export function HtmlSnippet({ html }: HtmlSnippetProps) {
   const statusId = useId();
   const [copyStatus, setCopyStatus] = useState<string | null>(null);

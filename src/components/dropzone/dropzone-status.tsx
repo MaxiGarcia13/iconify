@@ -3,7 +3,6 @@ export interface DropzoneStatusProps {
   error: string | null;
 }
 
-/** Live region for validation errors. */
 export function DropzoneStatus({ inputId, error }: DropzoneStatusProps) {
   return (
     <p

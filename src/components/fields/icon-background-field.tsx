@@ -14,7 +14,6 @@ export interface IconBackgroundFieldProps {
   id?: string;
 }
 
-/** Icon pad fill: transparent toggle + color — SPEC §5.3. */
 export function IconBackgroundField({
   transparent,
   backgroundHex,

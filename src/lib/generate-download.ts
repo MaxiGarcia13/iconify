@@ -2,7 +2,6 @@ import type { SettingsState } from './settings';
 
 import { appendSettingsToFormData } from './settings';
 
-/** Default ZIP filename from SPEC §4.6 / API `Content-Disposition`. */
 export const DEFAULT_ZIP_FILENAME = 'iconify-package.zip';
 
 export const GENERATE_ENDPOINT = '/api/v1/generate';
@@ -11,9 +10,6 @@ export type GenerateDownloadResult
   = | { ok: true; blob: Blob; filename: string }
     | { ok: false; message: string };
 
-/**
- * Build multipart body for `POST /api/v1/generate` — SPEC §5.5.
- */
 export function buildGenerateFormData(
   file: File,
   settings: SettingsState,
@@ -53,9 +49,7 @@ export function filenameFromContentDisposition(
   return null;
 }
 
-/**
- * Read JSON `ErrorResponse.message` (SPEC §3); fall back if body is not JSON.
- */
+/** Read JSON error `message`; fall back if the body is not JSON. */
 export async function messageFromErrorResponse(
   response: Response,
 ): Promise<string> {
@@ -77,10 +71,6 @@ export async function messageFromErrorResponse(
   return fallback;
 }
 
-/**
- * `POST /api/v1/generate` with FormData; return ZIP blob or error message.
- * SPEC §5.2 steps 6–8 / §5.5.
- */
 export async function postGenerateDownload(
   file: File,
   settings: SettingsState,

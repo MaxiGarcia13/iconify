@@ -13,7 +13,6 @@ export interface FieldProps {
   children: ReactNode;
 }
 
-/** Labeled field stack — label, optional hint, control(s). */
 export function Field({
   label,
   htmlFor,

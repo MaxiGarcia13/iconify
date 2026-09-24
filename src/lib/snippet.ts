@@ -1,7 +1,7 @@
 /**
  * Build the copy-paste `<head>` fragment for the UI snippet panel.
  * Omits the SVG favicon link when the source was not SVG.
- * Not written into the ZIP — SPEC §5.3.
+ * Not written into the ZIP.
  */
 export function buildHeadHtml(sourceIsSvg: boolean): string {
   const lines = [

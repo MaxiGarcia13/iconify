@@ -1,7 +1,4 @@
-/**
- * Asset matrix mirroring SPEC §2 (filenames, sizes, formats, presets).
- * Downstream processing must not invent names or dimensions.
- */
+/** Asset filenames, sizes, formats, and presets. Downstream processing must not invent names or dimensions. */
 
 export type PresetId
   = | 'favicon'
@@ -18,23 +15,22 @@ export type AssetSize
   = | { kind: 'square'; px: number }
     | { kind: 'layers'; px: readonly number[] }
     | { kind: 'rect'; width: number; height: number }
-    /** Source metadata width×height — SPEC §2.5. */
+    /** Source metadata width×height. */
     | { kind: 'native' }
     | { kind: 'scalable' };
 
 export interface MatrixEntry {
-  /** Path / filename inside the ZIP (§2.7). */
+  /** Path / filename inside the ZIP. */
   name: string;
   size: AssetSize;
   format: AssetFormat;
   contentType: string;
   /** Preset that owns this asset. */
   preset: Exclude<PresetId, 'all'>;
-  /** Omit unless the uploaded source is SVG (§2.1, AC1/AC2). */
+  /** Omit unless the uploaded source is SVG. */
   svgSourceOnly?: boolean;
 }
 
-/** ICO multi-resolution layers — SPEC §2.1 / §4 / AC5. */
 export const ICO_SIZES = [16, 32, 48] as const;
 
 export const PRESET_IDS: readonly PresetId[] = [
@@ -46,9 +42,8 @@ export const PRESET_IDS: readonly PresetId[] = [
   'all',
 ] as const;
 
-/** Full matrix: §2.1–§2.5 assets. */
 export const ASSET_MATRIX: readonly MatrixEntry[] = [
-  // §2.1 Modern Web / Favicons
+  // Modern Web / Favicons
   {
     name: 'favicon.ico',
     size: { kind: 'layers', px: ICO_SIZES },
@@ -87,7 +82,7 @@ export const ASSET_MATRIX: readonly MatrixEntry[] = [
     svgSourceOnly: true,
   },
 
-  // §2.2 iOS / Apple Touch
+  // iOS / Apple Touch
   {
     name: 'apple-touch-icon-152x152.png',
     size: { kind: 'square', px: 152 },
@@ -117,7 +112,7 @@ export const ASSET_MATRIX: readonly MatrixEntry[] = [
     preset: 'apple',
   },
 
-  // §2.3 Android / PWA
+  // Android / PWA
   {
     name: 'android-chrome-192x192.png',
     size: { kind: 'square', px: 192 },
@@ -133,7 +128,7 @@ export const ASSET_MATRIX: readonly MatrixEntry[] = [
     preset: 'android',
   },
 
-  // §2.4 Open Graph / Social
+  // Open Graph / Social
   {
     name: 'og-image.png',
     size: { kind: 'rect', width: 1200, height: 630 },
@@ -142,7 +137,7 @@ export const ASSET_MATRIX: readonly MatrixEntry[] = [
     preset: 'og',
   },
 
-  // §2.5 Original size — ZIP name overridden to upload basename at package time
+  // Original size — ZIP name overridden to upload basename at package time
   {
     name: 'original.png',
     size: { kind: 'native' },
@@ -153,9 +148,9 @@ export const ASSET_MATRIX: readonly MatrixEntry[] = [
 ] as const;
 
 /**
- * Expand `presets` (§2.6) into concrete matrix rows.
- * `all` expands to §2.1–§2.4 only (not `original`).
- * SVG-only rows are dropped when `sourceIsSvg` is false (AC1/AC2).
+ * Expand `presets` into concrete matrix rows.
+ * `all` expands to platform assets only (not `original`).
+ * SVG-only rows are dropped when `sourceIsSvg` is false.
  */
 export function resolveMatrix(
   presets: readonly PresetId[],
@@ -182,7 +177,7 @@ export function resolveMatrix(
 }
 
 /**
- * ZIP entry name for the original-size asset — SPEC §2.5 / AC11.
+ * ZIP entry name for the original-size asset.
  * Uses the upload basename; falls back to `original.png`; disambiguates collisions.
  */
 export function originalZipName(

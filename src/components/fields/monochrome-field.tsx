@@ -11,7 +11,6 @@ export interface MonochromeFieldProps {
   id?: string;
 }
 
-/** Monochrome toggle — SPEC §5.3 (greyscale raster content). */
 export function MonochromeField({
   value,
   onChange,

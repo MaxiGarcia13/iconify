@@ -2,10 +2,7 @@ import type { GenerateOptions, PresetId } from './icons/types';
 
 import { GENERATE_OPTION_DEFAULTS } from './generate-defaults';
 
-/**
- * Platform presets that collapse into `all` — SPEC §2.6.
- * Does **not** include opt-in `original`.
- */
+/** Platform presets that collapse into `all`. Does not include opt-in `original`. */
 export const PLATFORM_PRESETS = [
   'favicon',
   'apple',
@@ -15,7 +12,6 @@ export const PLATFORM_PRESETS = [
 
 export type PlatformPreset = (typeof PLATFORM_PRESETS)[number];
 
-/** Individual preset checkboxes (excludes `all`) — SPEC §2.5 / §5.3. */
 export const SELECTABLE_PRESETS = [
   ...PLATFORM_PRESETS,
   'original',
@@ -23,10 +19,7 @@ export const SELECTABLE_PRESETS = [
 
 export type SelectablePreset = (typeof SELECTABLE_PRESETS)[number];
 
-/**
- * Client settings state — SPEC §5.3.
- * `transparent` + `backgroundHex` map to API `background` (`transparent` | `#RRGGBB`).
- */
+/** `transparent` + `backgroundHex` map to API `background` (`transparent` | `#RRGGBB`). */
 export interface SettingsState {
   padding: number;
   cornerRadius: number;
@@ -48,26 +41,22 @@ export const SETTINGS_DEFAULTS: SettingsState = {
 
 const HEX6 = /^#?[0-9a-f]{6}$/i;
 
-/** Clamp 0–50 percent controls (padding) — SPEC §3 / §5.3. */
 function clampPercent0to50(value: number): number {
   if (!Number.isFinite(value))
     return 0;
   return Math.min(50, Math.max(0, Math.round(value)));
 }
 
-/** Clamp 0–100 percent controls (corner radius) — SPEC §3 / §5.3. */
 function clampPercent0to100(value: number): number {
   if (!Number.isFinite(value))
     return 0;
   return Math.min(100, Math.max(0, Math.round(value)));
 }
 
-/** Clamp padding to SPEC §3 / §5.3 range (0–50, step 1). */
 export function clampPadding(value: number): number {
   return clampPercent0to50(value);
 }
 
-/** Clamp corner radius to SPEC §3 / §5.3 range (0–100, step 1). */
 export function clampCornerRadius(value: number): number {
   return clampPercent0to100(value);
 }
@@ -89,12 +78,11 @@ export function hasOriginalPreset(presets: readonly PresetId[]): boolean {
   return presets.includes('original');
 }
 
-/** Whether a preset checkbox should appear checked. */
 export function isPresetChecked(
   presets: readonly PresetId[],
   id: PresetId,
 ): boolean {
-  // `original` is opt-in and never implied by `all` (SPEC §2.6 / AC11).
+  // `original` is opt-in and never implied by `all`.
   if (id === 'original')
     return hasOriginalPreset(presets);
   if (hasAllPreset(presets))
@@ -159,7 +147,6 @@ function isPlatformPreset(id: PresetId): id is PlatformPreset {
   return (PLATFORM_PRESETS as readonly string[]).includes(id);
 }
 
-/** Map UI state → API `GenerateOptions` — SPEC §4.2 / §5.5. */
 export function toGenerateOptions(state: SettingsState): GenerateOptions {
   return {
     padding: clampPadding(state.padding),
@@ -170,7 +157,6 @@ export function toGenerateOptions(state: SettingsState): GenerateOptions {
   };
 }
 
-/** Append settings fields to `FormData` for `POST /api/v1/generate` — SPEC §5.5. */
 export function appendSettingsToFormData(
   body: FormData,
   state: SettingsState,

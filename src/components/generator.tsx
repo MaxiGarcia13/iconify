@@ -10,10 +10,6 @@ import { GenerateButton } from './generate-button';
 import { HtmlSnippet } from './html-snippet';
 import { SettingsPanel } from './settings-panel';
 
-/**
- * Client island composing dropzone, settings, download, and snippet — SPEC §5.1 / §5.2.
- * Holds shared file + settings for generate; disables controls while pending (§5.2 step 5).
- */
 export function Generator() {
   const [file, setFile] = useState<File | null>(null);
   const [settings, setSettings] = useState<SettingsState>(SETTINGS_DEFAULTS);

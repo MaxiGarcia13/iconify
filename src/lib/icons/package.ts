@@ -17,8 +17,8 @@ import {
 
 /**
  * Build every asset buffer for the requested presets, then return them for ZIP.
- * Never starts packaging until all buffers succeed (SPEC §4.8).
- * `sourceFilename` sets the §2.5 original-size ZIP entry name (upload basename).
+ * Never starts packaging until all buffers succeed.
+ * `sourceFilename` sets the original-size ZIP entry name (upload basename).
  */
 export async function processIconPackage(
   input: Buffer,
@@ -79,7 +79,6 @@ async function renderMatrixEntry(
 /**
  * Pipe asset buffers into an archiver ZIP stream.
  * Callers must build all buffers before invoking (no partial ZIP on failure).
- * SPEC §4.6.
  */
 export function createZipStream(assets: AssetEntry[]): PassThrough {
   const output = new PassThrough();
@@ -96,7 +95,6 @@ export function createZipStream(assets: AssetEntry[]): PassThrough {
   return output;
 }
 
-/** Astro / Web Response helper — SPEC §4.6. */
 export function zipToWebResponse(
   assets: AssetEntry[],
   filename = 'iconify-package.zip',

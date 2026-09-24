@@ -12,17 +12,11 @@ import {
 } from './fields';
 
 export interface SettingsPanelProps {
-  /** Controlled value; omit for internal state starting at SPEC defaults. */
   value?: SettingsState;
   onChange?: (next: SettingsState) => void;
-  /** When true, controls are non-interactive (no valid file yet — SPEC §5.2). */
   disabled?: boolean;
 }
 
-/**
- * Generator settings — SPEC §5.3.
- * Padding, corner radius, monochrome, background, presets.
- */
 export function SettingsPanel({
   value,
   onChange,

@@ -16,7 +16,6 @@ export interface HexColorInputProps {
   describedBy?: string;
 }
 
-/** Color picker + hex text fallback — SPEC §5.4. */
 export function HexColorInput({
   id,
   value,

@@ -23,7 +23,6 @@ export interface DropzoneTargetProps {
   onDrop: (e: DragEvent) => void;
 }
 
-/** Hidden file input + dashed drop / browse target. */
 export function DropzoneTarget({
   inputId,
   inputRef,
