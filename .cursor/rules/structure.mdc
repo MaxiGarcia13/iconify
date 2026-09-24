@@ -10,30 +10,16 @@ alwaysApply: true
 ```text
 src/
 ├── pages/
-│   ├── index.astro                 # Generator UI
-│   └── api/v1/generate.ts          # POST endpoint
-├── components/
-│   ├── generator.tsx               # Client island: dropzone + settings + download + snippet
-│   ├── dropzone.tsx
-│   ├── settings-panel.tsx
-│   ├── html-snippet.tsx
-│   └── footer.astro                # GitHub repository link
-├── lib/
-│   ├── icons/
-│   │   ├── matrix.ts               # Asset matrix (sizes, names, presets)
-│   │   ├── process.ts              # Sharp pipeline
-│   │   ├── ico.ts                  # Multi-resolution ICO
-│   │   └── package.ts              # ZIP stream assembly
-│   ├── snippet.ts                  # HTML <head> generator (UI only)
-│   ├── same-origin.ts              # Same-origin Origin check
-│   ├── upload-constraints.ts       # Shared MIME / size checks
-│   ├── generate-defaults.ts        # Shared GenerateOptions defaults (client-safe)
-│   └── validate.ts                 # Multipart / option validation (server)
-└── layouts/
-    └── app.astro
+│   ├── *.astro                     # Product pages
+│   └── api/v1/*.ts                 # POST handlers; contract in SPEC §3
+├── components/                     # UI; feature folders when a surface grows
+├── lib/                            # Processing, validation, shared helpers
+│   └── icons/                      # Matrix, Sharp pipeline, ICO, ZIP
+├── layouts/                        # Document shells
+└── test/                           # Shared fixtures and test helpers
 ```
 
-Keep processing in `src/lib/`; pages and components stay thin.
+Keep processing in `src/lib/`; pages and components stay thin. Colocated `*.test.ts` / `*.spec.ts` sit next to the source they cover.
 
 ## File naming
 

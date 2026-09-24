@@ -6,9 +6,10 @@ alwaysApply: false
 
 # Generator UI
 
-- Workflow: dropzone → settings → generate ZIP → copy `<head>` snippet.
+- Workflow: dropzone → settings → live preview via `POST /api/v1/preview` → generate ZIP → copy `<head>` snippet.
 - Client islands only where interactivity needs it (dropzone, settings, generate, snippet).
 - Validate type/size on the client; server validation remains authoritative.
-- Map form fields to SPEC §3: `file`, `padding`, `cornerRadius`, `monochrome`, `background`, `presets`.
+- Map form fields to SPEC §3: `file`, `padding`, `cornerRadius`, `monochrome`, `background`, `presets` (generate only).
+- Debounce preview requests with `debounce` from `@maxigarcia/js-utils`; abort in-flight preview (`AbortController`) on newer settings/file/clear; aborted responses must not update UI; presets do not trigger preview.
 - Snippet markup must match SPEC §5.4; omit SVG `<link>` for raster sources; no manifest link.
 - Generate disabled until a valid file is selected; surface API errors via `aria-live`.

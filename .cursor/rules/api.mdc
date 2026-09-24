@@ -6,12 +6,12 @@ alwaysApply: false
 
 # API Routes
 
-- Versioned under `/api/v1/`. Primary endpoint: `POST /api/v1/generate` only (v1).
+- Versioned under `/api/v1/`. Endpoints: `POST /api/v1/generate` (ZIP) and `POST /api/v1/preview` (256×256 PNG).
 - Set `export const prerender = false` on API routes.
 - Accept `multipart/form-data` only; otherwise `415` + `UNSUPPORTED_MEDIA_TYPE`.
-- Same-origin only: require matching `Origin` (SPEC §3.4); no CORS / `Access-Control-Allow-Origin`.
+- Same-origin only: require matching `Origin` (SPEC §3.5); no CORS / `Access-Control-Allow-Origin`.
 - Validate before Sharp: MIME, ≤10MB, padding 0–50, color fields per SPEC §3.
-- Success: stream ZIP (`application/zip`), `Content-Disposition: attachment`.
+- Generate success: stream ZIP (`application/zip`), `Content-Disposition: attachment`. Build all buffers first; never finalize a partial ZIP after mid-pipeline failure.
+- Preview success: single `image/png` (256×256); no ZIP; same visual options as generate, no `presets`.
 - Errors: JSON `{ error, message, details? }` with codes from SPEC.
-- Build all asset buffers first; never finalize a partial ZIP after a mid-pipeline failure.
 - Reject non-image / oversize uploads; do not log raw file contents; do not eval SVG.
