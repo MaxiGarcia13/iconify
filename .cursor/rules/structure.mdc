@@ -1,0 +1,47 @@
+---
+description: Source tree layout and project file naming conventions
+alwaysApply: true
+---
+
+# Project structure
+
+## Source layout
+
+```text
+src/
+├── pages/
+│   ├── index.astro                 # Generator UI
+│   └── api/v1/generate.ts          # POST endpoint
+├── components/
+│   ├── generator.tsx               # Client island: dropzone + settings + download + snippet
+│   ├── dropzone.tsx
+│   ├── settings-panel.tsx
+│   ├── html-snippet.tsx
+│   └── footer.astro                # GitHub repository link
+├── lib/
+│   ├── icons/
+│   │   ├── matrix.ts               # Asset matrix (sizes, names, presets)
+│   │   ├── process.ts              # Sharp pipeline
+│   │   ├── ico.ts                  # Multi-resolution ICO
+│   │   └── package.ts              # ZIP stream assembly
+│   ├── snippet.ts                  # HTML <head> generator (UI only)
+│   ├── same-origin.ts              # Same-origin Origin check
+│   ├── upload-constraints.ts       # Shared MIME / size checks
+│   ├── generate-defaults.ts        # Shared GenerateOptions defaults (client-safe)
+│   └── validate.ts                 # Multipart / option validation (server)
+└── layouts/
+    └── app.astro
+```
+
+Keep processing in `src/lib/`; pages and components stay thin.
+
+## File naming
+
+| Kind            | Rule                                     | Examples                                |
+| --------------- | ---------------------------------------- | --------------------------------------- |
+| Source          | lowercase kebab-case + extension         | `dropzone.tsx`, `upload-constraints.ts` |
+| Tests           | same basename + `.test` / `.spec` suffix | `upload-constraints.test.ts`            |
+| Docs / markdown | **UPPERCASE** basename + `.md`           | `SPEC.md`, `TASKS.md`, `AGENTS.md`      |
+| Cursor rules    | lowercase kebab-case                     | `.cursor/rules/sdd.mdc`                 |
+
+**Exceptions:** ZIP / product asset names from SPEC §2; npm/Node lockfiles; framework dirs (`node_modules`). Exported symbols may use PascalCase / camelCase; only **file paths** are constrained.

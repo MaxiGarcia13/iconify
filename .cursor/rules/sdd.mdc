@@ -5,10 +5,11 @@ alwaysApply: true
 
 # SDD (Iconify)
 
-- Before implementing features, read [`SPEC.md`](../../SPEC.md) (product) and [`AGENTS.md`](../../AGENTS.md) (engineering).
+- Before implementing features, read [`SPEC.md`](../../SPEC.md) (product) and [`AGENTS.md`](../../AGENTS.md) (orientation).
 - Change product requirements in `SPEC.md` first; update `TASKS.md` only for work-breakdown / checkboxes; then code.
 - Do not invent API fields, asset filenames, sizes, or status codes.
 - Prefer matching SPEC §2 asset matrix and §3 API contract exactly.
 - After finishing a slice, update checkboxes in `TASKS.md`.
 - Keep diffs scoped to the active milestone; no unrelated refactors.
-- Source files use lowercase kebab-case; markdown docs use UPPERCASE basenames (`AGENTS.md`).
+- TypeScript strict; match existing file style; do not add dependencies unless required by SPEC or explicitly requested.
+- Green tests before marking `TASKS.md` done (`npm run test:unit`).

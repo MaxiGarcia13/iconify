@@ -288,7 +288,7 @@ A task is done only when its acceptance criteria are met and unit tests for that
 1. **SPEC is product truth.** Do not invent API fields, asset names, sizes, or status codes outside this document.
 2. **Spec before code.** Change requirements here first; adjust `TASKS.md` if the work breakdown changes; then implement.
 3. **Drift is a defect.** Prefer aligning code to SPEC unless the SPEC change is intentional.
-4. **Engineering policy** (stack, layout, naming, security practice) lives in [`AGENTS.md`](./AGENTS.md).
+4. **Engineering conventions** live in [`.cursor/rules/`](./.cursor/rules/) and the short orientation in [`AGENTS.md`](./AGENTS.md).
 
 ---
 
