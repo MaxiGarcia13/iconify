@@ -1,6 +1,8 @@
 /** Default polite status while removal is in flight without a ratio yet. */
 export const REMOVE_BACKGROUND_LIVE_PENDING = 'Removing background…';
 
+export const REMOVE_BACKGROUND_BUTTON_LABEL = 'Remove background';
+
 export const REMOVE_BACKGROUND_ERROR_UNSUPPORTED
   = 'Background removal is only available for PNG and JPG.';
 

@@ -10,7 +10,9 @@ import { DropzoneTarget } from './dropzone-target';
 
 export function Dropzone({
   onFileChange,
+  onRemoveBackground,
   disabled = false,
+  removeBackgroundDisabled = false,
   previewUrl = null,
   previewPending = false,
 }: DropzoneProps) {
@@ -132,7 +134,11 @@ export function Dropzone({
             <DropzoneClearBar
               fileName={file.name}
               disabled={disabled}
+              removeBackgroundDisabled={
+                removeBackgroundDisabled || !onRemoveBackground
+              }
               onClear={clearSelection}
+              onRemoveBackground={() => onRemoveBackground?.()}
             />
           )
         : null}
