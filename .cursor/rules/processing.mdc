@@ -1,6 +1,6 @@
 ---
 description: Sharp icon processing and ZIP packaging rules
-globs: src/lib/icons/**/*.{ts,js}
+globs: src/domain/icons/**/*.{ts,js}
 alwaysApply: false
 ---
 

@@ -7,7 +7,7 @@ import {
   generateButtonLabel,
   generateLiveStatus,
   isGenerateDisabled,
-} from '@/lib/generate-ui';
+} from '@/domain/generate-ui';
 
 describe('generateButtonLabel', () => {
   it('switches idle ↔ pending copy', () => {

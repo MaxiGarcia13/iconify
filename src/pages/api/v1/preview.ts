@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
 
-import { renderIcon } from '@/lib/icons/process';
+import { renderIcon } from '@/domain/icons/process';
+import { parsePreviewForm } from '@/domain/validate';
 import { jsonError } from '@/lib/json-error';
 import { isSameOriginRequest } from '@/lib/same-origin';
-import { parsePreviewForm } from '@/lib/validate';
 
 export const prerender = false;
 

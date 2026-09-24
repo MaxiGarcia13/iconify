@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { GENERATE_OPTION_DEFAULTS } from '@/lib/generate-defaults';
+import { GENERATE_OPTION_DEFAULTS } from '@/domain/generate-defaults';
 import {
   appendSettingsToFormData,
   clampCornerRadius,
@@ -11,7 +11,7 @@ import {
   SETTINGS_DEFAULTS,
   toGenerateOptions,
   togglePreset,
-} from '@/lib/settings';
+} from '@/domain/settings';
 
 describe('settings defaults', () => {
   it('matches SPEC §3 / §5.3 GenerateRequest defaults', () => {

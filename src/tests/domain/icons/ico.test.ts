@@ -2,8 +2,8 @@ import { Buffer } from 'node:buffer';
 
 import { describe, expect, it } from 'vitest';
 
-import { buildFaviconIco } from '@/lib/icons/ico';
-import { ICO_SIZES } from '@/lib/icons/matrix';
+import { buildFaviconIco } from '@/domain/icons/ico';
+import { ICO_SIZES } from '@/domain/icons/matrix';
 import { solidPng } from '@/tests/fixtures';
 
 describe('buildFaviconIco', () => {

@@ -1,6 +1,6 @@
-import type { SettingsState } from './settings';
+import type { SettingsState } from '@/domain/settings';
 
-import { appendSettingsToFormData } from './settings';
+import { appendSettingsToFormData } from '@/domain/settings';
 
 export const DEFAULT_ZIP_FILENAME = 'iconify-package.zip';
 

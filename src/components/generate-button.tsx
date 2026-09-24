@@ -1,17 +1,17 @@
-import type { SettingsState } from '@/lib/settings';
+import type { SettingsState } from '@/domain/settings';
 
 import { cn } from '@maxigarcia/js-utils';
 import { useEffect, useId, useState } from 'react';
 
 import {
-  postGenerateDownload,
-  triggerBlobDownload,
-} from '@/lib/generate-download';
-import {
   generateButtonLabel,
   generateLiveStatus,
   isGenerateDisabled,
-} from '@/lib/generate-ui';
+} from '@/domain/generate-ui';
+import {
+  postGenerateDownload,
+  triggerBlobDownload,
+} from '@/services/generate-download';
 
 export interface GenerateButtonProps {
   file: File | null;

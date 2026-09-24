@@ -4,7 +4,7 @@ import type { DropzoneState } from './types';
 
 import { cn } from '@maxigarcia/js-utils';
 
-import { DROPZONE_ACCEPT } from '@/lib/upload-constraints';
+import { DROPZONE_ACCEPT } from '@/domain/upload-constraints';
 import { DropzoneFilePreview } from './dropzone-file-preview';
 import { DropzonePrompt } from './dropzone-prompt';
 

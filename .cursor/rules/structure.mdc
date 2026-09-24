@@ -13,23 +13,27 @@ src/
 │   ├── *.astro                     # Product pages
 │   └── api/v1/*.ts                 # POST handlers; contract in SPEC §3
 ├── components/                     # UI; feature folders when a surface grows
-├── lib/                            # Processing, validation, shared helpers
+├── domain/                         # Business rules + product types
 │   └── icons/                      # Matrix, Sharp pipeline, ICO, ZIP
+├── services/                       # Client functions that call API endpoints
+├── lib/                            # Generic helpers only
 ├── layouts/                        # Document shells
 └── tests/                          # Unit tests + shared fixtures/helpers
     ├── fixtures.ts / zip.ts        # Shared test helpers
+    ├── domain/…                    # Mirrors src/domain/
+    ├── services/…                  # Mirrors src/services/
     ├── lib/…                       # Mirrors src/lib/
     └── pages/…                     # Mirrors src/pages/
 ```
 
-Keep processing in `src/lib/`; pages and components stay thin. Place `*.test.ts` / `*.spec.ts` under `src/tests/`, mirroring the source path (e.g. `src/lib/validate.ts` → `src/tests/lib/validate.test.ts`).
+Keep business logic in `src/domain/`, HTTP clients in `src/services/`, and generic helpers in `src/lib/`. Pages and components stay thin. Place `*.test.ts` / `*.spec.ts` under `src/tests/`, mirroring the source path (e.g. `src/domain/validate.ts` → `src/tests/domain/validate.test.ts`).
 
 ## File naming
 
 | Kind            | Rule                                     | Examples                                |
 | --------------- | ---------------------------------------- | --------------------------------------- |
 | Source          | lowercase kebab-case + extension         | `dropzone.tsx`, `upload-constraints.ts` |
-| Tests           | same basename + `.test` / `.spec` suffix under `src/tests/` | `src/tests/lib/upload-constraints.test.ts` |
+| Tests           | same basename + `.test` / `.spec` suffix under `src/tests/` | `src/tests/domain/upload-constraints.test.ts` |
 | Docs / markdown | **UPPERCASE** basename + `.md`           | `SPEC.md`, `TASKS.md`, `AGENTS.md`      |
 | Cursor rules    | lowercase kebab-case                     | `.cursor/rules/sdd.mdc`                 |
 

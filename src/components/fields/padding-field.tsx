@@ -3,7 +3,7 @@ import type { ChangeEvent } from 'react';
 import { cn } from '@maxigarcia/js-utils';
 import { useId } from 'react';
 
-import { clampPadding } from '@/lib/settings';
+import { clampPadding } from '@/domain/settings';
 import { Field } from './field';
 import { fieldHintClass, fieldInputClass, fieldRangeClass } from './field-styles';
 

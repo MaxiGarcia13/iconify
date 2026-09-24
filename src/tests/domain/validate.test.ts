@@ -4,7 +4,7 @@ import {
   GENERATE_OPTION_DEFAULTS,
   MAX_UPLOAD_BYTES,
   parseGenerateForm,
-} from '@/lib/validate';
+} from '@/domain/validate';
 import { solidPng } from '@/tests/fixtures';
 
 async function formWithFile(

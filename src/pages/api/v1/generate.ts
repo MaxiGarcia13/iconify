@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
 
-import { processIconPackage, zipToWebResponse } from '@/lib/icons/package';
+import { processIconPackage, zipToWebResponse } from '@/domain/icons/package';
+import { parseGenerateForm } from '@/domain/validate';
 import { jsonError } from '@/lib/json-error';
 import { isSameOriginRequest } from '@/lib/same-origin';
-import { parseGenerateForm } from '@/lib/validate';
 
 export const prerender = false;
 

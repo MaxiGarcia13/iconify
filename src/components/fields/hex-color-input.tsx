@@ -3,7 +3,7 @@ import type { ChangeEvent } from 'react';
 import { cn } from '@maxigarcia/js-utils';
 import { useEffect, useState } from 'react';
 
-import { normalizeHex6 } from '@/lib/settings';
+import { normalizeHex6 } from '@/domain/settings';
 import { colorSwatchClass, fieldInputClass } from './field-styles';
 
 export interface HexColorInputProps {

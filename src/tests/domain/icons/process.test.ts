@@ -3,13 +3,13 @@ import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { ASSET_MATRIX } from '@/lib/icons/matrix';
+import { ASSET_MATRIX } from '@/domain/icons/matrix';
 import {
   passthroughFaviconSvg,
   renderIcon,
   renderOgImage,
   renderOriginal,
-} from '@/lib/icons/process';
+} from '@/domain/icons/process';
 import {
   alphaPng,
   emptyTransparentPng,

@@ -1,14 +1,14 @@
 import type { PassThrough } from 'node:stream';
 
-import type { AssetEntry } from '@/lib/icons/types';
+import type { AssetEntry } from '@/domain/icons/types';
 import { Buffer } from 'node:buffer';
 
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { GENERATE_OPTION_DEFAULTS } from '@/lib/generate-defaults';
-import { resolveMatrix } from '@/lib/icons/matrix';
-import { createZipStream, processIconPackage, zipToWebResponse } from '@/lib/icons/package';
+import { GENERATE_OPTION_DEFAULTS } from '@/domain/generate-defaults';
+import { resolveMatrix } from '@/domain/icons/matrix';
+import { createZipStream, processIconPackage, zipToWebResponse } from '@/domain/icons/package';
 import {
   complexSvg,
   hugeDimensionSvg,

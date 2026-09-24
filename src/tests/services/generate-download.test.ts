@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { SETTINGS_DEFAULTS } from '@/domain/settings';
 import {
   buildGenerateFormData,
   DEFAULT_ZIP_FILENAME,
@@ -7,8 +8,7 @@ import {
   GENERATE_ENDPOINT,
   messageFromErrorResponse,
   postGenerateDownload,
-} from '@/lib/generate-download';
-import { SETTINGS_DEFAULTS } from '@/lib/settings';
+} from '@/services/generate-download';
 
 function pngFile(name = 'logo.png'): File {
   return new File([new Uint8Array([137, 80, 78, 71])], name, {
