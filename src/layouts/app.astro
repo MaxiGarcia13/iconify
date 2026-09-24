@@ -62,8 +62,7 @@ const SITE_OG_IMAGE_PATH = '/og-image.png';
 const SITE_OG_IMAGE_WIDTH = 1200;
 const SITE_OG_IMAGE_HEIGHT = 630;
 const SITE_OG_IMAGE_TYPE = 'image/png';
-const SITE_OG_IMAGE_ALT
-  = 'Iconify — high-performance icon set generator preview';
+const SITE_OG_IMAGE_ALT = 'Iconify — high-performance icon set generator preview';
 
 const canonicalUrl = new URL('/', site).href;
 const ogImageUrl = new URL(SITE_OG_IMAGE_PATH, site).href;
@@ -76,10 +75,7 @@ const title = capitalize(name);
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, viewport-fit=cover"
-    />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
     <title>{title}</title>
     <meta name="description" content={description} />
@@ -88,16 +84,7 @@ const title = capitalize(name);
     <link rel="canonical" href={canonicalUrl} />
     <link rel="manifest" href={webManifestHref} />
 
-    {
-      SITE_ICON_LINKS.map((icon) => (
-        <link
-          rel={icon.rel}
-          href={icon.href}
-          sizes={icon.sizes}
-          type={icon.type}
-        />
-      ))
-    }
+    {SITE_ICON_LINKS.map((icon) => <link rel={icon.rel} href={icon.href} sizes={icon.sizes} type={icon.type} />)}
 
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="en_US" />

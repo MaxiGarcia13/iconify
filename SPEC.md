@@ -745,7 +745,7 @@ export function zipToWebResponse(
 
 ### 4.8 Endpoint Skeleton (Astro)
 
-```typescript
+```
 // src/pages/api/v1/generate.ts
 import type { APIRoute } from 'astro';
 import {
