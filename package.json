@@ -41,6 +41,7 @@
   "dependencies": {
     "@astrojs/react": "^7.0.0",
     "@astrojs/vercel": "^11.0.11",
+    "@imgly/background-removal": "^1.7.0",
     "@maxigarcia/js-utils": "^1.15.0",
     "archiver": "^7.0.1",
     "astro": "^7.3.5",
