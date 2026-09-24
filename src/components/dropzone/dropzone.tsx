@@ -3,6 +3,7 @@ import type { DropzoneProps, DropzoneState } from './types';
 
 import { useId, useRef, useState } from 'react';
 
+import { isRemoveBackgroundDisabled } from '@/domain/remove-background-ui';
 import { validateSourceFile } from '@/domain/upload-constraints';
 import { DropzoneClearBar } from './dropzone-clear-bar';
 import { DropzoneStatus } from './dropzone-status';
@@ -12,7 +13,7 @@ export function Dropzone({
   onFileChange,
   onRemoveBackground,
   disabled = false,
-  removeBackgroundDisabled = false,
+  removeBackgroundPending = false,
   previewUrl = null,
   previewPending = false,
 }: DropzoneProps) {
@@ -135,7 +136,12 @@ export function Dropzone({
               fileName={file.name}
               disabled={disabled}
               removeBackgroundDisabled={
-                removeBackgroundDisabled || !onRemoveBackground
+                isRemoveBackgroundDisabled({
+                  file,
+                  removalPending: removeBackgroundPending,
+                  generatePending: disabled,
+                  previewPending,
+                }) || !onRemoveBackground
               }
               onClear={clearSelection}
               onRemoveBackground={() => onRemoveBackground?.()}

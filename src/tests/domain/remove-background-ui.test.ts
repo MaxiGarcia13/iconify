@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   applyRemoveBackgroundResult,
   discardRemoveBackgroundUndo,
+  isRemoveBackgroundDisabled,
   REMOVE_BACKGROUND_ERROR_FAILED,
   REMOVE_BACKGROUND_ERROR_UNSUPPORTED,
   REMOVE_BACKGROUND_LIVE_PENDING,
@@ -142,5 +143,43 @@ describe('discardRemoveBackgroundUndo', () => {
       file: current,
       error: null,
     }).undoFile).toBeNull();
+  });
+});
+
+describe('isRemoveBackgroundDisabled', () => {
+  function file(name: string, type: string): File {
+    return new File([new Uint8Array([1])], name, { type });
+  }
+
+  it('disables when there is no file or the source is SVG', () => {
+    expect(isRemoveBackgroundDisabled({ file: null })).toBe(true);
+    expect(isRemoveBackgroundDisabled({
+      file: file('mark.svg', 'image/svg+xml'),
+    })).toBe(true);
+  });
+
+  it('enables for an idle raster source', () => {
+    expect(isRemoveBackgroundDisabled({
+      file: file('logo.png', 'image/png'),
+    })).toBe(false);
+    expect(isRemoveBackgroundDisabled({
+      file: file('photo.jpg', 'image/jpeg'),
+    })).toBe(false);
+  });
+
+  it('disables while removal, generate, or preview is pending', () => {
+    const raster = file('logo.png', 'image/png');
+    expect(isRemoveBackgroundDisabled({
+      file: raster,
+      removalPending: true,
+    })).toBe(true);
+    expect(isRemoveBackgroundDisabled({
+      file: raster,
+      generatePending: true,
+    })).toBe(true);
+    expect(isRemoveBackgroundDisabled({
+      file: raster,
+      previewPending: true,
+    })).toBe(true);
   });
 });

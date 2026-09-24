@@ -1,3 +1,5 @@
+import { isRasterSource } from '@/domain/upload-constraints';
+
 /** Default polite status while removal is in flight without a ratio yet. */
 export const REMOVE_BACKGROUND_LIVE_PENDING = 'Removing background…';
 
@@ -72,4 +74,23 @@ export function discardRemoveBackgroundUndo(
   state: Pick<RemoveBackgroundSourceState, 'file' | 'error'>,
 ): RemoveBackgroundSourceState {
   return { file: state.file, error: state.error, undoFile: null };
+}
+
+/**
+ * Remove background is enabled only for a raster source while idle
+ * (not during removal, generate, or preview).
+ */
+export function isRemoveBackgroundDisabled(input: {
+  file: File | null;
+  removalPending?: boolean;
+  generatePending?: boolean;
+  previewPending?: boolean;
+}): boolean {
+  if (!input.file || !isRasterSource(input.file))
+    return true;
+  return Boolean(
+    input.removalPending
+    || input.generatePending
+    || input.previewPending,
+  );
 }

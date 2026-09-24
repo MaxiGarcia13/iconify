@@ -3,8 +3,8 @@ export interface DropzoneProps {
   /** Dropzone action: remove background from the current raster source. */
   onRemoveBackground?: () => void;
   disabled?: boolean;
-  /** When true, disables only the Remove background control. */
-  removeBackgroundDisabled?: boolean;
+  /** True while client background removal is in flight. */
+  removeBackgroundPending?: boolean;
   /** Object URL from the live preview response. */
   previewUrl?: string | null;
   /** True while a preview request is in flight. */
