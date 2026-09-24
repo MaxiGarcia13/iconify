@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildHeadHtml } from './snippet';
+import { buildHeadHtml } from '@/lib/snippet';
 
 describe('buildHeadHtml', () => {
   it('includes SVG favicon link when source is SVG (SPEC §5.3)', () => {

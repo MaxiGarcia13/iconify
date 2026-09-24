@@ -16,10 +16,10 @@ Iconify turns one uploaded image (SVG, PNG, or JPG) into a complete icon package
 
 ### 1.1 Goals
 
-| ID  | Goal                                                                                  |
-| --- | ------------------------------------------------------------------------------------- |
-| G1  | Generate a complete favicon / PWA / iOS / Android / OG set from one upload in seconds |
-| G2  | Deliver the package as a downloadable ZIP without leaving generated icons on disk     |
+| ID  | Goal                                                                                     |
+| --- | ---------------------------------------------------------------------------------------- |
+| G1  | Generate a complete favicon / PWA / iOS / Android / OG set from one upload in seconds    |
+| G2  | Deliver the package as a downloadable ZIP without leaving generated icons on disk        |
 | G3  | Expose private generate + preview APIs for the product UI only (same origin; not public) |
 | G4  | Focused UI: dropzone with live preview → settings → download ZIP + HTML snippet          |
 
@@ -151,13 +151,13 @@ Builds the ZIP package. Additional field:
 
 Returns a single processed PNG for the dropzone live preview. Same visual fields as §3.1 (`file`, `background`, `padding`, `cornerRadius`, `monochrome`). **No** `presets` (presets only affect ZIP membership).
 
-| Code  | When                               | Body                                                          |
-| ----- | ---------------------------------- | ------------------------------------------------------------- |
-| `200` | Success                            | PNG (`image/png`), square **256×256**, same treatment as §4   |
-| `400` | Missing/bad file, size, or options | JSON error                                                    |
-| `403` | Missing or cross-origin `Origin`   | JSON error                                                    |
-| `415` | Not `multipart/form-data`          | JSON error                                                    |
-| `500` | Processing failure                 | JSON error                                                    |
+| Code  | When                               | Body                                                        |
+| ----- | ---------------------------------- | ----------------------------------------------------------- |
+| `200` | Success                            | PNG (`image/png`), square **256×256**, same treatment as §4 |
+| `400` | Missing/bad file, size, or options | JSON error                                                  |
+| `403` | Missing or cross-origin `Origin`   | JSON error                                                  |
+| `415` | Not `multipart/form-data`          | JSON error                                                  |
+| `500` | Processing failure                 | JSON error                                                  |
 
 No ZIP; no persisted temp files. Preview must use the same processing rules as packaged rasters (§4).
 
@@ -226,17 +226,17 @@ Single page: `/`. Flow: dropzone (live preview) → settings → generate → ZI
 
 ### 5.2 Workflow
 
-| Step | Actor | Behavior                                                                 |
-| ---- | ----- | ------------------------------------------------------------------------ |
-| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                        |
-| 2    | UI    | Validates; shows live preview + file meta; enables settings              |
-| 3    | User  | Adjusts settings / presets; preview updates for visual options (§5.3.1)  |
-| 4    | User  | Optionally replaces source (click preview or drop another file)          |
-| 5    | UI    | Replaces preview with the new file; current settings stay applied        |
-| 6    | User  | Clicks **Generate & Download ZIP**                                       |
-| 7    | UI    | Calls generate API; shows progress / disabled state                      |
-| 8    | UI    | On success: browser download + populate snippet                          |
-| 9    | UI    | On error: show inline message from API                                   |
+| Step | Actor | Behavior                                                                |
+| ---- | ----- | ----------------------------------------------------------------------- |
+| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                       |
+| 2    | UI    | Validates; shows live preview + file meta; enables settings             |
+| 3    | User  | Adjusts settings / presets; preview updates for visual options (§5.3.1) |
+| 4    | User  | Optionally replaces source (click preview or drop another file)         |
+| 5    | UI    | Replaces preview with the new file; current settings stay applied       |
+| 6    | User  | Clicks **Generate & Download ZIP**                                      |
+| 7    | UI    | Calls generate API; shows progress / disabled state                     |
+| 8    | UI    | On success: browser download + populate snippet                         |
+| 9    | UI    | On error: show inline message from API                                  |
 
 ### 5.3 Controls
 
@@ -254,18 +254,18 @@ Dropzone accepts the same types/size as the API. Generate disabled until a valid
 
 When a valid source file is selected, the dropzone shows a **live visual preview** from `POST /api/v1/preview` (§3.3) — the same processing as packaged rasters, not a client-side approximation.
 
-| Rule              | Behavior                                                                                                                                      |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Show on select    | After successful validation, request a preview and show the returned PNG in the dropzone                                                      |
-| Reflect settings  | Re-request preview when `padding`, `cornerRadius`, `monochrome`, or `background` change                                                       |
-| Debounce          | Debounce preview requests while settings change so rapid slider input does not flood the API                                                  |
-| Cancel in-flight  | If the user changes settings (or replaces/clears the file) after a preview request has already been sent, **abort** that pending request before starting the next one |
-| Presets           | Preset checkboxes do **not** trigger preview (they only select ZIP membership)                                                                |
-| Fidelity          | Server PNG at 256×256 using §4 treatment (pad, background, corner radius, monochrome)                                                         |
-| Stale responses   | Aborted or superseded responses must not update the UI                                                                                        |
-| Replace           | Clicking the preview opens the file picker; dropping another valid file replaces the source. Current settings remain and apply to the new file |
-| Clear             | Clear removes the file, restores the empty dropzone prompt, aborts any pending preview, and hides the preview                                 |
-| No file           | Empty / error states keep the existing dropzone prompts; no preview                                                                           |
+| Rule             | Behavior                                                                                                                                                              |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Show on select   | After successful validation, request a preview and show the returned PNG in the dropzone                                                                              |
+| Reflect settings | Re-request preview when `padding`, `cornerRadius`, `monochrome`, or `background` change                                                                               |
+| Debounce         | Debounce preview requests while settings change so rapid slider input does not flood the API                                                                          |
+| Cancel in-flight | If the user changes settings (or replaces/clears the file) after a preview request has already been sent, **abort** that pending request before starting the next one |
+| Presets          | Preset checkboxes do **not** trigger preview (they only select ZIP membership)                                                                                        |
+| Fidelity         | Server PNG at 256×256 using §4 treatment (pad, background, corner radius, monochrome)                                                                                 |
+| Stale responses  | Aborted or superseded responses must not update the UI                                                                                                                |
+| Replace          | Clicking the preview opens the file picker; dropping another valid file replaces the source. Current settings remain and apply to the new file                        |
+| Clear            | Clear removes the file, restores the empty dropzone prompt, aborts any pending preview, and hides the preview                                                         |
+| No file          | Empty / error states keep the existing dropzone prompts; no preview                                                                                                   |
 
 Preview does not write ZIP assets. Generate remains a separate action (§3.2).
 
@@ -305,20 +305,20 @@ A task is done only when its acceptance criteria are met and unit tests for that
 
 ## 7. Acceptance Criteria
 
-| ID   | Criterion                                                                                                                                                                                                                |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| AC1  | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded)                                                                                                                   |
-| AC2  | Upload SVG returns ZIP that also includes `favicon.svg`                                                                                                                                                                  |
-| AC3  | Invalid MIME or >10 MB returns `400` with `VALIDATION_ERROR`                                                                                                                                                             |
-| AC4  | `padding=20` visibly insets icon content in generated PNG assets                                                                                                                                                         |
-| AC5  | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                                                          |
-| AC6  | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                                                              |
-| AC7  | No intermediate icon files persist on disk after the request completes                                                                                                                                                   |
-| AC8  | `cornerRadius=100` on a square PNG yields circular rasters; `0` leaves square corners; invalid values return `400 VALIDATION_ERROR`                                                                                      |
-| AC9  | Document head on `/` wires §5.5 public icons, manifest, theme-color, absolute OG/Twitter for `/og-image.png`, and canonical / `og:url`                                                                                   |
-| AC10 | `monochrome=true` yields greyscale raster PNG/ICO content; `false`/omitted keeps source colors; invalid → `400`; SVG passthrough unchanged                                                                               |
-| AC11 | Omit `presets` → `all,original`; `original` alone → ZIP with only upload basename at source size; options still apply; explicit `all` omits original; combining `original` with other presets adds the upload-named file |
-| AC12 | Missing or mismatched `Origin` on generate or preview → `403 FORBIDDEN_ORIGIN`; matching same-origin proceeds; no `Access-Control-Allow-Origin`                                                                          |
+| ID   | Criterion                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC1  | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded)                                                                                                                                                                                                                                                                                               |
+| AC2  | Upload SVG returns ZIP that also includes `favicon.svg`                                                                                                                                                                                                                                                                                                                                              |
+| AC3  | Invalid MIME or >10 MB returns `400` with `VALIDATION_ERROR`                                                                                                                                                                                                                                                                                                                                         |
+| AC4  | `padding=20` visibly insets icon content in generated PNG assets                                                                                                                                                                                                                                                                                                                                     |
+| AC5  | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                                                                                                                                                                                                                                      |
+| AC6  | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                                                                                                                                                                                                                                          |
+| AC7  | No intermediate icon files persist on disk after the request completes                                                                                                                                                                                                                                                                                                                               |
+| AC8  | `cornerRadius=100` on a square PNG yields circular rasters; `0` leaves square corners; invalid values return `400 VALIDATION_ERROR`                                                                                                                                                                                                                                                                  |
+| AC9  | Document head on `/` wires §5.5 public icons, manifest, theme-color, absolute OG/Twitter for `/og-image.png`, and canonical / `og:url`                                                                                                                                                                                                                                                               |
+| AC10 | `monochrome=true` yields greyscale raster PNG/ICO content; `false`/omitted keeps source colors; invalid → `400`; SVG passthrough unchanged                                                                                                                                                                                                                                                           |
+| AC11 | Omit `presets` → `all,original`; `original` alone → ZIP with only upload basename at source size; options still apply; explicit `all` omits original; combining `original` with other presets adds the upload-named file                                                                                                                                                                             |
+| AC12 | Missing or mismatched `Origin` on generate or preview → `403 FORBIDDEN_ORIGIN`; matching same-origin proceeds; no `Access-Control-Allow-Origin`                                                                                                                                                                                                                                                      |
 | AC13 | Valid upload shows a live preview from `POST /api/v1/preview` (256×256 PNG); padding / corner radius / monochrome / background re-fetch a debounced preview; an in-flight preview is **aborted** when settings/file change again; presets do not; aborted/stale responses do not update the UI; click or drop replaces the source while keeping settings; clear aborts and restores the empty prompt |
 
 ---
@@ -334,10 +334,10 @@ A task is done only when its acceptance criteria are met and unit tests for that
 
 ## Document History
 
-| Version | Date       | Notes                                                          |
-| ------- | ---------- | -------------------------------------------------------------- |
-| 1.0.x   | 2026-07    | Technical specification (API samples, Sharp/UI code, layout)   |
-| 1.1.0   | 2026-09-24 | Slimmed to product decisions; engineering moved to `AGENTS.md` |
-| 1.2.0   | 2026-09-24 | Live dropzone preview reflecting visual settings (§5.3.1)      |
+| Version | Date       | Notes                                                           |
+| ------- | ---------- | --------------------------------------------------------------- |
+| 1.0.x   | 2026-07    | Technical specification (API samples, Sharp/UI code, layout)    |
+| 1.1.0   | 2026-09-24 | Slimmed to product decisions; engineering moved to `AGENTS.md`  |
+| 1.2.0   | 2026-09-24 | Live dropzone preview reflecting visual settings (§5.3.1)       |
 | 1.3.0   | 2026-09-24 | Server preview API `POST /api/v1/preview` + debounced UI (AC13) |
-| 1.3.1   | 2026-09-24 | Abort in-flight preview when user changes settings again       |
+| 1.3.1   | 2026-09-24 | Abort in-flight preview when user changes settings again        |

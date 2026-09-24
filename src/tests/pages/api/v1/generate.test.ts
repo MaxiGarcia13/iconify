@@ -4,15 +4,15 @@ import { describe, expect, it } from 'vitest';
 
 import { resolveMatrix } from '@/lib/icons/matrix';
 import { MAX_UPLOAD_BYTES } from '@/lib/validate';
+import { POST } from '@/pages/api/v1/generate';
 import {
   complexSvg,
   hugeDimensionSvg,
   solidJpeg,
   solidPng,
   solidSvg,
-} from '@/test/fixtures';
-import { listZipEntryNames } from '@/test/zip';
-import { POST } from './generate';
+} from '@/tests/fixtures';
+import { listZipEntryNames } from '@/tests/zip';
 
 const GENERATE_URL = 'http://localhost/api/v1/generate';
 const SAME_ORIGIN = new URL(GENERATE_URL).origin;

@@ -2,9 +2,9 @@ import { Buffer } from 'node:buffer';
 
 import { describe, expect, it } from 'vitest';
 
-import { solidPng } from '@/test/fixtures';
-import { buildFaviconIco } from './ico';
-import { ICO_SIZES } from './matrix';
+import { buildFaviconIco } from '@/lib/icons/ico';
+import { ICO_SIZES } from '@/lib/icons/matrix';
+import { solidPng } from '@/tests/fixtures';
 
 describe('buildFaviconIco', () => {
   it('returns an ICO with 16, 32, and 48 px layers (SPEC §2.1 / §4.4 / AC5)', async () => {

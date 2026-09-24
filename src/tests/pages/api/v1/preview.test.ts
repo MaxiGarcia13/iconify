@@ -3,8 +3,8 @@ import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import { solidPng } from '@/test/fixtures';
-import { POST } from './preview';
+import { POST } from '@/pages/api/v1/preview';
+import { solidPng } from '@/tests/fixtures';
 
 const PREVIEW_URL = 'http://localhost/api/v1/preview';
 const SAME_ORIGIN = new URL(PREVIEW_URL).origin;

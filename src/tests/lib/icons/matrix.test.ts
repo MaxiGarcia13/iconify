@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { ASSET_MATRIX, resolveMatrix } from './matrix';
+import { ASSET_MATRIX, resolveMatrix } from '@/lib/icons/matrix';
 
 describe('resolveMatrix SVG omission (SPEC §2.1 / §4.9 / AC1)', () => {
   const svgOnlyNames = ASSET_MATRIX

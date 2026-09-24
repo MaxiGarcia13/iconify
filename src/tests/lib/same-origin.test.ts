@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { isSameOriginRequest } from './same-origin';
+import { isSameOriginRequest } from '@/lib/same-origin';
 
 describe('isSameOriginRequest (SPEC §3.3 / AC12)', () => {
   it('returns true when Origin matches request URL origin', () => {

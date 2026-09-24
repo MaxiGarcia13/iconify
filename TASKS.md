@@ -19,7 +19,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 - [x] SVG passthrough for `favicon.svg` when source is SVG
 - [x] ZIP stream packager (`createZipStream` / `zipToWebResponse`)
 - [x] Vitest setup: `"test:unit": "vitest"` in `package.json` scripts
-- [x] Vitest config (`vitest.config.ts`) targeting `src/**/*.{test,spec}.{ts,tsx}`
+- [x] Vitest config (`vitest.config.ts`) targeting `src/tests/**/*.{test,spec}.{ts,tsx}`
 - [x] Unit tests for processing core: one assertion per SPEC §2 matrix filename/size (`renderIcon`, `renderOgImage`, `buildFaviconIco`, SVG passthrough)
 - [x] Unit tests for UI `head` snippet generator (content matches SPEC §5.3)
 - [x] Unit test that ZIP membership matches the generated asset set (no partial/empty archive)
@@ -133,18 +133,18 @@ SPEC §3.3 / §5.2–§5.3.1 / AC13. Preview via `POST /api/v1/preview` (same Sh
 
 ## Verification Shortcuts
 
-| AC   | How to verify                                                                                                  |
-| ---- | -------------------------------------------------------------------------------------------------------------- |
-| AC1  | PNG + `presets=all` → unzip; list matches §2 minus SVG                                                         |
-| AC2  | SVG upload → ZIP includes `favicon.svg`                                                                        |
-| AC3  | `.gif` or 11 MB file → `400 VALIDATION_ERROR`                                                                  |
-| AC4  | `padding=20` → visual inset on PNGs                                                                            |
-| AC5  | Inspect `favicon.ico` layers 16/32/48                                                                          |
-| AC6  | UI download + copy snippet without reload                                                                      |
-| AC7  | No leftover files under OS temp after request                                                                  |
-| AC8  | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400`                                     |
-| AC9  | View-source `/`: all §5.5 `public/` icons + `site.webmanifest` + theme-color + absolute OG/Twitter + canonical |
-| AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`                                       |
-| AC11 | Default/`original` → upload basename at source size; explicit `all` omits it                                   |
-| AC12 | Missing/cross-origin `Origin` → `403 FORBIDDEN_ORIGIN`; same-origin OK                                         |
+| AC   | How to verify                                                                                                                                           |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC1  | PNG + `presets=all` → unzip; list matches §2 minus SVG                                                                                                  |
+| AC2  | SVG upload → ZIP includes `favicon.svg`                                                                                                                 |
+| AC3  | `.gif` or 11 MB file → `400 VALIDATION_ERROR`                                                                                                           |
+| AC4  | `padding=20` → visual inset on PNGs                                                                                                                     |
+| AC5  | Inspect `favicon.ico` layers 16/32/48                                                                                                                   |
+| AC6  | UI download + copy snippet without reload                                                                                                               |
+| AC7  | No leftover files under OS temp after request                                                                                                           |
+| AC8  | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400`                                                                              |
+| AC9  | View-source `/`: all §5.5 `public/` icons + `site.webmanifest` + theme-color + absolute OG/Twitter + canonical                                          |
+| AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`                                                                                |
+| AC11 | Default/`original` → upload basename at source size; explicit `all` omits it                                                                            |
+| AC12 | Missing/cross-origin `Origin` → `403 FORBIDDEN_ORIGIN`; same-origin OK                                                                                  |
 | AC13 | Upload → `POST /api/v1/preview` 256 PNG; debounced re-fetch; abort in-flight on newer change; presets ignored; click/drop replaces; clear aborts + idle |

@@ -7,8 +7,8 @@ import {
   GENERATE_ENDPOINT,
   messageFromErrorResponse,
   postGenerateDownload,
-} from './generate-download';
-import { SETTINGS_DEFAULTS } from './settings';
+} from '@/lib/generate-download';
+import { SETTINGS_DEFAULTS } from '@/lib/settings';
 
 function pngFile(name = 'logo.png'): File {
   return new File([new Uint8Array([137, 80, 78, 71])], name, {

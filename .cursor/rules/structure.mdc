@@ -16,17 +16,20 @@ src/
 ├── lib/                            # Processing, validation, shared helpers
 │   └── icons/                      # Matrix, Sharp pipeline, ICO, ZIP
 ├── layouts/                        # Document shells
-└── test/                           # Shared fixtures and test helpers
+└── tests/                          # Unit tests + shared fixtures/helpers
+    ├── fixtures.ts / zip.ts        # Shared test helpers
+    ├── lib/…                       # Mirrors src/lib/
+    └── pages/…                     # Mirrors src/pages/
 ```
 
-Keep processing in `src/lib/`; pages and components stay thin. Colocated `*.test.ts` / `*.spec.ts` sit next to the source they cover.
+Keep processing in `src/lib/`; pages and components stay thin. Place `*.test.ts` / `*.spec.ts` under `src/tests/`, mirroring the source path (e.g. `src/lib/validate.ts` → `src/tests/lib/validate.test.ts`).
 
 ## File naming
 
 | Kind            | Rule                                     | Examples                                |
 | --------------- | ---------------------------------------- | --------------------------------------- |
 | Source          | lowercase kebab-case + extension         | `dropzone.tsx`, `upload-constraints.ts` |
-| Tests           | same basename + `.test` / `.spec` suffix | `upload-constraints.test.ts`            |
+| Tests           | same basename + `.test` / `.spec` suffix under `src/tests/` | `src/tests/lib/upload-constraints.test.ts` |
 | Docs / markdown | **UPPERCASE** basename + `.md`           | `SPEC.md`, `TASKS.md`, `AGENTS.md`      |
 | Cursor rules    | lowercase kebab-case                     | `.cursor/rules/sdd.mdc`                 |
 

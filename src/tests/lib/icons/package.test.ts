@@ -1,22 +1,22 @@
 import type { PassThrough } from 'node:stream';
 
-import type { AssetEntry } from './types';
+import type { AssetEntry } from '@/lib/icons/types';
 import { Buffer } from 'node:buffer';
 
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
 import { GENERATE_OPTION_DEFAULTS } from '@/lib/generate-defaults';
+import { resolveMatrix } from '@/lib/icons/matrix';
+import { createZipStream, processIconPackage, zipToWebResponse } from '@/lib/icons/package';
 import {
   complexSvg,
   hugeDimensionSvg,
   solidJpeg,
   solidPng,
   solidSvg,
-} from '@/test/fixtures';
-import { listZipEntryNames } from '@/test/zip';
-import { resolveMatrix } from './matrix';
-import { createZipStream, processIconPackage, zipToWebResponse } from './package';
+} from '@/tests/fixtures';
+import { listZipEntryNames } from '@/tests/zip';
 
 async function streamToBuffer(stream: PassThrough): Promise<Buffer> {
   const chunks: Buffer[] = [];

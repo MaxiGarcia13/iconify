@@ -12,7 +12,7 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    include: ['src/tests/**/*.{test,spec}.{ts,tsx}'],
     environment: 'node',
     passWithNoTests: true,
   },

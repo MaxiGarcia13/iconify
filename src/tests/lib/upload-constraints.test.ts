@@ -9,7 +9,7 @@ import {
   MAX_UPLOAD_BYTES,
   normalizeMime,
   validateSourceFile,
-} from './upload-constraints';
+} from '@/lib/upload-constraints';
 
 describe('upload-constraints', () => {
   it('exposes SPEC §3.2 / §5.3 accept list for the dropzone', () => {

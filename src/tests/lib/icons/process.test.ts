@@ -3,19 +3,19 @@ import { Buffer } from 'node:buffer';
 import sharp from 'sharp';
 import { describe, expect, it } from 'vitest';
 
-import {
-  alphaPng,
-  emptyTransparentPng,
-  halfTransparentPng,
-  solidPng,
-} from '@/test/fixtures';
-import { ASSET_MATRIX } from './matrix';
+import { ASSET_MATRIX } from '@/lib/icons/matrix';
 import {
   passthroughFaviconSvg,
   renderIcon,
   renderOgImage,
   renderOriginal,
-} from './process';
+} from '@/lib/icons/process';
+import {
+  alphaPng,
+  emptyTransparentPng,
+  halfTransparentPng,
+  solidPng,
+} from '@/tests/fixtures';
 
 const SQUARE_PNG_ENTRIES = ASSET_MATRIX.filter(
   (entry) => entry.format === 'png' && entry.size.kind === 'square',
