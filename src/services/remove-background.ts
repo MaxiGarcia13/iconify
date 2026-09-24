@@ -4,12 +4,6 @@ import {
 } from '@/domain/remove-background-ui';
 import { isRasterSource } from '@/domain/upload-constraints';
 
-export type RemoveBackgroundProgress = (
-  key: string,
-  current: number,
-  total: number,
-) => void;
-
 export type RemoveBackgroundResult
   = | { ok: true; file: File }
     | { ok: false; message: string };
@@ -18,7 +12,6 @@ export type RemoveBackgroundResult
 export type RemoveBackgroundFn = (
   image: Blob | File,
   configuration?: {
-    progress?: RemoveBackgroundProgress;
     output?: {
       format?: 'image/png' | 'image/jpeg' | 'image/webp';
       type?: 'foreground' | 'background' | 'mask';
@@ -90,7 +83,6 @@ export async function removeBackgroundFromSource(
   options: {
     removeBackground?: RemoveBackgroundFn;
     loader?: RemoveBackgroundLoader;
-    onProgress?: RemoveBackgroundProgress;
   } = {},
 ): Promise<RemoveBackgroundResult> {
   if (!isRasterSource(file)) {
@@ -107,7 +99,6 @@ export async function removeBackgroundFromSource(
   let blob: Blob;
   try {
     blob = await remove(file, {
-      progress: options.onProgress,
       output: { format: 'image/png', type: 'foreground' },
     });
   } catch {

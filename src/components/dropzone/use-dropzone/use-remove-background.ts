@@ -3,6 +3,7 @@ import type { Dispatch, RefObject, SetStateAction } from 'react';
 import type { DropzoneState } from '../types';
 
 import { useRef, useState } from 'react';
+
 import {
   applyRemoveBackgroundResult,
   isRemoveBackgroundDisabled,
@@ -29,11 +30,9 @@ export function useDropzoneRemoveBackground({
   previewPending,
 }: UseDropzoneRemoveBackgroundOptions) {
   const [removalPending, setRemovalPending] = useState(false);
-  const [progressLabel, setProgressLabel] = useState<string | null>(null);
 
   const runnerRef = useRef(createRemoveBackgroundRunner({
     onPending: setRemovalPending,
-    onProgress: setProgressLabel,
     onResult: (result) => {
       setFile((previous) => {
         if (!previous)
@@ -77,7 +76,6 @@ export function useDropzoneRemoveBackground({
   return {
     removalPending,
     removeBackgroundDisabled,
-    progressLabel,
     cancel,
     onRemoveBackground,
   };

@@ -17,6 +17,7 @@ export interface DropzoneTargetProps {
   error: string | null;
   previewUrl?: string | null;
   previewPending?: boolean;
+  removeBackgroundPending?: boolean;
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onOpenPicker: () => void;
   onDragEnter: (e: DragEvent) => void;
@@ -34,6 +35,7 @@ export function DropzoneTarget({
   error,
   previewUrl = null,
   previewPending = false,
+  removeBackgroundPending = false,
   onInputChange,
   onOpenPicker,
   onDragEnter,
@@ -85,6 +87,7 @@ export function DropzoneTarget({
                 file={file}
                 previewUrl={previewUrl}
                 previewPending={previewPending}
+                removeBackgroundPending={removeBackgroundPending}
               />
             )
           : <DropzonePrompt displayState={displayState} />}

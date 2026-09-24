@@ -28,6 +28,7 @@ export function Dropzone({
         error={dz.error}
         previewUrl={previewUrl}
         previewPending={previewPending}
+        removeBackgroundPending={dz.removalPending}
         onInputChange={dz.onInputChange}
         onOpenPicker={dz.openPicker}
         onDragEnter={dz.onDragEnter}
@@ -42,6 +43,7 @@ export function Dropzone({
               fileName={dz.file.name}
               disabled={disabled}
               removeBackgroundDisabled={dz.removeBackgroundDisabled}
+              removeBackgroundPending={dz.removalPending}
               onClear={dz.clearSelection}
               onRemoveBackground={dz.onRemoveBackground}
             />

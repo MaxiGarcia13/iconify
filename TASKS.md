@@ -134,7 +134,7 @@ SPEC §5.3.2 / AC14. Browser-only cutout via `@imgly/background-removal` (not th
 ### Client
 
 - [x] Service helper: run removal on a `File`/`Blob` → PNG `Blob`/`File` with alpha; sensible basename (e.g. preserve stem + `.png`, or `-nobg.png`)
-- [x] Progress callback wiring for model download + inference (surface to UI)
+- [x] Pending state wiring (simple pending copy; no percent progress)
 - [x] Error mapping: failure → inline / `aria-live` message; do not clear the current file
 - [x] Optional **Undo**: keep pre-removal `File` in memory until clear / replace / another remove; restore on Undo
 
@@ -142,7 +142,7 @@ SPEC §5.3.2 / AC14. Browser-only cutout via `@imgly/background-removal` (not th
 
 - [x] Dropzone action bar (next to Clear): **Remove background** — not in Settings panel
 - [x] Enabled only when a valid raster source is selected; disabled for SVG, while removal/generate/preview pending, and when no file
-- [x] Pending state: disable control + announce progress; abort/supersede rules if user clears or replaces mid-run
+- [x] Pending state: disable control + announce pending; abort/supersede rules if user clears or replaces mid-run
 - [x] On success: replace `file` with cutout PNG; keep current settings; live preview re-fetches automatically
 - [ ] Clear / replace source: discard undo buffer; abort in-flight removal
 

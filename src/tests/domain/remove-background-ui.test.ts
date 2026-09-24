@@ -4,40 +4,33 @@ import {
   applyRemoveBackgroundResult,
   discardRemoveBackgroundUndo,
   isRemoveBackgroundDisabled,
+  REMOVE_BACKGROUND_BUTTON_LABEL,
+  REMOVE_BACKGROUND_BUTTON_PENDING_LABEL,
   REMOVE_BACKGROUND_ERROR_FAILED,
   REMOVE_BACKGROUND_ERROR_UNSUPPORTED,
   REMOVE_BACKGROUND_LIVE_PENDING,
+  removeBackgroundButtonLabel,
   removeBackgroundLiveStatus,
-  removeBackgroundProgressLabel,
   undoRemoveBackground,
 } from '@/domain/remove-background-ui';
 
-describe('removeBackgroundProgressLabel', () => {
-  it('returns pending copy when total is not usable', () => {
-    expect(removeBackgroundProgressLabel(0, 0)).toBe(REMOVE_BACKGROUND_LIVE_PENDING);
-    expect(removeBackgroundProgressLabel(1, -1)).toBe(REMOVE_BACKGROUND_LIVE_PENDING);
-  });
-
-  it('includes a clamped percent when total is known', () => {
-    expect(removeBackgroundProgressLabel(1, 4)).toBe(
-      `${REMOVE_BACKGROUND_LIVE_PENDING} 25%`,
-    );
-    expect(removeBackgroundProgressLabel(4, 4)).toBe(
-      `${REMOVE_BACKGROUND_LIVE_PENDING} 100%`,
-    );
-    expect(removeBackgroundProgressLabel(5, 4)).toBe(
-      `${REMOVE_BACKGROUND_LIVE_PENDING} 100%`,
+describe('removeBackgroundButtonLabel', () => {
+  it('switches idle ↔ pending copy', () => {
+    expect(removeBackgroundButtonLabel(false)).toBe(REMOVE_BACKGROUND_BUTTON_LABEL);
+    expect(removeBackgroundButtonLabel(true)).toBe(
+      REMOVE_BACKGROUND_BUTTON_PENDING_LABEL,
     );
   });
 });
 
 describe('removeBackgroundLiveStatus', () => {
-  it('announces progress while pending', () => {
+  it('announces pending copy while in flight', () => {
     expect(removeBackgroundLiveStatus(true, null)).toBe(
       REMOVE_BACKGROUND_LIVE_PENDING,
     );
-    expect(removeBackgroundLiveStatus(true, 'stale', 'Removing background… 50%'))
-      .toBe('Removing background… 50%');
+    expect(removeBackgroundLiveStatus(true, 'stale')).toBe(
+      REMOVE_BACKGROUND_LIVE_PENDING,
+    );
   });
 
   it('announces error when idle', () => {

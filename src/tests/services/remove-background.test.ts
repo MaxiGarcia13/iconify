@@ -105,21 +105,6 @@ describe('removeBackgroundFromSource', () => {
     expect(result.message).toMatch(/failed/i);
   });
 
-  it('forwards onProgress to the remover config', async () => {
-    const onProgress = vi.fn();
-    const removeBackground = vi.fn<RemoveBackgroundFn>(async (_image, config) => {
-      config?.progress?.('compute:inference', 1, 4);
-      return new Blob([new Uint8Array([1])], { type: 'image/png' });
-    });
-
-    await removeBackgroundFromSource(rasterFile('a.png', 'image/png'), {
-      removeBackground,
-      onProgress,
-    });
-
-    expect(onProgress).toHaveBeenCalledWith('compute:inference', 1, 4);
-  });
-
   it('lazy-loads via loader only when no remover is injected', async () => {
     const remover = vi.fn<RemoveBackgroundFn>(async () =>
       new Blob([new Uint8Array([1])], { type: 'image/png' }),

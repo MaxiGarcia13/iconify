@@ -5,6 +5,14 @@ export const REMOVE_BACKGROUND_LIVE_PENDING = 'Removing background…';
 
 export const REMOVE_BACKGROUND_BUTTON_LABEL = 'Remove background';
 
+export const REMOVE_BACKGROUND_BUTTON_PENDING_LABEL = 'Removing background…';
+
+export function removeBackgroundButtonLabel(pending: boolean): string {
+  return pending
+    ? REMOVE_BACKGROUND_BUTTON_PENDING_LABEL
+    : REMOVE_BACKGROUND_BUTTON_LABEL;
+}
+
 export const REMOVE_BACKGROUND_ERROR_UNSUPPORTED
   = 'Background removal is only available for PNG and JPG.';
 
@@ -19,30 +27,15 @@ export interface RemoveBackgroundSourceState {
 }
 
 /**
- * Label from library progress (`current` / `total`).
- * Used for aria-live while model download / inference runs.
- */
-export function removeBackgroundProgressLabel(
-  current: number,
-  total: number,
-): string {
-  if (!(total > 0) || !Number.isFinite(current) || !Number.isFinite(total))
-    return REMOVE_BACKGROUND_LIVE_PENDING;
-  const pct = Math.min(100, Math.max(0, Math.round((current / total) * 100)));
-  return `${REMOVE_BACKGROUND_LIVE_PENDING} ${pct}%`;
-}
-
-/**
- * Text for the polite live region: progress while pending, else error message.
+ * Text for the polite live region: pending copy while in flight, else error message.
  * Empty string when idle with no error.
  */
 export function removeBackgroundLiveStatus(
   pending: boolean,
   error: string | null,
-  progressLabel: string | null = null,
 ): string {
   if (pending)
-    return progressLabel ?? REMOVE_BACKGROUND_LIVE_PENDING;
+    return REMOVE_BACKGROUND_LIVE_PENDING;
   return error ?? '';
 }
 

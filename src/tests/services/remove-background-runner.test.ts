@@ -3,7 +3,6 @@ import type { RemoveBackgroundResult } from '@/services/remove-background';
 import { describe, expect, it } from 'vitest';
 import {
   REMOVE_BACKGROUND_ERROR_FAILED,
-  REMOVE_BACKGROUND_LIVE_PENDING,
 } from '@/domain/remove-background-ui';
 import { createRemoveBackgroundRunner } from '@/services/remove-background-runner';
 
@@ -12,9 +11,8 @@ function pngFile(name = 'logo.png'): File {
 }
 
 describe('createRemoveBackgroundRunner', () => {
-  it('reports pending and progress, then the result', async () => {
+  it('reports pending then the result', async () => {
     const pendingFlags: boolean[] = [];
-    const progressLabels: Array<string | null> = [];
     const results: RemoveBackgroundResult[] = [];
 
     const cutout = new File([new Uint8Array([9])], 'logo.png', {
@@ -24,23 +22,16 @@ describe('createRemoveBackgroundRunner', () => {
     const runner = createRemoveBackgroundRunner(
       {
         onPending: (p) => pendingFlags.push(p),
-        onProgress: (label) => progressLabels.push(label),
         onResult: (result) => results.push(result),
       },
       {
-        removeBackgroundFromSourceFn: async (_file, options) => {
-          options?.onProgress?.('compute:inference', 1, 4);
-          return { ok: true, file: cutout };
-        },
+        removeBackgroundFromSourceFn: async () => ({ ok: true, file: cutout }),
       },
     );
 
     await runner.run(pngFile());
 
     expect(pendingFlags).toEqual([true, false]);
-    expect(progressLabels[0]).toBe(REMOVE_BACKGROUND_LIVE_PENDING);
-    expect(progressLabels).toContain(`${REMOVE_BACKGROUND_LIVE_PENDING} 25%`);
-    expect(progressLabels.at(-1)).toBeNull();
     expect(results).toEqual([{ ok: true, file: cutout }]);
   });
 
@@ -54,7 +45,6 @@ describe('createRemoveBackgroundRunner', () => {
     const runner = createRemoveBackgroundRunner(
       {
         onPending: () => {},
-        onProgress: () => {},
         onResult: (result) => results.push(result),
       },
       {
@@ -80,7 +70,6 @@ describe('createRemoveBackgroundRunner', () => {
     const runner = createRemoveBackgroundRunner(
       {
         onPending: () => {},
-        onProgress: () => {},
         onResult: (result) => results.push(result),
       },
       {

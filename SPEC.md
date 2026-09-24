@@ -283,7 +283,7 @@ Optional **client-side** action on the dropzone (alongside Clear) — **not** in
 | Eligibility     | Enabled only for a valid **raster** source (PNG / JPG). Disabled or hidden for SVG; disabled when no file or while removal / generate / preview is pending |
 | On success      | Replace the source with a **PNG with alpha** (foreground cutout). Keep current settings. Live preview re-fetches for the new file (§5.3.1)                 |
 | Basename        | Preserve a sensible upload stem as `.png` (e.g. `logo.jpg` → `logo.png`, or an explicit `-nobg.png` stem). Bytes are always PNG                            |
-| Progress        | Show pending / progress while model assets load and inference runs; announce for assistive tech                                                            |
+| Progress        | Show pending state while removal runs; announce for assistive tech                                                                                         |
 | Failure         | Inline / `aria-live` error; **keep** the prior source file; do not clear the dropzone                                                                      |
 | Undo            | Optional: keep the pre-removal file until Clear, replace, or another successful remove; **Undo** restores it                                               |
 | Clear / replace | Abort in-flight removal; discard any undo buffer; Clear restores the empty prompt as in §5.3.1                                                             |

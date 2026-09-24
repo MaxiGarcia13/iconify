@@ -56,7 +56,6 @@ export function useDropzone({
     liveStatus: removeBackgroundLiveStatus(
       remove.removalPending,
       error,
-      remove.progressLabel,
     ),
     errorTone: Boolean(error) && !remove.removalPending,
     clearSelection: fileApi.clearSelection,
