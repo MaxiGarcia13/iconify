@@ -30,6 +30,7 @@ export function useDropzoneRemoveBackground({
   previewPending,
 }: UseDropzoneRemoveBackgroundOptions) {
   const [removalPending, setRemovalPending] = useState(false);
+  const undoFileRef = useRef<File | null>(null);
 
   const runnerRef = useRef(createRemoveBackgroundRunner({
     onPending: setRemovalPending,
@@ -37,8 +38,13 @@ export function useDropzoneRemoveBackground({
       setFile((previous) => {
         if (!previous)
           return previous;
-        const applied = applyRemoveBackgroundResult(previous, result);
+        const applied = applyRemoveBackgroundResult(
+          previous,
+          result,
+          undoFileRef.current,
+        );
         setError(applied.error);
+        undoFileRef.current = applied.undoFile;
         if (result.ok) {
           setState('ready');
           onFileChangeRef.current?.(applied.file);
@@ -48,8 +54,18 @@ export function useDropzoneRemoveBackground({
     },
   }));
 
-  function cancel() {
+  function cancelInFlight() {
     runnerRef.current.cancel();
+  }
+
+  function discardUndoBuffer() {
+    undoFileRef.current = null;
+  }
+
+  /** Clear or replace: abort in-flight removal and drop the undo buffer. */
+  function interrupt() {
+    cancelInFlight();
+    discardUndoBuffer();
   }
 
   function onRemoveBackground() {
@@ -60,9 +76,8 @@ export function useDropzoneRemoveBackground({
       removalPending,
       generatePending: disabled,
       previewPending,
-    })) {
+    }))
       return;
-    }
     void runnerRef.current.run(file);
   }
 
@@ -76,7 +91,7 @@ export function useDropzoneRemoveBackground({
   return {
     removalPending,
     removeBackgroundDisabled,
-    cancel,
+    interrupt,
     onRemoveBackground,
   };
 }

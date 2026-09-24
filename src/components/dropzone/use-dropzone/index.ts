@@ -40,7 +40,7 @@ export function useDropzone({
     setState,
     onFileChange,
     inputRef,
-    onInterrupt: remove.cancel,
+    onInterrupt: remove.interrupt,
   });
 
   const displayState = state === 'dragging' ? 'dragging' : file ? 'ready' : state;

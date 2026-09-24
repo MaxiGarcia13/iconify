@@ -14,7 +14,7 @@ export interface UseDropzoneFileOptions {
   setState: Dispatch<SetStateAction<DropzoneState>>;
   onFileChange?: (file: File | null) => void;
   inputRef: RefObject<HTMLInputElement | null>;
-  /** Cancel in-flight work before clear / replace. */
+  /** Abort in-flight removal and discard undo before clear / replace. */
   onInterrupt: () => void;
 }
 

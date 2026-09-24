@@ -144,7 +144,7 @@ SPEC §5.3.2 / AC14. Browser-only cutout via `@imgly/background-removal` (not th
 - [x] Enabled only when a valid raster source is selected; disabled for SVG, while removal/generate/preview pending, and when no file
 - [x] Pending state: disable control + announce pending; abort/supersede rules if user clears or replaces mid-run
 - [x] On success: replace `file` with cutout PNG; keep current settings; live preview re-fetches automatically
-- [ ] Clear / replace source: discard undo buffer; abort in-flight removal
+- [x] Clear / replace source: discard undo buffer; abort in-flight removal
 
 ### Tests
 
