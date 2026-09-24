@@ -3,9 +3,11 @@ import { describe, expect, it } from 'vitest';
 import { GENERATE_OPTION_DEFAULTS } from '@/domain/generate-defaults';
 import {
   appendSettingsToFormData,
+  appendVisualSettingsToFormData,
   isPresetChecked,
   SETTINGS_DEFAULTS,
   toGenerateOptions,
+  visualPreviewKey,
 } from '@/domain/settings';
 
 describe('settings defaults', () => {
@@ -123,5 +125,22 @@ describe('toGenerateOptions / appendSettingsToFormData', () => {
     expect(SETTINGS_DEFAULTS.presets).toEqual(['all', 'original']);
     expect(isPresetChecked(SETTINGS_DEFAULTS.presets, 'original')).toBe(true);
     expect(isPresetChecked(SETTINGS_DEFAULTS.presets, 'favicon')).toBe(true);
+  });
+
+  it('appendVisualSettingsToFormData omits presets (preview, SPEC §3.3)', () => {
+    const body = new FormData();
+    appendVisualSettingsToFormData(body, {
+      ...SETTINGS_DEFAULTS,
+      padding: 8,
+      presets: ['all', 'original'],
+    });
+    expect(body.get('padding')).toBe('8');
+    expect(body.get('presets')).toBeNull();
+  });
+
+  it('visualPreviewKey ignores presets', () => {
+    expect(
+      visualPreviewKey({ ...SETTINGS_DEFAULTS, presets: ['og'] }),
+    ).toBe(visualPreviewKey(SETTINGS_DEFAULTS));
   });
 });

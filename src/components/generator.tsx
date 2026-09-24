@@ -9,12 +9,14 @@ import { Dropzone } from './dropzone';
 import { GenerateButton } from './generate-button';
 import { HtmlSnippet } from './html-snippet';
 import { SettingsPanel } from './settings-panel';
+import { useLivePreview } from './use-live-preview';
 
 export function Generator() {
   const [file, setFile] = useState<File | null>(null);
   const [settings, setSettings] = useState<SettingsState>(SETTINGS_DEFAULTS);
   const [snippetHtml, setSnippetHtml] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const preview = useLivePreview(file, settings);
 
   function onGenerateSuccess() {
     if (!file)
@@ -29,7 +31,11 @@ export function Generator() {
           <h2 className="mb-3 text-sm font-medium tracking-wide uppercase">
             Dropzone
           </h2>
-          <Dropzone onFileChange={setFile} disabled={pending} />
+          <Dropzone
+            onFileChange={setFile}
+            disabled={pending}
+            previewUrl={preview.url}
+          />
         </section>
 
         <section aria-label="Generation settings" className="min-w-0">

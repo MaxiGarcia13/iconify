@@ -13,7 +13,8 @@ export function toGenerateOptions(state: SettingsState): GenerateOptions {
   };
 }
 
-export function appendSettingsToFormData(
+/** Visual fields only (SPEC §3.3 preview). Does not set `presets`. */
+export function appendVisualSettingsToFormData(
   body: FormData,
   state: SettingsState,
 ): void {
@@ -22,5 +23,27 @@ export function appendSettingsToFormData(
   body.set('cornerRadius', String(options.cornerRadius));
   body.set('monochrome', options.monochrome ? 'true' : 'false');
   body.set('background', options.background);
+}
+
+export function appendSettingsToFormData(
+  body: FormData,
+  state: SettingsState,
+): void {
+  appendVisualSettingsToFormData(body, state);
+  const options = toGenerateOptions(state);
   body.set('presets', options.presets.join(','));
+}
+
+/**
+ * Stable key of visual settings that affect preview (SPEC §5.3.1).
+ * Omits `presets` so ZIP membership toggles do not re-fetch.
+ */
+export function visualPreviewKey(state: SettingsState): string {
+  const options = toGenerateOptions(state);
+  return [
+    options.padding,
+    options.cornerRadius,
+    options.monochrome ? '1' : '0',
+    options.background,
+  ].join('|');
 }

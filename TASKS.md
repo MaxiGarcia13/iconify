@@ -105,15 +105,15 @@ SPEC §3.3 / §5.2–§5.3.1 / AC13. Preview via `POST /api/v1/preview` (same Sh
 
 ### UI
 
-- [ ] On valid file select → request preview; show returned image in the dropzone
-- [ ] Debounce preview calls with `debounce` from `@maxigarcia/js-utils` when `padding` / `cornerRadius` / `monochrome` / `background` change
-- [ ] Abort in-flight preview (`AbortController`) when a newer settings change, file replace, or clear happens after the request was already sent
-- [ ] Presets do not trigger preview
-- [ ] Aborted / superseded responses must not update the UI
-- [ ] Click preview → file picker; drop another valid file → replace source; keep current settings; abort prior preview; re-preview
-- [ ] Clear → abort pending preview; empty dropzone prompt; preview hidden
-- [ ] Unit tests: debounce wiring; abort on newer change; presets ignored; aborted responses ignored; replace keeps settings; clear restores idle
-- [ ] Verify AC13
+- [x] On valid file select → request preview; show returned image in the dropzone
+- [x] Debounce preview calls with `debounce` from `@maxigarcia/js-utils` when `padding` / `cornerRadius` / `monochrome` / `background` change
+- [x] Abort in-flight preview (`AbortController`) when a newer settings change, file replace, or clear happens after the request was already sent
+- [x] Presets do not trigger preview
+- [x] Aborted / superseded responses must not update the UI
+- [x] Click preview → file picker; drop another valid file → replace source; keep current settings; abort prior preview; re-preview
+- [x] Clear → abort pending preview; empty dropzone prompt; preview hidden
+- [x] Unit tests: debounce wiring; abort on newer change; presets ignored; aborted responses ignored; replace keeps settings; clear restores idle
+- [x] Verify AC13
 
 ## M4 — Hardening
 

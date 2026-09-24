@@ -15,6 +15,7 @@ export interface DropzoneTargetProps {
   displayState: DropzoneState;
   file: File | null;
   error: string | null;
+  previewUrl?: string | null;
   onInputChange: (e: ChangeEvent<HTMLInputElement>) => void;
   onOpenPicker: () => void;
   onDragEnter: (e: DragEvent) => void;
@@ -30,6 +31,7 @@ export function DropzoneTarget({
   displayState,
   file,
   error,
+  previewUrl = null,
   onInputChange,
   onOpenPicker,
   onDragEnter,
@@ -76,7 +78,7 @@ export function DropzoneTarget({
         onDrop={onDrop}
       >
         {file && displayState === 'ready'
-          ? <DropzoneFilePreview file={file} />
+          ? <DropzoneFilePreview file={file} previewUrl={previewUrl} />
           : <DropzonePrompt displayState={displayState} />}
       </button>
     </>

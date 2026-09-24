@@ -8,7 +8,11 @@ import { DropzoneClearBar } from './dropzone-clear-bar';
 import { DropzoneStatus } from './dropzone-status';
 import { DropzoneTarget } from './dropzone-target';
 
-export function Dropzone({ onFileChange, disabled = false }: DropzoneProps) {
+export function Dropzone({
+  onFileChange,
+  disabled = false,
+  previewUrl = null,
+}: DropzoneProps) {
   const inputId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const [state, setState] = useState<DropzoneState>('idle');
@@ -112,6 +116,7 @@ export function Dropzone({ onFileChange, disabled = false }: DropzoneProps) {
         displayState={displayState}
         file={file}
         error={error}
+        previewUrl={previewUrl}
         onInputChange={onInputChange}
         onOpenPicker={openPicker}
         onDragEnter={onDragEnter}

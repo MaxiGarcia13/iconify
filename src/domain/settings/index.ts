@@ -3,7 +3,12 @@ export {
   clampPadding,
   normalizeHex6,
 } from './fields';
-export { appendSettingsToFormData, toGenerateOptions } from './form';
+export {
+  appendSettingsToFormData,
+  appendVisualSettingsToFormData,
+  toGenerateOptions,
+  visualPreviewKey,
+} from './form';
 export {
   hasAllPreset,
   hasOriginalPreset,
