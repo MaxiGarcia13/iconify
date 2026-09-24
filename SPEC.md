@@ -3,7 +3,7 @@
 | Field       | Value    |
 | ----------- | -------- |
 | **Product** | Iconify  |
-| **Version** | 1.3.1    |
+| **Version** | 1.4.0    |
 | **Status**  | Accepted |
 
 Product requirements and decisions only. Engineering policy lives in [`AGENTS.md`](./AGENTS.md); work breakdown in [`TASKS.md`](./TASKS.md).
@@ -31,6 +31,7 @@ Iconify turns one uploaded image (SVG, PNG, or JPG) into a complete icon package
 - Custom per-size override editors
 - Animated GIF / WebP animation sources
 - Public or third-party use of the generate or preview APIs
+- Server-side / API background removal (`removeBackground` is **not** a generate or preview multipart field; cutout is a client UI action only — §5.3.2)
 
 ---
 
@@ -212,9 +213,9 @@ Single page: `/`. Flow: dropzone (live preview) → settings → generate → ZI
 │  Brand + short product description                      │
 ├────────────────────────────┬────────────────────────────┤
 │  Dropzone + live preview   │  Settings                   │
-│  drag/drop, browse, clear  │  padding, corner radius,    │
-│  (settings reflected)      │  monochrome, background,    │
-│                            │  presets                    │
+│  drag/drop, browse         │  padding, corner radius,    │
+│  Remove background · Clear │  monochrome, background,    │
+│  (settings reflected)      │  presets                    │
 ├────────────────────────────┴────────────────────────────┤
 │  [ Generate & Download ZIP ]                             │
 ├─────────────────────────────────────────────────────────┤
@@ -226,27 +227,30 @@ Single page: `/`. Flow: dropzone (live preview) → settings → generate → ZI
 
 ### 5.2 Workflow
 
-| Step | Actor | Behavior                                                                |
-| ---- | ----- | ----------------------------------------------------------------------- |
-| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                       |
-| 2    | UI    | Validates; shows live preview + file meta; enables settings             |
-| 3    | User  | Adjusts settings / presets; preview updates for visual options (§5.3.1) |
-| 4    | User  | Optionally replaces source (click preview or drop another file)         |
-| 5    | UI    | Replaces preview with the new file; current settings stay applied       |
-| 6    | User  | Clicks **Generate & Download ZIP**                                      |
-| 7    | UI    | Calls generate API; shows progress / disabled state                     |
-| 8    | UI    | On success: browser download + populate snippet                         |
-| 9    | UI    | On error: show inline message from API                                  |
+| Step | Actor | Behavior                                                                                         |
+| ---- | ----- | ------------------------------------------------------------------------------------------------ |
+| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                                                |
+| 2    | UI    | Validates; shows live preview + file meta; enables settings                                      |
+| 3    | User  | Optionally **Remove background** on a raster source (§5.3.2); UI replaces source with PNG cutout |
+| 4    | User  | Adjusts settings / presets; preview updates for visual options (§5.3.1)                          |
+| 5    | User  | Optionally replaces source (click preview or drop another file)                                  |
+| 6    | UI    | Replaces preview with the new file; current settings stay applied                                |
+| 7    | User  | Clicks **Generate & Download ZIP**                                                               |
+| 8    | UI    | Calls generate API; shows progress / disabled state                                              |
+| 9    | UI    | On success: browser download + populate snippet                                                  |
+| 10   | UI    | On error: show inline message from API                                                           |
 
 ### 5.3 Controls
 
-| Control       | Default        | Notes                                                |
-| ------------- | -------------- | ---------------------------------------------------- |
-| Padding       | `0`            | 0–50, `%`                                            |
-| Corner radius | `0`            | 0–100, `%` of half shorter side                      |
-| Monochrome    | off            | Greyscale rasters only                               |
-| Background    | transparent    | Transparent or `#RRGGBB`                             |
-| Presets       | all + Original | Original default-on with `all`; independent of `all` |
+| Control           | Default        | Notes                                                           |
+| ----------------- | -------------- | --------------------------------------------------------------- |
+| Padding           | `0`            | 0–50, `%` (Settings)                                            |
+| Corner radius     | `0`            | 0–100, `%` of half shorter side (Settings)                      |
+| Monochrome        | off            | Greyscale rasters only (Settings)                               |
+| Background        | transparent    | Transparent or `#RRGGBB` (Settings)                             |
+| Presets           | all + Original | Original default-on with `all`; independent of `all` (Settings) |
+| Remove background | —              | Dropzone action only (§5.3.2); not a Settings control           |
+| Clear             | —              | Dropzone action; removes source and restores empty prompt       |
 
 Dropzone accepts the same types/size as the API. Generate disabled until a valid file is present. Errors announced for assistive tech. Settings and dropzone are interaction surfaces (not decorative cards).
 
@@ -268,6 +272,22 @@ When a valid source file is selected, the dropzone shows a **live visual preview
 | No file          | Empty / error states keep the existing dropzone prompts; no preview                                                                                                   |
 
 Preview does not write ZIP assets. Generate remains a separate action (§3.2).
+
+### 5.3.2 Remove background (dropzone)
+
+Optional **client-side** action on the dropzone (alongside Clear) — **not** in Settings and **not** an API option. Runs in the browser (e.g. `@imgly/background-removal`); the cutout becomes the new source `File`. Generate and preview then process that file with the existing §3 / §4 contract (no `removeBackground` multipart field).
+
+| Rule            | Behavior                                                                                                                                                   |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Placement       | Dropzone action bar (e.g. next to Clear); never a Settings control                                                                                         |
+| Eligibility     | Enabled only for a valid **raster** source (PNG / JPG). Disabled or hidden for SVG; disabled when no file or while removal / generate / preview is pending |
+| On success      | Replace the source with a **PNG with alpha** (foreground cutout). Keep current settings. Live preview re-fetches for the new file (§5.3.1)                 |
+| Basename        | Preserve a sensible upload stem as `.png` (e.g. `logo.jpg` → `logo.png`, or an explicit `-nobg.png` stem). Bytes are always PNG                            |
+| Progress        | Show pending / progress while model assets load and inference runs; announce for assistive tech                                                            |
+| Failure         | Inline / `aria-live` error; **keep** the prior source file; do not clear the dropzone                                                                      |
+| Undo            | Optional: keep the pre-removal file until Clear, replace, or another successful remove; **Undo** restores it                                               |
+| Clear / replace | Abort in-flight removal; discard any undo buffer; Clear restores the empty prompt as in §5.3.1                                                             |
+| Privacy         | Source image stays in the browser for this step; no dedicated remove-background API                                                                        |
 
 ### 5.4 HTML snippet (UI only)
 
@@ -320,6 +340,7 @@ A task is done only when its acceptance criteria are met and unit tests for that
 | AC11 | Omit `presets` → `all,original`; `original` alone → ZIP with only upload basename at source size; options still apply; explicit `all` omits original; combining `original` with other presets adds the upload-named file                                                                                                                                                                             |
 | AC12 | Missing or mismatched `Origin` on generate or preview → `403 FORBIDDEN_ORIGIN`; matching same-origin proceeds; no `Access-Control-Allow-Origin`                                                                                                                                                                                                                                                      |
 | AC13 | Valid upload shows a live preview from `POST /api/v1/preview` (256×256 PNG); padding / corner radius / monochrome / background re-fetch a debounced preview; an in-flight preview is **aborted** when settings/file change again; presets do not; aborted/stale responses do not update the UI; click or drop replaces the source while keeping settings; clear aborts and restores the empty prompt |
+| AC14 | Raster upload exposes dropzone **Remove background** (not in Settings); success replaces source with a PNG cutout and preview/generate use it with current settings; SVG: action disabled/hidden; failure keeps the prior file; no `removeBackground` (or equivalent) field on generate or preview                                                                                                   |
 
 ---
 
@@ -334,10 +355,11 @@ A task is done only when its acceptance criteria are met and unit tests for that
 
 ## Document History
 
-| Version | Date       | Notes                                                           |
-| ------- | ---------- | --------------------------------------------------------------- |
-| 1.0.x   | 2026-07    | Technical specification (API samples, Sharp/UI code, layout)    |
-| 1.1.0   | 2026-09-24 | Slimmed to product decisions; engineering moved to `AGENTS.md`  |
-| 1.2.0   | 2026-09-24 | Live dropzone preview reflecting visual settings (§5.3.1)       |
-| 1.3.0   | 2026-09-24 | Server preview API `POST /api/v1/preview` + debounced UI (AC13) |
-| 1.3.1   | 2026-09-24 | Abort in-flight preview when user changes settings again        |
+| Version | Date       | Notes                                                                   |
+| ------- | ---------- | ----------------------------------------------------------------------- |
+| 1.0.x   | 2026-07    | Technical specification (API samples, Sharp/UI code, layout)            |
+| 1.1.0   | 2026-09-24 | Slimmed to product decisions; engineering moved to `AGENTS.md`          |
+| 1.2.0   | 2026-09-24 | Live dropzone preview reflecting visual settings (§5.3.1)               |
+| 1.3.0   | 2026-09-24 | Server preview API `POST /api/v1/preview` + debounced UI (AC13)         |
+| 1.3.1   | 2026-09-24 | Abort in-flight preview when user changes settings again                |
+| 1.4.0   | 2026-09-24 | Client dropzone **Remove background** (§5.3.2 / AC14); not an API field |

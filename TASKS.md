@@ -115,6 +115,42 @@ SPEC §3.3 / §5.2–§5.3.1 / AC13. Preview via `POST /api/v1/preview` (same Sh
 - [x] Unit tests: debounce wiring; abort on newer change; presets ignored; aborted responses ignored; replace keeps settings; clear restores idle
 - [x] Verify AC13
 
+## M3g — Remove background (client)
+
+SPEC §5.3.2 / AC14. Client-side cutout via `@imgly/background-removal` (browser WASM/ONNX). **Not** a settings control and **not** a generate/preview API field — mutates the source `File`, then existing preview/generate pipelines apply.
+
+### Spec
+
+- [x] SPEC: document dropzone **Remove background** action (outside Settings); client-only; raster PNG/JPG only; SVG disabled/hidden; output replaces source as PNG with alpha; settings unchanged; live preview re-runs on new file
+- [x] SPEC: AC14 acceptance criterion + Document History bump
+- [x] Non-goal / note: no `removeBackground` multipart field on generate or preview
+
+### Deps & assets
+
+- [ ] Add `@imgly/background-removal` + required `onnxruntime-web` peer (exact versions per package docs)
+- [ ] Lazy-load the library (dynamic `import`) on first use — do not inflate the initial island bundle
+- [ ] Configure `publicPath` for model/WASM assets (self-host under `public/` for production; CDN OK for local/dev)
+
+### Client
+
+- [ ] Service helper: run removal on a `File`/`Blob` → PNG `Blob`/`File` with alpha; sensible basename (e.g. preserve stem + `.png`, or `-nobg.png`)
+- [ ] Progress callback wiring for model download + inference (surface to UI)
+- [ ] Error mapping: failure → inline / `aria-live` message; do not clear the current file
+- [ ] Optional **Undo**: keep pre-removal `File` in memory until clear / replace / another remove; restore on Undo
+
+### UI
+
+- [ ] Dropzone action bar (next to Clear): **Remove background** — not in Settings panel
+- [ ] Enabled only when a valid raster source is selected; disabled for SVG, while removal/generate/preview pending, and when no file
+- [ ] Pending state: disable control + announce progress; abort/supersede rules if user clears or replaces mid-run
+- [ ] On success: replace `file` with cutout PNG; keep current settings; live preview re-fetches automatically
+- [ ] Clear / replace source: discard undo buffer; abort in-flight removal
+
+### Tests
+
+- [ ] Unit tests: helper produces PNG File/Blob; SVG path not offered / rejected; basename rules; undo restores prior file; pending/clear does not apply stale result
+- [ ] Verify AC14
+
 ## M4 — Hardening
 
 - [x] Transparent PNG + opaque background edge cases
@@ -133,18 +169,19 @@ SPEC §3.3 / §5.2–§5.3.1 / AC13. Preview via `POST /api/v1/preview` (same Sh
 
 ## Verification Shortcuts
 
-| AC   | How to verify                                                                                                                                           |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AC1  | PNG + `presets=all` → unzip; list matches §2 minus SVG                                                                                                  |
-| AC2  | SVG upload → ZIP includes `favicon.svg`                                                                                                                 |
-| AC3  | `.gif` or 11 MB file → `400 VALIDATION_ERROR`                                                                                                           |
-| AC4  | `padding=20` → visual inset on PNGs                                                                                                                     |
-| AC5  | Inspect `favicon.ico` layers 16/32/48                                                                                                                   |
-| AC6  | UI download + copy snippet without reload                                                                                                               |
-| AC7  | No leftover files under OS temp after request                                                                                                           |
-| AC8  | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400`                                                                              |
-| AC9  | View-source `/`: all §5.5 `public/` icons + `site.webmanifest` + theme-color + absolute OG/Twitter + canonical                                          |
-| AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`                                                                                |
-| AC11 | Default/`original` → upload basename at source size; explicit `all` omits it                                                                            |
-| AC12 | Missing/cross-origin `Origin` → `403 FORBIDDEN_ORIGIN`; same-origin OK                                                                                  |
-| AC13 | Upload → `POST /api/v1/preview` 256 PNG; debounced re-fetch; abort in-flight on newer change; presets ignored; click/drop replaces; clear aborts + idle |
+| AC   | How to verify                                                                                                                                                                           |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| AC1  | PNG + `presets=all` → unzip; list matches §2 minus SVG                                                                                                                                  |
+| AC2  | SVG upload → ZIP includes `favicon.svg`                                                                                                                                                 |
+| AC3  | `.gif` or 11 MB file → `400 VALIDATION_ERROR`                                                                                                                                           |
+| AC4  | `padding=20` → visual inset on PNGs                                                                                                                                                     |
+| AC5  | Inspect `favicon.ico` layers 16/32/48                                                                                                                                                   |
+| AC6  | UI download + copy snippet without reload                                                                                                                                               |
+| AC7  | No leftover files under OS temp after request                                                                                                                                           |
+| AC8  | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400`                                                                                                              |
+| AC9  | View-source `/`: all §5.5 `public/` icons + `site.webmanifest` + theme-color + absolute OG/Twitter + canonical                                                                          |
+| AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`                                                                                                                |
+| AC11 | Default/`original` → upload basename at source size; explicit `all` omits it                                                                                                            |
+| AC12 | Missing/cross-origin `Origin` → `403 FORBIDDEN_ORIGIN`; same-origin OK                                                                                                                  |
+| AC13 | Upload → `POST /api/v1/preview` 256 PNG; debounced re-fetch; abort in-flight on newer change; presets ignored; click/drop replaces; clear aborts + idle                                 |
+| AC14 | Raster upload → dropzone **Remove background** (not in Settings) → source becomes PNG cutout; preview/generate use it; SVG: action disabled; failure keeps prior file; no new API field |
