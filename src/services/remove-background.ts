@@ -22,7 +22,36 @@ export type RemoveBackgroundFn = (
   },
 ) => Promise<Blob>;
 
+export type RemoveBackgroundLoader = () => Promise<RemoveBackgroundFn>;
+
 const DEFAULT_ERROR = 'Background removal failed. Try again with a different image.';
+
+let loadCache: Promise<RemoveBackgroundFn> | null = null;
+let activeLoader: RemoveBackgroundLoader | null = null;
+
+/** Clears the cached dynamic import (tests only). */
+export function resetRemoveBackgroundLoaderCache(): void {
+  loadCache = null;
+  activeLoader = null;
+}
+
+async function importRemoveBackground(): Promise<RemoveBackgroundFn> {
+  const { removeBackground } = await import('@imgly/background-removal');
+  return removeBackground;
+}
+
+/**
+ * Resolve the remover, loading `@imgly/background-removal` on first use only.
+ */
+export function loadRemoveBackground(
+  loader: RemoveBackgroundLoader = importRemoveBackground,
+): Promise<RemoveBackgroundFn> {
+  if (activeLoader !== loader || !loadCache) {
+    activeLoader = loader;
+    loadCache = loader();
+  }
+  return loadCache;
+}
 
 /**
  * PNG filename for a cutout source.
@@ -49,19 +78,16 @@ export function cutoutPngFilename(uploadFilename: string): string {
   return `${stem.length > 0 ? stem : 'cutout'}.png`;
 }
 
-async function loadRemoveBackground(): Promise<RemoveBackgroundFn> {
-  const { removeBackground } = await import('@imgly/background-removal');
-  return removeBackground;
-}
-
 /**
  * Client-side background removal.
  * Returns a PNG `File` with alpha; does not mutate or clear the input on failure.
+ * The library is loaded via dynamic `import` on first use (not at island boot).
  */
 export async function removeBackgroundFromSource(
   file: File,
   options: {
     removeBackground?: RemoveBackgroundFn;
+    loader?: RemoveBackgroundLoader;
     onProgress?: RemoveBackgroundProgress;
   } = {},
 ): Promise<RemoveBackgroundResult> {
@@ -73,7 +99,8 @@ export async function removeBackgroundFromSource(
   }
 
   const remove
-    = options.removeBackground ?? (await loadRemoveBackground());
+    = options.removeBackground
+      ?? (await loadRemoveBackground(options.loader));
 
   let blob: Blob;
   try {

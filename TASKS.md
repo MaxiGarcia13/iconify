@@ -128,7 +128,7 @@ SPEC §5.3.2 / AC14. Browser-only cutout via `@imgly/background-removal` (not th
 ### Deps & assets
 
 - [x] Add `@imgly/background-removal` (browser). Do **not** add `@imgly/background-removal-node`. Add `onnxruntime-web` only if the package peer actually requires an explicit install
-- [ ] Lazy-load the library (dynamic `import`) on first use — do not inflate the initial island bundle
+- [x] Lazy-load the library (dynamic `import`) on first use — do not inflate the initial island bundle
 - [ ] Configure `publicPath` for model/WASM assets (self-host under `public/` for production; CDN OK for local/dev)
 
 ### Client

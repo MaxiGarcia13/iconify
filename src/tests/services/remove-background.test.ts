@@ -1,14 +1,21 @@
 import type { RemoveBackgroundFn } from '@/services/remove-background';
-import { describe, expect, it, vi } from 'vitest';
+
+import { afterEach, describe, expect, it, vi } from 'vitest';
+
 import {
   cutoutPngFilename,
+  loadRemoveBackground,
   removeBackgroundFromSource,
-
+  resetRemoveBackgroundLoaderCache,
 } from '@/services/remove-background';
 
 function rasterFile(name: string, type: string): File {
   return new File([new Uint8Array([1, 2, 3])], name, { type });
 }
+
+afterEach(() => {
+  resetRemoveBackgroundLoaderCache();
+});
 
 describe('cutoutPngFilename', () => {
   it('preserves stem and forces .png', () => {
@@ -22,6 +29,22 @@ describe('cutoutPngFilename', () => {
     expect(cutoutPngFilename('')).toBe('cutout.png');
     expect(cutoutPngFilename('.')).toBe('cutout.png');
     expect(cutoutPngFilename('..')).toBe('cutout.png');
+  });
+});
+
+describe('loadRemoveBackground', () => {
+  it('invokes the loader only once for the same loader', async () => {
+    const remover = vi.fn<RemoveBackgroundFn>(async () =>
+      new Blob([new Uint8Array([1])], { type: 'image/png' }),
+    );
+    const loader = vi.fn(async () => remover);
+
+    const a = await loadRemoveBackground(loader);
+    const b = await loadRemoveBackground(loader);
+
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(a).toBe(remover);
+    expect(b).toBe(remover);
   });
 });
 
@@ -94,5 +117,18 @@ describe('removeBackgroundFromSource', () => {
     });
 
     expect(onProgress).toHaveBeenCalledWith('compute:inference', 1, 4);
+  });
+
+  it('lazy-loads via loader only when no remover is injected', async () => {
+    const remover = vi.fn<RemoveBackgroundFn>(async () =>
+      new Blob([new Uint8Array([1])], { type: 'image/png' }),
+    );
+    const loader = vi.fn(async () => remover);
+
+    await removeBackgroundFromSource(rasterFile('a.png', 'image/png'), { loader });
+    await removeBackgroundFromSource(rasterFile('b.png', 'image/png'), { loader });
+
+    expect(loader).toHaveBeenCalledTimes(1);
+    expect(remover).toHaveBeenCalledTimes(2);
   });
 });
