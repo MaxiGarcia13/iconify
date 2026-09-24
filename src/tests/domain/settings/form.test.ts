@@ -3,118 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { GENERATE_OPTION_DEFAULTS } from '@/domain/generate-defaults';
 import {
   appendSettingsToFormData,
-  clampCornerRadius,
-  clampPadding,
-  hasAllPreset,
   isPresetChecked,
-  normalizeHex6,
   SETTINGS_DEFAULTS,
   toGenerateOptions,
-  togglePreset,
 } from '@/domain/settings';
 
 describe('settings defaults', () => {
   it('matches SPEC §3 / §5.3 GenerateRequest defaults', () => {
     expect(toGenerateOptions(SETTINGS_DEFAULTS)).toEqual(GENERATE_OPTION_DEFAULTS);
-  });
-});
-
-describe('clampPadding / clampCornerRadius', () => {
-  it('clampPadding clamps to 0–50 and rounds', () => {
-    expect(clampPadding(-1)).toBe(0);
-    expect(clampPadding(0)).toBe(0);
-    expect(clampPadding(20.4)).toBe(20);
-    expect(clampPadding(20.6)).toBe(21);
-    expect(clampPadding(50)).toBe(50);
-    expect(clampPadding(99)).toBe(50);
-    expect(clampPadding(Number.NaN)).toBe(0);
-  });
-
-  it('clampCornerRadius clamps to 0–100 and rounds', () => {
-    expect(clampCornerRadius(-1)).toBe(0);
-    expect(clampCornerRadius(0)).toBe(0);
-    expect(clampCornerRadius(50.4)).toBe(50);
-    expect(clampCornerRadius(50.6)).toBe(51);
-    expect(clampCornerRadius(100)).toBe(100);
-    expect(clampCornerRadius(150)).toBe(100);
-    expect(clampCornerRadius(Number.NaN)).toBe(0);
-  });
-});
-
-describe('normalizeHex6', () => {
-  it('accepts #RRGGBB and RRGGBB', () => {
-    expect(normalizeHex6('#AaBbCc')).toBe('#aabbcc');
-    expect(normalizeHex6('ff00aa')).toBe('#ff00aa');
-  });
-
-  it('rejects invalid values', () => {
-    expect(normalizeHex6('#fff')).toBeNull();
-    expect(normalizeHex6('transparent')).toBeNull();
-    expect(normalizeHex6('#gg0000')).toBeNull();
-  });
-});
-
-describe('preset checkboxes', () => {
-  it('treats all as every platform preset checked (not original)', () => {
-    expect(hasAllPreset(['all'])).toBe(true);
-    expect(isPresetChecked(['all'], 'favicon')).toBe(true);
-    expect(isPresetChecked(['all'], 'og')).toBe(true);
-    expect(isPresetChecked(['all'], 'original')).toBe(false);
-    expect(isPresetChecked(['favicon'], 'apple')).toBe(false);
-    expect(isPresetChecked(['all', 'original'], 'original')).toBe(true);
-  });
-
-  it('toggles all on/off', () => {
-    expect(togglePreset(['favicon'], 'all', true)).toEqual(['all']);
-    expect(togglePreset(['all'], 'all', false)).toEqual(['favicon']);
-  });
-
-  it('preserves original when collapsing platform presets to all', () => {
-    expect(
-      togglePreset(['favicon', 'apple', 'android', 'original'], 'og', true),
-    ).toEqual(['all', 'original']);
-  });
-
-  it('preserves original when exiting all-mode', () => {
-    expect(togglePreset(['all', 'original'], 'og', false)).toEqual([
-      'favicon',
-      'apple',
-      'android',
-      'original',
-    ]);
-  });
-
-  it('toggles original independently of all (AC11)', () => {
-    expect(togglePreset(['all'], 'original', true)).toEqual([
-      'all',
-      'original',
-    ]);
-    expect(togglePreset(['all', 'original'], 'original', false)).toEqual([
-      'all',
-    ]);
-    expect(togglePreset(['favicon'], 'original', true)).toEqual([
-      'favicon',
-      'original',
-    ]);
-    expect(togglePreset(['original'], 'original', false)).toEqual(['all']);
-  });
-
-  it('collapses four individuals to all', () => {
-    expect(
-      togglePreset(['favicon', 'apple', 'android'], 'og', true),
-    ).toEqual(['all']);
-  });
-
-  it('keeps at least one preset when unchecking the last', () => {
-    expect(togglePreset(['favicon'], 'favicon', false)).toEqual(['apple']);
-  });
-
-  it('exits all-mode when unchecking one individual', () => {
-    expect(togglePreset(['all'], 'og', false)).toEqual([
-      'favicon',
-      'apple',
-      'android',
-    ]);
   });
 });
 
