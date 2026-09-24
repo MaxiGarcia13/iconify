@@ -15,6 +15,11 @@ export { MAX_UPLOAD_BYTES } from './upload-constraints';
 
 const HEX_BG = /^#(?:[0-9a-f]{6}|[0-9a-f]{8})$/i;
 
+export type PreviewOptions = Pick<
+  GenerateOptions,
+  'background' | 'padding' | 'cornerRadius' | 'monochrome'
+>;
+
 export type ParseGenerateFormResult
   = | {
     ok: true;
@@ -29,9 +34,81 @@ export type ParseGenerateFormResult
     details?: Record<string, unknown>;
   };
 
+export type ParsePreviewFormResult
+  = | {
+    ok: true;
+    file: Buffer;
+    options: PreviewOptions;
+  }
+  | {
+    ok: false;
+    message: string;
+    details?: Record<string, unknown>;
+  };
+
+type ParsedUpload
+  = | {
+    ok: true;
+    file: Buffer;
+    sourceIsSvg: boolean;
+    sourceFilename: string;
+    options: PreviewOptions;
+  }
+  | {
+    ok: false;
+    message: string;
+    details?: Record<string, unknown>;
+  };
+
 export async function parseGenerateForm(
   form: FormData,
 ): Promise<ParseGenerateFormResult> {
+  const parsed = await parseUpload(form);
+  if (!parsed.ok)
+    return parsed;
+
+  const presetsRaw = presetsField(form);
+  const presets
+    = presetsRaw === null
+      ? [...GENERATE_OPTION_DEFAULTS.presets]
+      : parsePresets(presetsRaw);
+  if (presets === null) {
+    return {
+      ok: false,
+      message:
+        'Invalid presets. Allowed: favicon, apple, android, og, original, all.',
+      details: { field: 'presets' },
+    };
+  }
+
+  return {
+    ok: true,
+    file: parsed.file,
+    sourceIsSvg: parsed.sourceIsSvg,
+    sourceFilename: parsed.sourceFilename,
+    options: {
+      ...parsed.options,
+      presets,
+    },
+  };
+}
+
+/** Visual fields only. `presets` is ignored (ZIP membership is generate-only). */
+export async function parsePreviewForm(
+  form: FormData,
+): Promise<ParsePreviewFormResult> {
+  const parsed = await parseUpload(form);
+  if (!parsed.ok)
+    return parsed;
+
+  return {
+    ok: true,
+    file: parsed.file,
+    options: parsed.options,
+  };
+}
+
+async function parseUpload(form: FormData): Promise<ParsedUpload> {
   const fileEntry = form.get('file');
   if (fileEntry === null || fileEntry === '') {
     return {
@@ -120,20 +197,6 @@ export async function parseGenerateForm(
     };
   }
 
-  const presetsRaw = presetsField(form);
-  const presets
-    = presetsRaw === null
-      ? [...GENERATE_OPTION_DEFAULTS.presets]
-      : parsePresets(presetsRaw);
-  if (presets === null) {
-    return {
-      ok: false,
-      message:
-        'Invalid presets. Allowed: favicon, apple, android, og, original, all.',
-      details: { field: 'presets' },
-    };
-  }
-
   return {
     ok: true,
     file: buffer,
@@ -144,7 +207,6 @@ export async function parseGenerateForm(
       padding,
       cornerRadius,
       monochrome,
-      presets,
     },
   };
 }

@@ -90,16 +90,29 @@ SPEC §2.5 upload-basename / §2.6 preset `original` / §4 / §5 presets / AC11.
 - [x] Unit tests: dimensions match source; options applied; `all` ZIP omits original; `original` alone uses upload name; settings → FormData
 - [x] Verify AC11
 
-## M3f — Live dropzone preview
+## M3f — Live dropzone preview (server)
 
-SPEC §5.2–§5.3.1 / AC13. Client-side only; no generate API round-trip for preview.
+SPEC §3.3 / §5.2–§5.3.1 / AC13. Preview via `POST /api/v1/preview` (same Sharp treatment as packaged rasters); UI debounces with `@maxigarcia/js-utils` `debounce` and aborts in-flight fetches on newer changes.
 
-- [ ] Show validated source image in the dropzone (replace metadata-only ready state)
-- [ ] Wire settings into preview: `padding`, `cornerRadius`, `monochrome`, `background` update the preview live
-- [ ] Presets do not affect the preview
-- [ ] Click preview → file picker; drop another valid file → replace source; keep current settings applied to the new file
-- [ ] Clear → empty dropzone prompt; preview hidden
-- [ ] Unit tests: preview reflects visual settings; replace keeps settings; clear restores idle; presets ignored by preview helpers
+### API
+
+- [x] `src/pages/api/v1/preview.ts` — `POST` handler; `prerender = false`
+- [x] Same-origin guard + multipart-only (`403` / `415`) matching generate
+- [x] Validate `file` + visual options only (`padding`, `cornerRadius`, `monochrome`, `background`); ignore / do not require `presets`
+- [x] Process with shared icon pipeline → **256×256** PNG (`image/png`); no ZIP; no temp files
+- [x] Error JSON contract aligned with generate (`VALIDATION_ERROR`, `PROCESSING_ERROR`, …)
+- [x] Unit tests: happy-path 256×256 PNG; options applied; invalid file/options → `400`; missing/cross-origin → `403`; presets not required
+
+### UI
+
+- [ ] On valid file select → request preview; show returned image in the dropzone
+- [ ] Debounce preview calls with `debounce` from `@maxigarcia/js-utils` when `padding` / `cornerRadius` / `monochrome` / `background` change
+- [ ] Abort in-flight preview (`AbortController`) when a newer settings change, file replace, or clear happens after the request was already sent
+- [ ] Presets do not trigger preview
+- [ ] Aborted / superseded responses must not update the UI
+- [ ] Click preview → file picker; drop another valid file → replace source; keep current settings; abort prior preview; re-preview
+- [ ] Clear → abort pending preview; empty dropzone prompt; preview hidden
+- [ ] Unit tests: debounce wiring; abort on newer change; presets ignored; aborted responses ignored; replace keeps settings; clear restores idle
 - [ ] Verify AC13
 
 ## M4 — Hardening
@@ -108,7 +121,7 @@ SPEC §5.2–§5.3.1 / AC13. Client-side only; no generate API round-trip for pr
 - [x] Large SVG performance sanity check
 - [x] Omit SVG links/files when source is raster
 - [x] README aligned with SPEC usage
-- [x] Same-origin guard on `POST /api/v1/generate` (SPEC §3.4 / AC12)
+- [x] Same-origin guard on `POST /api/v1/generate` (SPEC §3.5 / AC12)
 - [x] Unit tests: matching `Origin` → proceeds; missing / cross-origin → `403 FORBIDDEN_ORIGIN`; no ACAO header
 - [x] Verify AC12
 
@@ -134,4 +147,4 @@ SPEC §5.2–§5.3.1 / AC13. Client-side only; no generate API round-trip for pr
 | AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`                                       |
 | AC11 | Default/`original` → upload basename at source size; explicit `all` omits it                                   |
 | AC12 | Missing/cross-origin `Origin` → `403 FORBIDDEN_ORIGIN`; same-origin OK                                         |
-| AC13 | Upload → live preview; padding/radius/mono/bg update preview; presets ignored; click/drop replaces; clear idle |
+| AC13 | Upload → `POST /api/v1/preview` 256 PNG; debounced re-fetch; abort in-flight on newer change; presets ignored; click/drop replaces; clear aborts + idle |

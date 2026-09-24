@@ -3,7 +3,7 @@
 | Field       | Value    |
 | ----------- | -------- |
 | **Product** | Iconify  |
-| **Version** | 1.2.0    |
+| **Version** | 1.3.1    |
 | **Status**  | Accepted |
 
 Product requirements and decisions only. Engineering policy lives in [`AGENTS.md`](./AGENTS.md); work breakdown in [`TASKS.md`](./TASKS.md).
@@ -20,8 +20,8 @@ Iconify turns one uploaded image (SVG, PNG, or JPG) into a complete icon package
 | --- | ------------------------------------------------------------------------------------- |
 | G1  | Generate a complete favicon / PWA / iOS / Android / OG set from one upload in seconds |
 | G2  | Deliver the package as a downloadable ZIP without leaving generated icons on disk     |
-| G3  | Expose a private generate API for the product UI only (same origin; not a public API) |
-| G4  | Focused UI: dropzone with live preview → settings → download ZIP + HTML snippet       |
+| G3  | Expose private generate + preview APIs for the product UI only (same origin; not public) |
+| G4  | Focused UI: dropzone with live preview → settings → download ZIP + HTML snippet          |
 
 ### 1.2 Non-Goals (v1)
 
@@ -30,7 +30,7 @@ Iconify turns one uploaded image (SVG, PNG, or JPG) into a complete icon package
 - User accounts or history
 - Custom per-size override editors
 - Animated GIF / WebP animation sources
-- Public or third-party use of the generate API
+- Public or third-party use of the generate or preview APIs
 
 ---
 
@@ -115,24 +115,29 @@ iconify-package/
 
 ---
 
-## 3. Generate API (product contract)
+## 3. API (product contract)
 
-Single private endpoint for the Iconify UI: `POST /api/v1/generate`.
+Private same-origin endpoints for the Iconify UI only (path prefix `/api/v1`).
 
-### 3.1 Request
+### 3.1 Shared request fields
 
-`multipart/form-data` with:
+`multipart/form-data`. Visual options shared by generate and preview:
 
-| Field          | Required | Default        | Meaning                                                                                                                                                                     |
-| -------------- | -------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `file`         | yes      | —              | Source image (SVG, PNG, or JPG). Max 10 MB.                                                                                                                                 |
-| `background`   | no       | `transparent`  | Fill behind padded/resized icons: literal `transparent` or `#RRGGBB` / `#RRGGBBAA`.                                                                                         |
-| `padding`      | no       | `0`            | Padding as % of the shorter side (0–50).                                                                                                                                    |
-| `cornerRadius` | no       | `0`            | Outer corner radius as % of half the shorter canvas side (0–100). `0` = square; `100` = fully rounded. Applied to rasters only; does not alter SVG passthrough.             |
-| `monochrome`   | no       | `false`        | Literals `true` / `false`. When true, greyscale raster content before compositing onto background (alpha kept; background color unchanged). Does not alter SVG passthrough. |
-| `presets`      | no       | `all,original` | Comma-separated preset IDs (§2.6).                                                                                                                                          |
+| Field          | Required | Default       | Meaning                                                                                                                                                                     |
+| -------------- | -------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`         | yes      | —             | Source image (SVG, PNG, or JPG). Max 10 MB.                                                                                                                                 |
+| `background`   | no       | `transparent` | Fill behind padded/resized icons: literal `transparent` or `#RRGGBB` / `#RRGGBBAA`.                                                                                         |
+| `padding`      | no       | `0`           | Padding as % of the shorter side (0–50).                                                                                                                                    |
+| `cornerRadius` | no       | `0`           | Outer corner radius as % of half the shorter canvas side (0–100). `0` = square; `100` = fully rounded. Applied to rasters only; does not alter SVG passthrough.             |
+| `monochrome`   | no       | `false`       | Literals `true` / `false`. When true, greyscale raster content before compositing onto background (alpha kept; background color unchanged). Does not alter SVG passthrough. |
 
-### 3.2 Response
+### 3.2 `POST /api/v1/generate`
+
+Builds the ZIP package. Additional field:
+
+| Field     | Required | Default        | Meaning                            |
+| --------- | -------- | -------------- | ---------------------------------- |
+| `presets` | no       | `all,original` | Comma-separated preset IDs (§2.6). |
 
 | Code  | When                               | Body                                                                                                             |
 | ----- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -142,21 +147,34 @@ Single private endpoint for the Iconify UI: `POST /api/v1/generate`.
 | `415` | Not `multipart/form-data`          | JSON error                                                                                                       |
 | `500` | Processing / packaging failure     | JSON error                                                                                                       |
 
-Error JSON shape: `{ error, message, details? }` with `error` one of `VALIDATION_ERROR`, `PROCESSING_ERROR`, `UNSUPPORTED_MEDIA_TYPE`, `FORBIDDEN_ORIGIN`.
+### 3.3 `POST /api/v1/preview`
 
-### 3.3 Constraints
+Returns a single processed PNG for the dropzone live preview. Same visual fields as §3.1 (`file`, `background`, `padding`, `cornerRadius`, `monochrome`). **No** `presets` (presets only affect ZIP membership).
+
+| Code  | When                               | Body                                                          |
+| ----- | ---------------------------------- | ------------------------------------------------------------- |
+| `200` | Success                            | PNG (`image/png`), square **256×256**, same treatment as §4   |
+| `400` | Missing/bad file, size, or options | JSON error                                                    |
+| `403` | Missing or cross-origin `Origin`   | JSON error                                                    |
+| `415` | Not `multipart/form-data`          | JSON error                                                    |
+| `500` | Processing failure                 | JSON error                                                    |
+
+No ZIP; no persisted temp files. Preview must use the same processing rules as packaged rasters (§4).
+
+### 3.4 Errors & constraints
+
+Error JSON shape: `{ error, message, details? }` with `error` one of `VALIDATION_ERROR`, `PROCESSING_ERROR`, `UNSUPPORTED_MEDIA_TYPE`, `FORBIDDEN_ORIGIN`.
 
 | Constraint    | Value                                            |
 | ------------- | ------------------------------------------------ |
 | Max upload    | 10 MB                                            |
 | Allowed types | SVG, PNG, JPEG (`.svg`, `.png`, `.jpg`, `.jpeg`) |
-| Response      | Streamed ZIP; no persisted temp icon files       |
 | Versioning    | Path prefix `/api/v1`                            |
-| Access        | Same-origin UI only (§3.4)                       |
+| Access        | Same-origin UI only (§3.5)                       |
 
-### 3.4 Same-origin access
+### 3.5 Same-origin access
 
-The generate endpoint is private to the Iconify UI on the same origin.
+Both generate and preview are private to the Iconify UI on the same origin.
 
 - Request must include `Origin` equal to the request URL origin (scheme + host + port).
 - Otherwise → `403` with `FORBIDDEN_ORIGIN`.
@@ -234,19 +252,22 @@ Dropzone accepts the same types/size as the API. Generate disabled until a valid
 
 ### 5.3.1 Live preview (dropzone)
 
-When a valid source file is selected, the dropzone shows a **live visual preview** of that image (not metadata alone).
+When a valid source file is selected, the dropzone shows a **live visual preview** from `POST /api/v1/preview` (§3.3) — the same processing as packaged rasters, not a client-side approximation.
 
 | Rule              | Behavior                                                                                                                                      |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Show on select    | After successful validation, render the image in the dropzone                                                                                 |
-| Reflect settings  | Preview updates when `padding`, `cornerRadius`, `monochrome`, or `background` change                                                          |
-| Presets           | Preset checkboxes do **not** change the preview (they only select ZIP membership)                                                             |
-| Fidelity          | Client-side approximation of icon treatment (§4): pad inset, background fill, corner rounding, greyscale when monochrome                      |
+| Show on select    | After successful validation, request a preview and show the returned PNG in the dropzone                                                      |
+| Reflect settings  | Re-request preview when `padding`, `cornerRadius`, `monochrome`, or `background` change                                                       |
+| Debounce          | Debounce preview requests while settings change so rapid slider input does not flood the API                                                  |
+| Cancel in-flight  | If the user changes settings (or replaces/clears the file) after a preview request has already been sent, **abort** that pending request before starting the next one |
+| Presets           | Preset checkboxes do **not** trigger preview (they only select ZIP membership)                                                                |
+| Fidelity          | Server PNG at 256×256 using §4 treatment (pad, background, corner radius, monochrome)                                                         |
+| Stale responses   | Aborted or superseded responses must not update the UI                                                                                        |
 | Replace           | Clicking the preview opens the file picker; dropping another valid file replaces the source. Current settings remain and apply to the new file |
-| Clear             | Clear removes the file, restores the empty dropzone prompt, and hides the preview                                                             |
+| Clear             | Clear removes the file, restores the empty dropzone prompt, aborts any pending preview, and hides the preview                                 |
 | No file           | Empty / error states keep the existing dropzone prompts; no preview                                                                           |
 
-Preview is UI-only. It is not a generate API call and does not write ZIP assets.
+Preview does not write ZIP assets. Generate remains a separate action (§3.2).
 
 ### 5.4 HTML snippet (UI only)
 
@@ -297,8 +318,8 @@ A task is done only when its acceptance criteria are met and unit tests for that
 | AC9  | Document head on `/` wires §5.5 public icons, manifest, theme-color, absolute OG/Twitter for `/og-image.png`, and canonical / `og:url`                                                                                   |
 | AC10 | `monochrome=true` yields greyscale raster PNG/ICO content; `false`/omitted keeps source colors; invalid → `400`; SVG passthrough unchanged                                                                               |
 | AC11 | Omit `presets` → `all,original`; `original` alone → ZIP with only upload basename at source size; options still apply; explicit `all` omits original; combining `original` with other presets adds the upload-named file |
-| AC12 | Missing or mismatched `Origin` → `403 FORBIDDEN_ORIGIN`; matching same-origin proceeds; no `Access-Control-Allow-Origin`                                                                                                 |
-| AC13 | Valid upload shows a live image preview in the dropzone; padding / corner radius / monochrome / background updates reflect in the preview; presets do not; click or drop replaces the source while keeping settings; clear restores the empty prompt |
+| AC12 | Missing or mismatched `Origin` on generate or preview → `403 FORBIDDEN_ORIGIN`; matching same-origin proceeds; no `Access-Control-Allow-Origin`                                                                          |
+| AC13 | Valid upload shows a live preview from `POST /api/v1/preview` (256×256 PNG); padding / corner radius / monochrome / background re-fetch a debounced preview; an in-flight preview is **aborted** when settings/file change again; presets do not; aborted/stale responses do not update the UI; click or drop replaces the source while keeping settings; clear aborts and restores the empty prompt |
 
 ---
 
@@ -318,3 +339,5 @@ A task is done only when its acceptance criteria are met and unit tests for that
 | 1.0.x   | 2026-07    | Technical specification (API samples, Sharp/UI code, layout)   |
 | 1.1.0   | 2026-09-24 | Slimmed to product decisions; engineering moved to `AGENTS.md` |
 | 1.2.0   | 2026-09-24 | Live dropzone preview reflecting visual settings (§5.3.1)      |
+| 1.3.0   | 2026-09-24 | Server preview API `POST /api/v1/preview` + debounced UI (AC13) |
+| 1.3.1   | 2026-09-24 | Abort in-flight preview when user changes settings again       |
