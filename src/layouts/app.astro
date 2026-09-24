@@ -3,11 +3,8 @@ import { capitalize } from '@maxigarcia/js-utils';
 import { description, keywords, name } from '../../package.json';
 import '@/index.css';
 
-if (!Astro.site) {
-  throw new Error('Astro `site` must be set (SPEC §5.6)');
-}
+const site = Astro.url.origin;
 
-/** Favicon / Apple Touch / Android Chrome links — SPEC §5.6 table order. */
 const SITE_ICON_LINKS: {
   rel: 'icon' | 'apple-touch-icon';
   href: string;
@@ -70,10 +67,9 @@ const SITE_OG_IMAGE_TYPE = 'image/png';
 const SITE_OG_IMAGE_ALT
   = 'Iconify — high-performance icon set generator preview';
 
-const canonicalUrl = new URL('/', Astro.site).href;
-const ogImageUrl = new URL(SITE_OG_IMAGE_PATH, Astro.site).href;
+const canonicalUrl = new URL('/', site).href;
+const ogImageUrl = new URL(SITE_OG_IMAGE_PATH, site).href;
 
-/** SPEC §5.6 — matches `public/site.webmanifest` theme_color / dark canvas. */
 const themeColor = '#141826';
 const webManifestHref = '/site.webmanifest';
 const title = capitalize(name);
