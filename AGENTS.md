@@ -10,13 +10,13 @@ When SPEC and code disagree, treat it as a defect. Prefer aligning code to SPEC 
 
 ## Stack
 
-| Layer   | Technology                        |
-| ------- | --------------------------------- |
-| UI      | Astro 7, Tailwind 4, client islands |
+| Layer   | Technology                             |
+| ------- | -------------------------------------- |
+| UI      | Astro 7, Tailwind 4, client islands    |
 | API     | Astro routes under `src/pages/api/v1/` |
-| Image   | Sharp                             |
-| Package | archiver (ZIP stream)             |
-| ICO     | multi-layer (e.g. `to-ico`)       |
+| Image   | Sharp                                  |
+| Package | archiver (ZIP stream)                  |
+| ICO     | multi-layer (e.g. `to-ico`)            |
 
 ## Commands
 

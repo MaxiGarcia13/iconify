@@ -16,12 +16,12 @@ Iconify turns one uploaded image (SVG, PNG, or JPG) into a complete icon package
 
 ### 1.1 Goals
 
-| ID  | Goal                                                                                    |
-| --- | --------------------------------------------------------------------------------------- |
-| G1  | Generate a complete favicon / PWA / iOS / Android / OG set from one upload in seconds    |
-| G2  | Deliver the package as a downloadable ZIP without leaving generated icons on disk        |
-| G3  | Expose a private generate API for the product UI only (same origin; not a public API)    |
-| G4  | Focused UI: dropzone → settings → download ZIP + HTML snippet                            |
+| ID  | Goal                                                                                  |
+| --- | ------------------------------------------------------------------------------------- |
+| G1  | Generate a complete favicon / PWA / iOS / Android / OG set from one upload in seconds |
+| G2  | Deliver the package as a downloadable ZIP without leaving generated icons on disk     |
+| G3  | Expose a private generate API for the product UI only (same origin; not a public API) |
+| G4  | Focused UI: dropzone → settings → download ZIP + HTML snippet                         |
 
 ### 1.2 Non-Goals (v1)
 
@@ -40,13 +40,13 @@ All raster outputs are PNG unless noted. Dimensions are width × height in pixel
 
 ### 2.1 Modern Web / Favicons
 
-| Filename                | Size                | Format | Use case                                             |
-| ----------------------- | ------------------- | ------ | ---------------------------------------------------- |
-| `favicon.ico`           | 16, 32, 48 (layers) | `.ico` | Legacy browsers / bookmarks                          |
-| `favicon-16x16.png`     | 16×16               | `.png` | Explicit small favicon                               |
-| `favicon-32x32.png`     | 32×32               | `.png` | Standard browser tab icon                            |
-| `favicon.svg`           | scalable            | `.svg` | Modern browsers (source SVG only; otherwise omitted) |
-| `safari-pinned-tab.svg` | scalable            | `.svg` | Safari pinned tab (monochrome SVG when source is SVG)|
+| Filename                | Size                | Format | Use case                                              |
+| ----------------------- | ------------------- | ------ | ----------------------------------------------------- |
+| `favicon.ico`           | 16, 32, 48 (layers) | `.ico` | Legacy browsers / bookmarks                           |
+| `favicon-16x16.png`     | 16×16               | `.png` | Explicit small favicon                                |
+| `favicon-32x32.png`     | 32×32               | `.png` | Standard browser tab icon                             |
+| `favicon.svg`           | scalable            | `.svg` | Modern browsers (source SVG only; otherwise omitted)  |
+| `safari-pinned-tab.svg` | scalable            | `.svg` | Safari pinned tab (monochrome SVG when source is SVG) |
 
 ### 2.2 iOS / Apple Touch
 
@@ -74,9 +74,9 @@ All raster outputs are PNG unless noted. Dimensions are width × height in pixel
 
 One raster export at the source image’s native pixel dimensions, with the same padding / background / corner-radius / monochrome settings as other assets (no resize to a fixed matrix size). Non-square sources stay non-square.
 
-| Filename                      | Size                         | Format | Use case                                  |
-| ----------------------------- | ---------------------------- | ------ | ----------------------------------------- |
-| uploaded basename (see below) | source width × source height | `.png` | Processed export at upload dimensions     |
+| Filename                      | Size                         | Format | Use case                              |
+| ----------------------------- | ---------------------------- | ------ | ------------------------------------- |
+| uploaded basename (see below) | source width × source height | `.png` | Processed export at upload dimensions |
 
 **ZIP entry name:** upload basename (path stripped), e.g. `logo.png` → `logo.png`, `Brand/Icon.JPG` → `Icon.JPG`. Bytes are always processed PNG (extension may not match when the upload was JPEG/SVG). On collision with another package asset, insert `-original` before the extension. Empty/unsafe basename → `original.png`. If source dimensions are unavailable → processing failure.
 
@@ -123,36 +123,36 @@ Single private endpoint for the Iconify UI: `POST /api/v1/generate`.
 
 `multipart/form-data` with:
 
-| Field          | Required | Default        | Meaning                                                                 |
-| -------------- | -------- | -------------- | ----------------------------------------------------------------------- |
-| `file`         | yes      | —              | Source image (SVG, PNG, or JPG). Max 10 MB.                             |
-| `background`   | no       | `transparent`  | Fill behind padded/resized icons: literal `transparent` or `#RRGGBB` / `#RRGGBBAA`. |
-| `padding`      | no       | `0`            | Padding as % of the shorter side (0–50).                                |
-| `cornerRadius` | no       | `0`            | Outer corner radius as % of half the shorter canvas side (0–100). `0` = square; `100` = fully rounded. Applied to rasters only; does not alter SVG passthrough. |
+| Field          | Required | Default        | Meaning                                                                                                                                                                     |
+| -------------- | -------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `file`         | yes      | —              | Source image (SVG, PNG, or JPG). Max 10 MB.                                                                                                                                 |
+| `background`   | no       | `transparent`  | Fill behind padded/resized icons: literal `transparent` or `#RRGGBB` / `#RRGGBBAA`.                                                                                         |
+| `padding`      | no       | `0`            | Padding as % of the shorter side (0–50).                                                                                                                                    |
+| `cornerRadius` | no       | `0`            | Outer corner radius as % of half the shorter canvas side (0–100). `0` = square; `100` = fully rounded. Applied to rasters only; does not alter SVG passthrough.             |
 | `monochrome`   | no       | `false`        | Literals `true` / `false`. When true, greyscale raster content before compositing onto background (alpha kept; background color unchanged). Does not alter SVG passthrough. |
-| `presets`      | no       | `all,original` | Comma-separated preset IDs (§2.6).                                      |
+| `presets`      | no       | `all,original` | Comma-separated preset IDs (§2.6).                                                                                                                                          |
 
 ### 3.2 Response
 
-| Code  | When                                           | Body                 |
-| ----- | ---------------------------------------------- | -------------------- |
-| `200` | Success                                        | ZIP stream (`application/zip`); `Content-Disposition: attachment`; optional `X-Iconify-Assets` listing filenames |
-| `400` | Missing/bad file, size, or options             | JSON error           |
-| `403` | Missing or cross-origin `Origin`               | JSON error           |
-| `415` | Not `multipart/form-data`                      | JSON error           |
-| `500` | Processing / packaging failure                 | JSON error           |
+| Code  | When                               | Body                                                                                                             |
+| ----- | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `200` | Success                            | ZIP stream (`application/zip`); `Content-Disposition: attachment`; optional `X-Iconify-Assets` listing filenames |
+| `400` | Missing/bad file, size, or options | JSON error                                                                                                       |
+| `403` | Missing or cross-origin `Origin`   | JSON error                                                                                                       |
+| `415` | Not `multipart/form-data`          | JSON error                                                                                                       |
+| `500` | Processing / packaging failure     | JSON error                                                                                                       |
 
 Error JSON shape: `{ error, message, details? }` with `error` one of `VALIDATION_ERROR`, `PROCESSING_ERROR`, `UNSUPPORTED_MEDIA_TYPE`, `FORBIDDEN_ORIGIN`.
 
 ### 3.3 Constraints
 
-| Constraint      | Value                                      |
-| --------------- | ------------------------------------------ |
-| Max upload      | 10 MB                                      |
-| Allowed types   | SVG, PNG, JPEG (`.svg`, `.png`, `.jpg`, `.jpeg`) |
-| Response        | Streamed ZIP; no persisted temp icon files |
-| Versioning      | Path prefix `/api/v1`                      |
-| Access          | Same-origin UI only (§3.4)                 |
+| Constraint    | Value                                            |
+| ------------- | ------------------------------------------------ |
+| Max upload    | 10 MB                                            |
+| Allowed types | SVG, PNG, JPEG (`.svg`, `.png`, `.jpg`, `.jpeg`) |
+| Response      | Streamed ZIP; no persisted temp icon files       |
+| Versioning    | Path prefix `/api/v1`                            |
+| Access        | Same-origin UI only (§3.4)                       |
 
 ### 3.4 Same-origin access
 
@@ -170,15 +170,15 @@ This is abuse/CSRF mitigation for browsers, not authentication.
 
 Product rules for how the source becomes assets (implementation details are out of scope here):
 
-| Rule            | Behavior                                                                 |
-| --------------- | ------------------------------------------------------------------------ |
-| SVG input       | Keep `favicon.svg` (and optional pinned-tab) as SVG; rasters derived from source |
-| Raster input    | Omit SVG outputs; still produce PNG/ICO targets                          |
-| Transparency    | Default background transparent; PNG keeps alpha; ICO may flatten         |
-| Padding         | Uniform % inset; content fitted inside the padded box                    |
-| Corner radius   | Rounded outer canvas on rasters; no-op at `0`; skip SVG passthrough      |
-| Monochrome      | Greyscale raster content when enabled; skip SVG passthrough              |
-| Original preset | Native-size PNG; ZIP name = upload basename; not part of `all`           |
+| Rule            | Behavior                                                                                                             |
+| --------------- | -------------------------------------------------------------------------------------------------------------------- |
+| SVG input       | Keep `favicon.svg` (and optional pinned-tab) as SVG; rasters derived from source                                     |
+| Raster input    | Omit SVG outputs; still produce PNG/ICO targets                                                                      |
+| Transparency    | Default background transparent; PNG keeps alpha; ICO may flatten                                                     |
+| Padding         | Uniform % inset; content fitted inside the padded box                                                                |
+| Corner radius   | Rounded outer canvas on rasters; no-op at `0`; skip SVG passthrough                                                  |
+| Monochrome      | Greyscale raster content when enabled; skip SVG passthrough                                                          |
+| Original preset | Native-size PNG; ZIP name = upload basename; not part of `all`                                                       |
 | Failure         | Any processing failure → `500`; never start a ZIP after a mid-pipeline failure (build all assets first, then stream) |
 
 ---
@@ -208,25 +208,25 @@ Single page: `/`. Flow: dropzone → settings → generate → ZIP download + HT
 
 ### 5.2 Workflow
 
-| Step | Actor | Behavior                                                                        |
-| ---- | ----- | ------------------------------------------------------------------------------- |
-| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                               |
-| 2    | UI    | Validates; shows file meta; enables settings                                    |
-| 3    | User  | Adjusts settings / presets                                                      |
-| 4    | User  | Clicks **Generate & Download ZIP**                                              |
-| 5    | UI    | Calls generate API; shows progress / disabled state                             |
-| 6    | UI    | On success: browser download + populate snippet                                 |
-| 7    | UI    | On error: show inline message from API                                          |
+| Step | Actor | Behavior                                            |
+| ---- | ----- | --------------------------------------------------- |
+| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                   |
+| 2    | UI    | Validates; shows file meta; enables settings        |
+| 3    | User  | Adjusts settings / presets                          |
+| 4    | User  | Clicks **Generate & Download ZIP**                  |
+| 5    | UI    | Calls generate API; shows progress / disabled state |
+| 6    | UI    | On success: browser download + populate snippet     |
+| 7    | UI    | On error: show inline message from API              |
 
 ### 5.3 Controls
 
-| Control       | Default        | Notes                                                                 |
-| ------------- | -------------- | --------------------------------------------------------------------- |
-| Padding       | `0`            | 0–50, `%`                                                             |
-| Corner radius | `0`            | 0–100, `%` of half shorter side                                       |
-| Monochrome    | off            | Greyscale rasters only                                                |
-| Background    | transparent    | Transparent or `#RRGGBB`                                              |
-| Presets       | all + Original | Original default-on with `all`; independent of `all`                  |
+| Control       | Default        | Notes                                                |
+| ------------- | -------------- | ---------------------------------------------------- |
+| Padding       | `0`            | 0–50, `%`                                            |
+| Corner radius | `0`            | 0–100, `%` of half shorter side                      |
+| Monochrome    | off            | Greyscale rasters only                               |
+| Background    | transparent    | Transparent or `#RRGGBB`                             |
+| Presets       | all + Original | Original default-on with `all`; independent of `all` |
 
 Dropzone accepts the same types/size as the API. Generate disabled until a valid file is present. Errors announced for assistive tech. Settings and dropzone are interaction surfaces (not decorative cards).
 
@@ -266,20 +266,20 @@ A task is done only when its acceptance criteria are met and unit tests for that
 
 ## 7. Acceptance Criteria
 
-| ID   | Criterion |
-| ---- | --------- |
-| AC1  | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded) |
-| AC2  | Upload SVG returns ZIP that also includes `favicon.svg` |
-| AC3  | Invalid MIME or >10 MB returns `400` with `VALIDATION_ERROR` |
-| AC4  | `padding=20` visibly insets icon content in generated PNG assets |
-| AC5  | `favicon.ico` contains 16, 32, and 48 px layers |
-| AC6  | UI can download ZIP and copy `<head>` snippet in one session without reload |
-| AC7  | No intermediate icon files persist on disk after the request completes |
-| AC8  | `cornerRadius=100` on a square PNG yields circular rasters; `0` leaves square corners; invalid values return `400 VALIDATION_ERROR` |
-| AC9  | Document head on `/` wires §5.5 public icons, manifest, theme-color, absolute OG/Twitter for `/og-image.png`, and canonical / `og:url` |
-| AC10 | `monochrome=true` yields greyscale raster PNG/ICO content; `false`/omitted keeps source colors; invalid → `400`; SVG passthrough unchanged |
+| ID   | Criterion                                                                                                                                                                                                                |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| AC1  | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded)                                                                                                                   |
+| AC2  | Upload SVG returns ZIP that also includes `favicon.svg`                                                                                                                                                                  |
+| AC3  | Invalid MIME or >10 MB returns `400` with `VALIDATION_ERROR`                                                                                                                                                             |
+| AC4  | `padding=20` visibly insets icon content in generated PNG assets                                                                                                                                                         |
+| AC5  | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                                                          |
+| AC6  | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                                                              |
+| AC7  | No intermediate icon files persist on disk after the request completes                                                                                                                                                   |
+| AC8  | `cornerRadius=100` on a square PNG yields circular rasters; `0` leaves square corners; invalid values return `400 VALIDATION_ERROR`                                                                                      |
+| AC9  | Document head on `/` wires §5.5 public icons, manifest, theme-color, absolute OG/Twitter for `/og-image.png`, and canonical / `og:url`                                                                                   |
+| AC10 | `monochrome=true` yields greyscale raster PNG/ICO content; `false`/omitted keeps source colors; invalid → `400`; SVG passthrough unchanged                                                                               |
 | AC11 | Omit `presets` → `all,original`; `original` alone → ZIP with only upload basename at source size; options still apply; explicit `all` omits original; combining `original` with other presets adds the upload-named file |
-| AC12 | Missing or mismatched `Origin` → `403 FORBIDDEN_ORIGIN`; matching same-origin proceeds; no `Access-Control-Allow-Origin` |
+| AC12 | Missing or mismatched `Origin` → `403 FORBIDDEN_ORIGIN`; matching same-origin proceeds; no `Access-Control-Allow-Origin`                                                                                                 |
 
 ---
 
@@ -294,7 +294,7 @@ A task is done only when its acceptance criteria are met and unit tests for that
 
 ## Document History
 
-| Version | Date       | Notes |
-| ------- | ---------- | ----- |
-| 1.0.x   | 2026-07    | Technical specification (API samples, Sharp/UI code, layout) |
+| Version | Date       | Notes                                                          |
+| ------- | ---------- | -------------------------------------------------------------- |
+| 1.0.x   | 2026-07    | Technical specification (API samples, Sharp/UI code, layout)   |
 | 1.1.0   | 2026-09-24 | Slimmed to product decisions; engineering moved to `AGENTS.md` |
