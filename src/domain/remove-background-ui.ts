@@ -1,6 +1,12 @@
 /** Default polite status while removal is in flight without a ratio yet. */
 export const REMOVE_BACKGROUND_LIVE_PENDING = 'Removing background…';
 
+export const REMOVE_BACKGROUND_ERROR_UNSUPPORTED
+  = 'Background removal is only available for PNG and JPG.';
+
+export const REMOVE_BACKGROUND_ERROR_FAILED
+  = 'Background removal failed. Try again with a different image.';
+
 /**
  * Label from library progress (`current` / `total`).
  * Used for aria-live while model download / inference runs.
@@ -27,4 +33,17 @@ export function removeBackgroundLiveStatus(
   if (pending)
     return progressLabel ?? REMOVE_BACKGROUND_LIVE_PENDING;
   return error ?? '';
+}
+
+/**
+ * Apply a removal result to source state: replace file on success;
+ * on failure keep the prior file and expose the message for inline / aria-live.
+ */
+export function applyRemoveBackgroundResult(
+  previous: File,
+  result: { ok: true; file: File } | { ok: false; message: string },
+): { file: File; error: string | null } {
+  if (result.ok)
+    return { file: result.file, error: null };
+  return { file: previous, error: result.message };
 }

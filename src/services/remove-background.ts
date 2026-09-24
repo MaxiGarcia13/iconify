@@ -1,3 +1,7 @@
+import {
+  REMOVE_BACKGROUND_ERROR_FAILED,
+  REMOVE_BACKGROUND_ERROR_UNSUPPORTED,
+} from '@/domain/remove-background-ui';
 import { isRasterSource } from '@/domain/upload-constraints';
 
 export type RemoveBackgroundProgress = (
@@ -23,8 +27,6 @@ export type RemoveBackgroundFn = (
 ) => Promise<Blob>;
 
 export type RemoveBackgroundLoader = () => Promise<RemoveBackgroundFn>;
-
-const DEFAULT_ERROR = 'Background removal failed. Try again with a different image.';
 
 let loadCache: Promise<RemoveBackgroundFn> | null = null;
 let activeLoader: RemoveBackgroundLoader | null = null;
@@ -94,7 +96,7 @@ export async function removeBackgroundFromSource(
   if (!isRasterSource(file)) {
     return {
       ok: false,
-      message: 'Background removal is only available for PNG and JPG.',
+      message: REMOVE_BACKGROUND_ERROR_UNSUPPORTED,
     };
   }
 
@@ -109,11 +111,11 @@ export async function removeBackgroundFromSource(
       output: { format: 'image/png', type: 'foreground' },
     });
   } catch {
-    return { ok: false, message: DEFAULT_ERROR };
+    return { ok: false, message: REMOVE_BACKGROUND_ERROR_FAILED };
   }
 
   if (!blob || blob.size === 0) {
-    return { ok: false, message: DEFAULT_ERROR };
+    return { ok: false, message: REMOVE_BACKGROUND_ERROR_FAILED };
   }
 
   return {

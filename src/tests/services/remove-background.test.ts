@@ -2,6 +2,7 @@ import type { RemoveBackgroundFn } from '@/services/remove-background';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { REMOVE_BACKGROUND_ERROR_UNSUPPORTED } from '@/domain/remove-background-ui';
 import {
   cutoutPngFilename,
   loadRemoveBackground,
@@ -58,7 +59,7 @@ describe('removeBackgroundFromSource', () => {
 
     expect(result).toEqual({
       ok: false,
-      message: 'Background removal is only available for PNG and JPG.',
+      message: REMOVE_BACKGROUND_ERROR_UNSUPPORTED,
     });
     expect(removeBackground).not.toHaveBeenCalled();
   });
