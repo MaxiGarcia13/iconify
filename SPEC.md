@@ -3,7 +3,7 @@
 | Field       | Value    |
 | ----------- | -------- |
 | **Product** | Iconify  |
-| **Version** | 1.1.0    |
+| **Version** | 1.2.0    |
 | **Status**  | Accepted |
 
 Product requirements and decisions only. Engineering policy lives in [`AGENTS.md`](./AGENTS.md); work breakdown in [`TASKS.md`](./TASKS.md).
@@ -21,7 +21,7 @@ Iconify turns one uploaded image (SVG, PNG, or JPG) into a complete icon package
 | G1  | Generate a complete favicon / PWA / iOS / Android / OG set from one upload in seconds |
 | G2  | Deliver the package as a downloadable ZIP without leaving generated icons on disk     |
 | G3  | Expose a private generate API for the product UI only (same origin; not a public API) |
-| G4  | Focused UI: dropzone → settings → download ZIP + HTML snippet                         |
+| G4  | Focused UI: dropzone with live preview → settings → download ZIP + HTML snippet       |
 
 ### 1.2 Non-Goals (v1)
 
@@ -185,7 +185,7 @@ Product rules for how the source becomes assets (implementation details are out 
 
 ## 5. UI / UX
 
-Single page: `/`. Flow: dropzone → settings → generate → ZIP download + HTML snippet.
+Single page: `/`. Flow: dropzone (live preview) → settings → generate → ZIP download + HTML snippet.
 
 ### 5.1 Layout (conceptual)
 
@@ -193,9 +193,9 @@ Single page: `/`. Flow: dropzone → settings → generate → ZIP download + HT
 ┌─────────────────────────────────────────────────────────┐
 │  Brand + short product description                      │
 ├────────────────────────────┬────────────────────────────┤
-│  Dropzone                  │  Settings                   │
+│  Dropzone + live preview   │  Settings                   │
 │  drag/drop, browse, clear  │  padding, corner radius,    │
-│                            │  monochrome, background,    │
+│  (settings reflected)      │  monochrome, background,    │
 │                            │  presets                    │
 ├────────────────────────────┴────────────────────────────┤
 │  [ Generate & Download ZIP ]                             │
@@ -208,15 +208,17 @@ Single page: `/`. Flow: dropzone → settings → generate → ZIP download + HT
 
 ### 5.2 Workflow
 
-| Step | Actor | Behavior                                            |
-| ---- | ----- | --------------------------------------------------- |
-| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                   |
-| 2    | UI    | Validates; shows file meta; enables settings        |
-| 3    | User  | Adjusts settings / presets                          |
-| 4    | User  | Clicks **Generate & Download ZIP**                  |
-| 5    | UI    | Calls generate API; shows progress / disabled state |
-| 6    | UI    | On success: browser download + populate snippet     |
-| 7    | UI    | On error: show inline message from API              |
+| Step | Actor | Behavior                                                                 |
+| ---- | ----- | ------------------------------------------------------------------------ |
+| 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                        |
+| 2    | UI    | Validates; shows live preview + file meta; enables settings              |
+| 3    | User  | Adjusts settings / presets; preview updates for visual options (§5.3.1)  |
+| 4    | User  | Optionally replaces source (click preview or drop another file)          |
+| 5    | UI    | Replaces preview with the new file; current settings stay applied        |
+| 6    | User  | Clicks **Generate & Download ZIP**                                       |
+| 7    | UI    | Calls generate API; shows progress / disabled state                      |
+| 8    | UI    | On success: browser download + populate snippet                          |
+| 9    | UI    | On error: show inline message from API                                   |
 
 ### 5.3 Controls
 
@@ -229,6 +231,22 @@ Single page: `/`. Flow: dropzone → settings → generate → ZIP download + HT
 | Presets       | all + Original | Original default-on with `all`; independent of `all` |
 
 Dropzone accepts the same types/size as the API. Generate disabled until a valid file is present. Errors announced for assistive tech. Settings and dropzone are interaction surfaces (not decorative cards).
+
+### 5.3.1 Live preview (dropzone)
+
+When a valid source file is selected, the dropzone shows a **live visual preview** of that image (not metadata alone).
+
+| Rule              | Behavior                                                                                                                                      |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Show on select    | After successful validation, render the image in the dropzone                                                                                 |
+| Reflect settings  | Preview updates when `padding`, `cornerRadius`, `monochrome`, or `background` change                                                          |
+| Presets           | Preset checkboxes do **not** change the preview (they only select ZIP membership)                                                             |
+| Fidelity          | Client-side approximation of icon treatment (§4): pad inset, background fill, corner rounding, greyscale when monochrome                      |
+| Replace           | Clicking the preview opens the file picker; dropping another valid file replaces the source. Current settings remain and apply to the new file |
+| Clear             | Clear removes the file, restores the empty dropzone prompt, and hides the preview                                                             |
+| No file           | Empty / error states keep the existing dropzone prompts; no preview                                                                           |
+
+Preview is UI-only. It is not a generate API call and does not write ZIP assets.
 
 ### 5.4 HTML snippet (UI only)
 
@@ -280,6 +298,7 @@ A task is done only when its acceptance criteria are met and unit tests for that
 | AC10 | `monochrome=true` yields greyscale raster PNG/ICO content; `false`/omitted keeps source colors; invalid → `400`; SVG passthrough unchanged                                                                               |
 | AC11 | Omit `presets` → `all,original`; `original` alone → ZIP with only upload basename at source size; options still apply; explicit `all` omits original; combining `original` with other presets adds the upload-named file |
 | AC12 | Missing or mismatched `Origin` → `403 FORBIDDEN_ORIGIN`; matching same-origin proceeds; no `Access-Control-Allow-Origin`                                                                                                 |
+| AC13 | Valid upload shows a live image preview in the dropzone; padding / corner radius / monochrome / background updates reflect in the preview; presets do not; click or drop replaces the source while keeping settings; clear restores the empty prompt |
 
 ---
 
@@ -298,3 +317,4 @@ A task is done only when its acceptance criteria are met and unit tests for that
 | ------- | ---------- | -------------------------------------------------------------- |
 | 1.0.x   | 2026-07    | Technical specification (API samples, Sharp/UI code, layout)   |
 | 1.1.0   | 2026-09-24 | Slimmed to product decisions; engineering moved to `AGENTS.md` |
+| 1.2.0   | 2026-09-24 | Live dropzone preview reflecting visual settings (§5.3.1)      |

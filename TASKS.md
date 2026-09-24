@@ -90,6 +90,18 @@ SPEC §2.5 upload-basename / §2.6 preset `original` / §4 / §5 presets / AC11.
 - [x] Unit tests: dimensions match source; options applied; `all` ZIP omits original; `original` alone uses upload name; settings → FormData
 - [x] Verify AC11
 
+## M3f — Live dropzone preview
+
+SPEC §5.2–§5.3.1 / AC13. Client-side only; no generate API round-trip for preview.
+
+- [ ] Show validated source image in the dropzone (replace metadata-only ready state)
+- [ ] Wire settings into preview: `padding`, `cornerRadius`, `monochrome`, `background` update the preview live
+- [ ] Presets do not affect the preview
+- [ ] Click preview → file picker; drop another valid file → replace source; keep current settings applied to the new file
+- [ ] Clear → empty dropzone prompt; preview hidden
+- [ ] Unit tests: preview reflects visual settings; replace keeps settings; clear restores idle; presets ignored by preview helpers
+- [ ] Verify AC13
+
 ## M4 — Hardening
 
 - [x] Transparent PNG + opaque background edge cases
@@ -122,3 +134,4 @@ SPEC §2.5 upload-basename / §2.6 preset `original` / §4 / §5 presets / AC11.
 | AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`                                       |
 | AC11 | Default/`original` → upload basename at source size; explicit `all` omits it                                   |
 | AC12 | Missing/cross-origin `Origin` → `403 FORBIDDEN_ORIGIN`; same-origin OK                                         |
+| AC13 | Upload → live preview; padding/radius/mono/bg update preview; presets ignored; click/drop replaces; clear idle |
