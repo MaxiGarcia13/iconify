@@ -1,14 +1,14 @@
 ---
-description: Spec-Driven Development — SPEC.md is source of truth
+description: Spec-Driven Development — SPEC.md is product source of truth
 alwaysApply: true
 ---
 
 # SDD (Iconify)
 
-- Before implementing features, read [`SPEC.md`](../../SPEC.md) and [`AGENTS.md`](../../AGENTS.md).
-- Change requirements in `SPEC.md` first; update `TASKS.md` only for work-breakdown / checkboxes; then code.
+- Before implementing features, read [`SPEC.md`](../../SPEC.md) (product) and [`AGENTS.md`](../../AGENTS.md) (engineering).
+- Change product requirements in `SPEC.md` first; update `TASKS.md` only for work-breakdown / checkboxes; then code.
 - Do not invent API fields, asset filenames, sizes, or status codes.
-- Prefer matching SPEC §2 matrix and §3 OpenAPI exactly.
+- Prefer matching SPEC §2 asset matrix and §3 API contract exactly.
 - After finishing a slice, update checkboxes in `TASKS.md`.
 - Keep diffs scoped to the active milestone; no unrelated refactors.
-- Source files use lowercase kebab-case; markdown docs use UPPERCASE basenames (SPEC §1.6).
+- Source files use lowercase kebab-case; markdown docs use UPPERCASE basenames (`AGENTS.md`).

@@ -1,29 +1,27 @@
-# Iconify — Technical Specification
+# Iconify — Product Specification
 
-| Field        | Value                                                                       |
-| ------------ | --------------------------------------------------------------------------- |
-| **Product**  | Iconify                                                                     |
-| **Version**  | 1.0.18                                                                      |
-| **Status**   | Accepted                                                                    |
-| **Stack**    | Astro · Node.js (Astro API routes) · Sharp · archiver                       |
-| **Audience** | Engineers implementing Iconify under Specification-Driven Development (SDD) |
+| Field       | Value    |
+| ----------- | -------- |
+| **Product** | Iconify  |
+| **Version** | 1.1.0    |
+| **Status**  | Accepted |
+
+Product requirements and decisions only. Engineering policy lives in [`AGENTS.md`](./AGENTS.md); work breakdown in [`TASKS.md`](./TASKS.md).
 
 ---
 
-## 1. Executive Summary
+## 1. Product
 
-Iconify is a high-performance icon set generator that accepts a single source image (SVG, PNG, or JPG) and produces a complete icon package for the modern web: favicons, Apple Touch icons, Android/PWA assets, Open Graph images, and a copy-paste HTML `<head>` snippet in the UI.
-
-Processing runs server-side via Sharp. The API streams a ZIP archive back to the client so large multi-asset packages never materialize fully on disk.
+Iconify turns one uploaded image (SVG, PNG, or JPG) into a complete icon package: favicons, Apple Touch icons, Android/PWA assets, Open Graph image, plus a copy-paste HTML `<head>` snippet in the UI. The user downloads a ZIP of the assets.
 
 ### 1.1 Goals
 
-| ID  | Goal                                                                                       |
-| --- | ------------------------------------------------------------------------------------------ |
-| G1  | Generate a complete favicon / PWA / iOS / Android / OG icon set from one upload in seconds |
-| G2  | Stream a ZIP response without writing intermediate files to persistent storage             |
-| G3  | Expose a versioned REST API (`/api/v1/*`) for the Astro UI only (same-origin; not public)  |
-| G4  | Provide a focused UI: dropzone → settings → download ZIP + HTML snippet                    |
+| ID  | Goal                                                                                    |
+| --- | --------------------------------------------------------------------------------------- |
+| G1  | Generate a complete favicon / PWA / iOS / Android / OG set from one upload in seconds    |
+| G2  | Deliver the package as a downloadable ZIP without leaving generated icons on disk        |
+| G3  | Expose a private generate API for the product UI only (same origin; not a public API)    |
+| G4  | Focused UI: dropzone → settings → download ZIP + HTML snippet                            |
 
 ### 1.2 Non-Goals (v1)
 
@@ -32,119 +30,32 @@ Processing runs server-side via Sharp. The API streams a ZIP archive back to the
 - User accounts or history
 - Custom per-size override editors
 - Animated GIF / WebP animation sources
-- Public / third-party consumption of `POST /api/v1/generate` (same-origin UI only)
-
-### 1.3 Architecture Overview
-
-```mermaid
-flowchart LR
-  subgraph Client["Astro UI (SSR + Client Islands)"]
-    DZ[Dropzone]
-    SET[Settings Panel]
-    SNIP[HTML Snippet]
-  end
-
-  subgraph API["Astro REST API"]
-    EP["POST /api/v1/generate"]
-    VAL[Multipart Validator]
-  end
-
-  subgraph Core["Processing Core"]
-    SH[Sharp Pipeline]
-    ICO[ICO Multi-layer Builder]
-    ZIP[ZIP Stream Packager]
-  end
-
-  DZ --> EP
-  SET --> EP
-  EP --> VAL --> SH
-  SH --> ICO
-  SH --> ZIP
-  ICO --> ZIP
-  ZIP -->|application/zip stream| Client
-  Client --> SNIP
-```
-
-### 1.4 Request Lifecycle
-
-1. User drops or selects an image in the Astro UI.
-2. Client sends `multipart/form-data` to `POST /api/v1/generate`.
-3. API validates MIME type, size (≤ 10 MB), and option fields.
-4. Sharp normalizes the buffer (decode → optional greyscale → optional pad/background → resize per target → optional corner-radius mask).
-5. Specialized builders emit `.ico`, `.png`, and optional `.svg` assets.
-6. Packager pipes all entries into an `archiver` ZIP stream.
-7. Response headers set `Content-Type: application/zip` and `Content-Disposition: attachment`.
-8. UI offers download of the ZIP package and shows a copy-paste `<head>` snippet (client-side; not included in the ZIP).
-
-### 1.5 Proposed Source Layout
-
-```text
-src/
-├── pages/
-│   ├── index.astro                 # Generator UI
-│   └── api/v1/generate.ts          # POST endpoint
-├── components/
-│   ├── generator.tsx               # Client island: dropzone + settings + download + snippet
-│   ├── dropzone.tsx
-│   ├── settings-panel.tsx
-│   ├── html-snippet.tsx
-│   └── footer.astro                # GitHub repository link
-├── lib/
-│   ├── icons/
-│   │   ├── matrix.ts               # Asset matrix (sizes, names, presets)
-│   │   ├── process.ts              # Sharp pipeline
-│   │   ├── ico.ts                  # Multi-resolution ICO
-│   │   └── package.ts              # ZIP stream assembly
-│   ├── snippet.ts                  # HTML <head> generator (UI only)
-│   ├── same-origin.ts              # Same-origin Origin check (SPEC §3.3)
-│   ├── upload-constraints.ts       # Shared MIME / size checks
-│   ├── generate-defaults.ts        # Shared GenerateOptions defaults (client-safe)
-│   └── validate.ts                 # Multipart / option validation (server)
-└── layouts/
-    └── app.astro
-```
-
-### 1.6 Project file naming
-
-| Kind            | Rule                                     | Examples                                                        |
-| --------------- | ---------------------------------------- | --------------------------------------------------------------- |
-| Source          | lowercase kebab-case + extension         | `dropzone.tsx`, `settings-panel.tsx`, `upload-constraints.ts`   |
-| Tests           | same basename + `.test` / `.spec` suffix | `upload-constraints.test.ts`                                    |
-| Docs / markdown | **UPPERCASE** basename + `.md`           | `SPEC.md`, `TASKS.md`, `AGENTS.md`, `README.md`, `CHANGELOG.md` |
-| Cursor rules    | lowercase kebab-case                     | `.cursor/rules/sdd.mdc`                                         |
-
-**Exceptions (do not rename to satisfy this rule):**
-
-- Generated ZIP / product asset names in §2 (`favicon.ico`, `apple-touch-icon.png`, …)
-- Toolchain or lockfiles required by npm / Node (`package.json`, `package-lock.json`, …)
-- Directory names that are framework conventions (e.g. `node_modules`)
-
-Exported TypeScript / React **symbols** may use PascalCase or camelCase (`Dropzone`, `validateSourceFile`); only **file paths** are constrained.
+- Public or third-party use of the generate API
 
 ---
 
-## 2. Icon Assets Matrix
+## 2. Icon Assets
 
-All raster outputs are PNG unless noted. Dimensions are width × height in pixels. Naming is fixed so ZIP membership stays deterministic.
+All raster outputs are PNG unless noted. Dimensions are width × height in pixels. Filenames are fixed so package membership is deterministic.
 
 ### 2.1 Modern Web / Favicons
 
-| Filename                | Size                | Format | Use case                                              |
-| ----------------------- | ------------------- | ------ | ----------------------------------------------------- |
-| `favicon.ico`           | 16, 32, 48 (layers) | `.ico` | Legacy browsers / bookmarks                           |
-| `favicon-16x16.png`     | 16×16               | `.png` | Explicit small favicon                                |
-| `favicon-32x32.png`     | 32×32               | `.png` | Standard browser tab icon                             |
-| `favicon.svg`           | scalable            | `.svg` | Modern browsers (source SVG only; otherwise omitted)  |
-| `safari-pinned-tab.svg` | scalable            | `.svg` | Safari pinned tab (monochrome SVG when source is SVG) |
+| Filename                | Size                | Format | Use case                                             |
+| ----------------------- | ------------------- | ------ | ---------------------------------------------------- |
+| `favicon.ico`           | 16, 32, 48 (layers) | `.ico` | Legacy browsers / bookmarks                          |
+| `favicon-16x16.png`     | 16×16               | `.png` | Explicit small favicon                               |
+| `favicon-32x32.png`     | 32×32               | `.png` | Standard browser tab icon                            |
+| `favicon.svg`           | scalable            | `.svg` | Modern browsers (source SVG only; otherwise omitted) |
+| `safari-pinned-tab.svg` | scalable            | `.svg` | Safari pinned tab (monochrome SVG when source is SVG)|
 
 ### 2.2 iOS / Apple Touch
 
-| Filename                       | Size    | Format | Use case                  |
-| ------------------------------ | ------- | ------ | ------------------------- |
-| `apple-touch-icon-152x152.png` | 152×152 | `.png` | iPad (iOS 7+)             |
-| `apple-touch-icon-167x167.png` | 167×167 | `.png` | iPad Pro                  |
-| `apple-touch-icon-180x180.png` | 180×180 | `.png` | iPhone (primary)          |
-| `apple-touch-icon.png`         | 180×180 | `.png` | Default Apple touch alias |
+| Filename                       | Size    | Format | Use case         |
+| ------------------------------ | ------- | ------ | ---------------- |
+| `apple-touch-icon-152x152.png` | 152×152 | `.png` | iPad (iOS 7+)    |
+| `apple-touch-icon-167x167.png` | 167×167 | `.png` | iPad Pro         |
+| `apple-touch-icon-180x180.png` | 180×180 | `.png` | iPhone (primary) |
+| `apple-touch-icon.png`         | 180×180 | `.png` | Default alias    |
 
 ### 2.3 Android / PWA
 
@@ -161,19 +72,17 @@ All raster outputs are PNG unless noted. Dimensions are width × height in pixel
 
 ### 2.5 Original size
 
-Single raster export at the source image’s native pixel dimensions, with the same padding / background / corner-radius / monochrome settings as other assets (no resize to a fixed matrix size).
+One raster export at the source image’s native pixel dimensions, with the same padding / background / corner-radius / monochrome settings as other assets (no resize to a fixed matrix size). Non-square sources stay non-square.
 
-| Filename                      | Size                         | Format | Use case                                               |
-| ----------------------------- | ---------------------------- | ------ | ------------------------------------------------------ |
-| uploaded basename (see below) | source width × source height | `.png` | Processed export keeping upload dimensions (aspect OK) |
+| Filename                      | Size                         | Format | Use case                                  |
+| ----------------------------- | ---------------------------- | ------ | ----------------------------------------- |
+| uploaded basename (see below) | source width × source height | `.png` | Processed export at upload dimensions     |
 
-**ZIP entry name:** the uploaded file’s basename (path segments stripped), e.g. upload `logo.png` → `logo.png`, upload `Brand/Icon.JPG` → `Icon.JPG`. Bytes are always the processed PNG from `renderOriginal` (extension may not match PNG when the upload was JPEG/SVG). If that basename collides with another asset already in the package, insert `-original` before the extension (`favicon.ico` → `favicon-original.ico`). If the basename is empty or unsafe, fall back to `original.png`.
+**ZIP entry name:** upload basename (path stripped), e.g. `logo.png` → `logo.png`, `Brand/Icon.JPG` → `Icon.JPG`. Bytes are always processed PNG (extension may not match when the upload was JPEG/SVG). On collision with another package asset, insert `-original` before the extension. Empty/unsafe basename → `original.png`. If source dimensions are unavailable → processing failure.
 
-Canvas size equals Sharp metadata `width` × `height` after decode. Non-square sources stay non-square. SVG sources use intrinsic pixel size from the decoded raster; if dimensions are unavailable, return `500 PROCESSING_ERROR`.
+### 2.6 Presets
 
-### 2.6 Preset Groups
-
-Clients may request subsets via the `presets` form field (comma-separated or repeated):
+Clients may request subsets via `presets` (comma-separated or repeated):
 
 | Preset ID  | Includes                                        |
 | ---------- | ----------------------------------------------- |
@@ -184,9 +93,9 @@ Clients may request subsets via the `presets` form field (comma-separated or rep
 | `original` | §2.5                                            |
 | `all`      | §2.1–§2.4 only; does **not** include `original` |
 
-`original` is independent of `all`: combine it with any other preset IDs, or request it alone. Default when `presets` is omitted: `all,original` (platform package **plus** original-size export). Explicit `presets=all` still omits the original-size file.
+`original` is independent of `all`. Default when `presets` is omitted: `all,original`. Explicit `presets=all` omits the original-size file.
 
-### 2.7 ZIP Package Layout
+### 2.7 Package contents (example)
 
 ```text
 iconify-package/
@@ -201,688 +110,129 @@ iconify-package/
 ├── android-chrome-192x192.png
 ├── android-chrome-512x512.png
 ├── og-image.png
-└── <upload-basename>              # if presets includes original (e.g. logo.png)
+└── <upload-basename>              # if presets includes original
 ```
 
 ---
 
-## 3. REST API — OpenAPI 3.1 Specification
+## 3. Generate API (product contract)
 
-```yaml
-openapi: 3.1.0
-info:
-  title: Iconify API
-  version: 1.0.0
-  description: |
-    Generate favicon, PWA, iOS, Android, and Open Graph assets from a single image.
-    Successful responses stream a ZIP archive.
-servers:
-  - url: /
-paths:
-  /api/v1/generate:
-    post:
-      operationId: generateIconPackage
-      summary: Generate icon package ZIP
-      description: |
-        Accepts a multipart upload and processing options.
-        Returns a streamed ZIP (`application/zip`) on success.
-        Private same-origin endpoint: `Origin` must equal the request URL origin
-        (Astro UI only). Cross-origin and missing `Origin` → `403 FORBIDDEN_ORIGIN`.
-        No `Access-Control-Allow-Origin` is emitted.
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/GenerateRequest'
-            encoding:
-              file:
-                contentType: image/svg+xml, image/png, image/jpeg
-      responses:
-        '200':
-          description: ZIP archive stream containing generated assets
-          headers:
-            Content-Disposition:
-              schema:
-                type: string
-              example: attachment; filename="iconify-package.zip"
-            X-Iconify-Assets:
-              description: Comma-separated list of filenames included in the ZIP
-              schema:
-                type: string
-          content:
-            application/zip:
-              schema:
-                type: string
-                format: binary
-        '400':
-          description: Validation error (bad file, size, or options)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              examples:
-                invalidType:
-                  value:
-                    error: VALIDATION_ERROR
-                    message: 'Unsupported file type. Allowed: SVG, PNG, JPG.'
-                    details:
-                      field: file
-                tooLarge:
-                  value:
-                    error: VALIDATION_ERROR
-                    message: File exceeds maximum size of 10MB.
-                    details:
-                      field: file
-                      maxBytes: 10485760
-        '403':
-          description: Cross-origin or missing Origin (same-origin UI only)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error: FORBIDDEN_ORIGIN
-                message: This endpoint is only available from the Iconify UI (same origin).
-        '415':
-          description: Unsupported media type (non-multipart request)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '500':
-          description: Processing failure (Sharp decode/resize/packaging)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-              example:
-                error: PROCESSING_ERROR
-                message: Failed to process image.
+Single private endpoint for the Iconify UI: `POST /api/v1/generate`.
 
-components:
-  schemas:
-    GenerateRequest:
-      type: object
-      required:
-        - file
-      properties:
-        file:
-          type: string
-          format: binary
-          description: Source image (SVG, PNG, or JPG). Max 10MB.
-        background:
-          type: string
-          pattern: '^#([0-9A-Fa-f]{6}|[0-9A-Fa-f]{8})$'
-          default: transparent
-          description: |
-            Background fill behind padded/resized icons.
-            Use `transparent` (literal) or `#RRGGBB` / `#RRGGBBAA`.
-        padding:
-          type: number
-          minimum: 0
-          maximum: 50
-          default: 0
-          description: Padding as percentage of the shorter side (0–50).
-        cornerRadius:
-          type: number
-          minimum: 0
-          maximum: 100
-          default: 0
-          description: |
-            Outer corner radius as a percentage of half the shorter canvas side (0–100).
-            `0` = square corners; `100` = fully rounded (circle on square icons).
-            Applied to raster outputs via an SVG rounded-rect alpha mask after pad/background.
-            Does not alter SVG passthrough (`favicon.svg`).
-        monochrome:
-          type: string
-          enum:
-            - 'true'
-            - 'false'
-          default: 'false'
-          description: |
-            When `true`, convert the uploaded image content to greyscale via Sharp `.greyscale()`
-            before compositing onto the background canvas (alpha preserved; `background` color unchanged).
-            Applied to raster outputs in `renderIcon` / `renderOgImage` (ICO inherits via `renderIcon`).
-            Does not alter SVG passthrough (`favicon.svg`, `safari-pinned-tab.svg`).
-            Multipart values must be the literals `true` or `false` (omit → default `false`).
-        presets:
-          type: string
-          default: all,original
-          description: |
-            Comma-separated preset IDs: favicon, apple, android, og, original, all.
-            `all` expands to favicon+apple+android+og only (not original).
-            Omit → `all,original` (Original selected by default alongside platform assets).
-          example: favicon,apple,original
+### 3.1 Request
 
-    ErrorResponse:
-      type: object
-      required:
-        - error
-        - message
-      properties:
-        error:
-          type: string
-          enum:
-            - VALIDATION_ERROR
-            - PROCESSING_ERROR
-            - UNSUPPORTED_MEDIA_TYPE
-            - FORBIDDEN_ORIGIN
-        message:
-          type: string
-        details:
-          type: object
-          additionalProperties: true
-```
+`multipart/form-data` with:
 
-### 3.1 Status Code Contract
+| Field          | Required | Default        | Meaning                                                                 |
+| -------------- | -------- | -------------- | ----------------------------------------------------------------------- |
+| `file`         | yes      | —              | Source image (SVG, PNG, or JPG). Max 10 MB.                             |
+| `background`   | no       | `transparent`  | Fill behind padded/resized icons: literal `transparent` or `#RRGGBB` / `#RRGGBBAA`. |
+| `padding`      | no       | `0`            | Padding as % of the shorter side (0–50).                                |
+| `cornerRadius` | no       | `0`            | Outer corner radius as % of half the shorter canvas side (0–100). `0` = square; `100` = fully rounded. Applied to rasters only; does not alter SVG passthrough. |
+| `monochrome`   | no       | `false`        | Literals `true` / `false`. When true, greyscale raster content before compositing onto background (alpha kept; background color unchanged). Does not alter SVG passthrough. |
+| `presets`      | no       | `all,original` | Comma-separated preset IDs (§2.6).                                      |
 
-| Code  | When                                             | Body                 |
-| ----- | ------------------------------------------------ | -------------------- |
-| `200` | Assets generated; ZIP streaming                  | Binary ZIP           |
-| `400` | Missing file, bad MIME, >10MB, invalid options   | JSON `ErrorResponse` |
-| `403` | Missing or cross-origin `Origin` header          | JSON `ErrorResponse` |
-| `415` | Content-Type is not `multipart/form-data`        | JSON `ErrorResponse` |
-| `500` | Sharp failure, ICO build failure, ZIP pipe error | JSON `ErrorResponse` |
+### 3.2 Response
 
-### 3.2 Constraints
+| Code  | When                                           | Body                 |
+| ----- | ---------------------------------------------- | -------------------- |
+| `200` | Success                                        | ZIP stream (`application/zip`); `Content-Disposition: attachment`; optional `X-Iconify-Assets` listing filenames |
+| `400` | Missing/bad file, size, or options             | JSON error           |
+| `403` | Missing or cross-origin `Origin`               | JSON error           |
+| `415` | Not `multipart/form-data`                      | JSON error           |
+| `500` | Processing / packaging failure                 | JSON error           |
 
-| Constraint         | Value                                        |
-| ------------------ | -------------------------------------------- |
-| Max upload size    | 10 × 1024 × 1024 bytes (10 MB)               |
-| Allowed MIME       | `image/svg+xml`, `image/png`, `image/jpeg`   |
-| Allowed extensions | `.svg`, `.png`, `.jpg`, `.jpeg`              |
-| Response mode      | Streamed ZIP (no persisted temp files in v1) |
-| API versioning     | Path prefix `/api/v1`                        |
-| Access             | Same-origin only (see §3.3)                  |
+Error JSON shape: `{ error, message, details? }` with `error` one of `VALIDATION_ERROR`, `PROCESSING_ERROR`, `UNSUPPORTED_MEDIA_TYPE`, `FORBIDDEN_ORIGIN`.
 
-### 3.3 Same-origin access (private endpoint)
+### 3.3 Constraints
 
-`POST /api/v1/generate` is **private**: intended only for the Iconify Astro UI on the same origin.
+| Constraint      | Value                                      |
+| --------------- | ------------------------------------------ |
+| Max upload      | 10 MB                                      |
+| Allowed types   | SVG, PNG, JPEG (`.svg`, `.png`, `.jpg`, `.jpeg`) |
+| Response        | Streamed ZIP; no persisted temp icon files |
+| Versioning      | Path prefix `/api/v1`                      |
+| Access          | Same-origin UI only (§3.4)                 |
 
-| Rule              | Behavior                                                                 |
-| ----------------- | ------------------------------------------------------------------------ |
-| Require `Origin`  | Request must include an `Origin` header                                  |
-| Match request URL | `Origin` must equal `new URL(request.url).origin` (scheme + host + port) |
-| Reject otherwise  | `403` JSON `{ error: "FORBIDDEN_ORIGIN", message }`                      |
-| No CORS           | Do not set `Access-Control-Allow-Origin` (or other ACAO headers)         |
+### 3.4 Same-origin access
 
-Browser same-origin `fetch('/api/v1/generate', …)` from the UI sends a matching `Origin` and succeeds. Cross-site pages and tools that omit or spoof a foreign `Origin` are rejected. Note: matching `Origin` is browser abuse / CSRF mitigation, not authentication — non-browser clients can still forge the header.
+The generate endpoint is private to the Iconify UI on the same origin.
 
-Helper: `isSameOriginRequest(request)` in `src/lib/same-origin.ts`.
+- Request must include `Origin` equal to the request URL origin (scheme + host + port).
+- Otherwise → `403` with `FORBIDDEN_ORIGIN`.
+- No CORS (`Access-Control-Allow-Origin` must not be set).
+
+This is abuse/CSRF mitigation for browsers, not authentication.
 
 ---
 
-## 4. Sharp.js Processing Logic
+## 4. Processing behavior
 
-### 4.1 Dependencies
+Product rules for how the source becomes assets (implementation details are out of scope here):
 
-```json
-{
-  "dependencies": {
-    "astro": "^7.1.3",
-    "sharp": "^0.34.0",
-    "archiver": "^7.0.0",
-    "to-ico": "^1.1.5"
-  }
-}
-```
-
-> `to-ico` (or equivalent) builds multi-resolution `.ico` from PNG buffers. If replaced, keep the same public contract: input PNG buffers at 16/32/48 → single `.ico` Buffer.
-
-### 4.2 Types
-
-```typescript
-import type { Buffer } from 'node:buffer';
-
-export type PresetId
-  = 'favicon' | 'apple' | 'android' | 'og' | 'original' | 'all';
-
-export interface GenerateOptions {
-  background: 'transparent' | `#${string}`;
-  padding: number; // 0–50
-  cornerRadius: number; // 0–100 (% of half the shorter canvas side)
-  monochrome: boolean; // default false — Sharp greyscale on raster content
-  presets: PresetId[];
-}
-
-export interface AssetEntry {
-  name: string; // path inside ZIP
-  buffer: Buffer;
-  contentType: string;
-}
-
-export interface ProcessResult {
-  assets: AssetEntry[];
-}
-```
-
-### 4.3 Normalize + Pad
-
-```typescript
-import type { GenerateOptions } from './types';
-import { Buffer } from 'node:buffer';
-import sharp from 'sharp';
-
-/**
- * Decode source, optionally greyscale, apply padding + background, optionally
- * round outer corners, return a square PNG buffer at `targetSize` suitable for
- * further encoding.
- *
- * Monochrome: when `monochrome` is true, apply Sharp `.greyscale()` to the
- * uploaded image content before compositing onto the background (alpha kept).
- *
- * Corner rounding: when `cornerRadius > 0`, composite an SVG rounded-rect mask
- * with blend `dest-in`. Radius px = round((cornerRadius / 100) * (min(w,h) / 2)).
- */
-export async function renderIcon(
-  input: Buffer,
-  targetSize: number,
-  options: Pick<
-    GenerateOptions,
-    'background' | 'padding' | 'cornerRadius' | 'monochrome'
-  >,
-): Promise<Buffer> {
-  const padRatio = Math.min(Math.max(options.padding, 0), 50) / 100;
-  const contentSize = Math.max(1, Math.round(targetSize * (1 - padRatio * 2)));
-  const paddingPx = Math.floor((targetSize - contentSize) / 2);
-
-  let pipeline = sharp(input, { density: 300 });
-  if (options.monochrome) {
-    pipeline = pipeline.greyscale();
-  }
-  const resized = await pipeline
-    .resize(contentSize, contentSize, {
-      fit: 'contain',
-      background: parseBackground(options.background),
-    })
-    .png()
-    .toBuffer();
-
-  const canvasBg
-    = options.background === 'transparent'
-      ? { r: 0, g: 0, b: 0, alpha: 0 }
-      : parseBackground(options.background);
-
-  let png = await sharp({
-    create: {
-      width: targetSize,
-      height: targetSize,
-      channels: 4,
-      background: canvasBg,
-    },
-  })
-    .composite([{ input: resized, left: paddingPx, top: paddingPx }])
-    .png()
-    .toBuffer();
-
-  png = await applyCornerRadius(
-    png,
-    targetSize,
-    targetSize,
-    options.cornerRadius,
-  );
-  return png;
-}
-
-/** Apply outer rounded-rect alpha mask; no-op when radius is 0. */
-async function applyCornerRadius(
-  png: Buffer,
-  width: number,
-  height: number,
-  cornerRadius: number,
-): Promise<Buffer> {
-  const clamped = Math.min(Math.max(cornerRadius, 0), 100);
-  if (clamped === 0)
-    return png;
-  const r = Math.round((clamped / 100) * (Math.min(width, height) / 2));
-  const mask = Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-      <rect width="${width}" height="${height}" rx="${r}" ry="${r}" fill="#fff"/>
-    </svg>`,
-  );
-  return sharp(png)
-    .composite([{ input: mask, blend: 'dest-in' }])
-    .png()
-    .toBuffer();
-}
-
-function parseBackground(value: GenerateOptions['background']) {
-  if (value === 'transparent') {
-    return { r: 0, g: 0, b: 0, alpha: 0 };
-  }
-  const hex = value.replace('#', '');
-  const r = Number.parseInt(hex.slice(0, 2), 16);
-  const g = Number.parseInt(hex.slice(2, 4), 16);
-  const b = Number.parseInt(hex.slice(4, 6), 16);
-  const alpha
-    = hex.length === 8 ? Number.parseInt(hex.slice(6, 8), 16) / 255 : 1;
-  return { r, g, b, alpha };
-}
-```
-
-### 4.4 Multi-layer ICO
-
-```typescript
-import type { Buffer } from 'node:buffer';
-import type { GenerateOptions } from './types';
-import toIco from 'to-ico';
-import { renderIcon } from './process';
-
-const ICO_SIZES = [16, 32, 48] as const;
-
-export async function buildFaviconIco(
-  input: Buffer,
-  options: Pick<
-    GenerateOptions,
-    'background' | 'padding' | 'cornerRadius' | 'monochrome'
-  >,
-): Promise<Buffer> {
-  const layers = await Promise.all(
-    ICO_SIZES.map((size) => renderIcon(input, size, options)),
-  );
-  return toIco(layers);
-}
-```
-
-### 4.5 OG Image (non-square)
-
-```typescript
-import type { Buffer } from 'node:buffer';
-import type { GenerateOptions } from './types';
-import sharp from 'sharp';
-
-export async function renderOgImage(
-  input: Buffer,
-  options: Pick<
-    GenerateOptions,
-    'background' | 'padding' | 'cornerRadius' | 'monochrome'
-  >,
-): Promise<Buffer> {
-  const width = 1200;
-  const height = 630;
-  const padRatio = Math.min(Math.max(options.padding, 0), 50) / 100;
-  const innerW = Math.round(width * (1 - padRatio * 2));
-  const innerH = Math.round(height * (1 - padRatio * 2));
-
-  let pipeline = sharp(input, { density: 300 });
-  if (options.monochrome) {
-    pipeline = pipeline.greyscale();
-  }
-  const logo = await pipeline
-    .resize(innerW, innerH, {
-      fit: 'contain',
-      background: parseBackground(options.background),
-    })
-    .png()
-    .toBuffer();
-
-  const meta = await sharp(logo).metadata();
-  const left = Math.floor((width - (meta.width ?? innerW)) / 2);
-  const top = Math.floor((height - (meta.height ?? innerH)) / 2);
-
-  let png = await sharp({
-    create: {
-      width,
-      height,
-      channels: 4,
-      background: parseBackground(options.background),
-    },
-  })
-    .composite([{ input: logo, left, top }])
-    .png()
-    .toBuffer();
-
-  png = await applyCornerRadius(png, width, height, options.cornerRadius);
-  return png;
-}
-```
-
-### 4.6 Original size (native dimensions)
-
-```typescript
-import type { Buffer } from 'node:buffer';
-import type { GenerateOptions } from './types';
-import sharp from 'sharp';
-
-/**
- * Same pad / background / corner-radius / monochrome pipeline as `renderOgImage`,
- * but canvas width×height = source metadata (no fixed target resize).
- * Content is fitted with `contain` into the padded inner box; aspect ratio preserved.
- */
-export async function renderOriginal(
-  input: Buffer,
-  options: Pick<
-    GenerateOptions,
-    'background' | 'padding' | 'cornerRadius' | 'monochrome'
-  >,
-): Promise<Buffer> {
-  const meta = await sharp(input, { density: 300 }).metadata();
-  const width = meta.width;
-  const height = meta.height;
-  if (!width || !height) {
-    throw new Error('Source image has no measurable dimensions');
-  }
-
-  const padRatio = Math.min(Math.max(options.padding, 0), 50) / 100;
-  const innerW = Math.max(1, Math.round(width * (1 - padRatio * 2)));
-  const innerH = Math.max(1, Math.round(height * (1 - padRatio * 2)));
-
-  let pipeline = sharp(input, { density: 300 });
-  if (options.monochrome) {
-    pipeline = pipeline.greyscale();
-  }
-  const content = await pipeline
-    .resize(innerW, innerH, {
-      fit: 'contain',
-      background: parseBackground(options.background),
-    })
-    .png()
-    .toBuffer();
-
-  const contentMeta = await sharp(content).metadata();
-  const left = Math.floor((width - (contentMeta.width ?? innerW)) / 2);
-  const top = Math.floor((height - (contentMeta.height ?? innerH)) / 2);
-
-  let png = await sharp({
-    create: {
-      width,
-      height,
-      channels: 4,
-      background: parseBackground(options.background),
-    },
-  })
-    .composite([{ input: content, left, top }])
-    .png()
-    .toBuffer();
-
-  png = await applyCornerRadius(png, width, height, options.cornerRadius);
-  return png;
-}
-```
-
-### 4.7 ZIP Stream Packager
-
-```typescript
-import type { AssetEntry } from './types';
-import { PassThrough, Readable } from 'node:stream';
-import archiver from 'archiver';
-
-export function createZipStream(assets: AssetEntry[]): PassThrough {
-  const output = new PassThrough();
-  const archive = archiver('zip', { zlib: { level: 9 } });
-
-  archive.on('error', (err) => output.destroy(err));
-  archive.pipe(output);
-
-  for (const asset of assets) {
-    archive.append(asset.buffer, { name: asset.name });
-  }
-
-  void archive.finalize();
-  return output;
-}
-
-/** Astro / Web Response helper */
-export function zipToWebResponse(
-  assets: AssetEntry[],
-  filename = 'iconify-package.zip',
-): Response {
-  const stream = createZipStream(assets);
-  const webStream = Readable.toWeb(stream) as ReadableStream;
-
-  return new Response(webStream, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Cache-Control': 'no-store',
-      'X-Iconify-Assets': assets.map((a) => a.name).join(','),
-    },
-  });
-}
-```
-
-### 4.8 Endpoint Skeleton (Astro)
-
-```
-// src/pages/api/v1/generate.ts
-import type { APIRoute } from 'astro';
-import {
-  processIconPackage,
-  zipToWebResponse,
-} from '../../../lib/icons/package';
-import { isSameOriginRequest } from '../../../lib/same-origin';
-import { parseGenerateForm } from '../../../lib/validate';
-
-export const prerender = false;
-
-export const POST: APIRoute = async ({ request }) => {
-  try {
-    if (!isSameOriginRequest(request)) {
-      return jsonError(
-        403,
-        'FORBIDDEN_ORIGIN',
-        'This endpoint is only available from the Iconify UI (same origin).',
-      );
-    }
-
-    const contentType = request.headers.get('content-type') ?? '';
-    if (!contentType.includes('multipart/form-data')) {
-      return jsonError(
-        415,
-        'UNSUPPORTED_MEDIA_TYPE',
-        'Expected multipart/form-data.',
-      );
-    }
-
-    const form = await request.formData();
-    const parsed = await parseGenerateForm(form);
-    if (!parsed.ok) {
-      return jsonError(400, 'VALIDATION_ERROR', parsed.message, parsed.details);
-    }
-
-    const result = await processIconPackage(parsed.file, parsed.options);
-    return zipToWebResponse(result.assets);
-  } catch (err) {
-    console.error('[iconify] generate failed', err);
-    return jsonError(500, 'PROCESSING_ERROR', 'Failed to process image.');
-  }
-};
-
-function jsonError(
-  status: number,
-  error: string,
-  message: string,
-  details?: Record<string, unknown>,
-) {
-  return new Response(JSON.stringify({ error, message, details }), {
-    status,
-    headers: { 'Content-Type': 'application/json' },
-  });
-}
-```
-
-### 4.9 Processing Rules
-
-| Rule              | Behavior                                                                                                                                       |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| SVG input         | Preserve `favicon.svg` (and optional pinned-tab) as original/sanitized SVG; rasters via Sharp density 300                                      |
-| Raster input      | Skip SVG outputs; still produce all PNG/ICO targets                                                                                            |
-| Transparency      | Default background `transparent`; PNG stays alpha; ICO flattens per `to-ico` behavior                                                          |
-| Padding           | Applied uniformly as % inset; content uses `fit: 'contain'`                                                                                    |
-| Monochrome        | When `monochrome=true`, Sharp `.greyscale()` on upload content before background composite; SVG passthrough skip                               |
-| Original preset   | Native-size PNG at source metadata W×H; ZIP name = upload basename; same options as other rasters; not in `all`; default omit → `all,original` |
-| Failure isolation | Any Sharp throw → 500; never start ZIP stream after a mid-pipeline failure (build all buffers first, then stream)                              |
+| Rule            | Behavior                                                                 |
+| --------------- | ------------------------------------------------------------------------ |
+| SVG input       | Keep `favicon.svg` (and optional pinned-tab) as SVG; rasters derived from source |
+| Raster input    | Omit SVG outputs; still produce PNG/ICO targets                          |
+| Transparency    | Default background transparent; PNG keeps alpha; ICO may flatten         |
+| Padding         | Uniform % inset; content fitted inside the padded box                    |
+| Corner radius   | Rounded outer canvas on rasters; no-op at `0`; skip SVG passthrough      |
+| Monochrome      | Greyscale raster content when enabled; skip SVG passthrough              |
+| Original preset | Native-size PNG; ZIP name = upload basename; not part of `all`           |
+| Failure         | Any processing failure → `500`; never start a ZIP after a mid-pipeline failure (build all assets first, then stream) |
 
 ---
 
-## 5. Astro UI / UX Specification
+## 5. UI / UX
 
-### 5.1 Page Structure
+Single page: `/`. Flow: dropzone → settings → generate → ZIP download + HTML snippet.
 
-Single route: `/` (`src/pages/index.astro`) inside `app.astro` layout.
+### 5.1 Layout (conceptual)
 
 ```text
 ┌─────────────────────────────────────────────────────────┐
-│  [app icon]  Iconify                                     │
-│              High-performance icon set generator         │
-│              Short product description (one upload →     │
-│              favicons, PWA/iOS, OG, HTML snippet)        │
+│  Brand + short product description                      │
 ├────────────────────────────┬────────────────────────────┤
 │  Dropzone                  │  Settings                   │
-│  • drag & drop             │  • padding %                │
-│  • click to browse         │  • corner radius %          │
-│  • file meta + clear       │  • monochrome (toggle)      │
-│                            │  • background color         │
-│                            │  • presets (checkboxes)     │
+│  drag/drop, browse, clear  │  padding, corner radius,    │
+│                            │  monochrome, background,    │
+│                            │  presets                    │
 ├────────────────────────────┴────────────────────────────┤
 │  [ Generate & Download ZIP ]                             │
 ├─────────────────────────────────────────────────────────┤
 │  HTML <head> snippet                    [ Copy ]         │
 ├─────────────────────────────────────────────────────────┤
-│  Footer: [GitHub icon] link to repository                │
+│  Footer: link to GitHub repository                       │
 └─────────────────────────────────────────────────────────┘
 ```
-
-Header brand mark uses an existing `public/` icon (e.g. `android-chrome-192x192.png`); do not invent filenames.
-
-Footer links to the project GitHub repository (`package.json` `homepage` / `repository`); implemented as `src/components/footer.astro` using `src/components/icons/github.astro`.
 
 ### 5.2 Workflow
 
 | Step | Actor | Behavior                                                                        |
 | ---- | ----- | ------------------------------------------------------------------------------- |
 | 1    | User  | Drops/selects SVG/PNG/JPG ≤ 10 MB                                               |
-| 2    | UI    | Validates client-side; shows filename, size, MIME; enables settings             |
-| 3    | User  | Toggles presets, adjusts padding / corner radius / monochrome, picks background |
+| 2    | UI    | Validates; shows file meta; enables settings                                    |
+| 3    | User  | Adjusts settings / presets                                                      |
 | 4    | User  | Clicks **Generate & Download ZIP**                                              |
-| 5    | UI    | `POST /api/v1/generate` with `FormData`; shows progress/disabled state          |
-| 6    | UI    | On 200: trigger browser download from blob URL; populate snippet panel          |
-| 7    | UI    | On 4xx/5xx: show inline error from JSON `message`                               |
+| 5    | UI    | Calls generate API; shows progress / disabled state                             |
+| 6    | UI    | On success: browser download + populate snippet                                 |
+| 7    | UI    | On error: show inline message from API                                          |
 
-### 5.3 Component Contracts
+### 5.3 Controls
 
-#### Dropzone (client island)
+| Control       | Default        | Notes                                                                 |
+| ------------- | -------------- | --------------------------------------------------------------------- |
+| Padding       | `0`            | 0–50, `%`                                                             |
+| Corner radius | `0`            | 0–100, `%` of half shorter side                                       |
+| Monochrome    | off            | Greyscale rasters only                                                |
+| Background    | transparent    | Transparent or `#RRGGBB`                                              |
+| Presets       | all + Original | Original default-on with `all`; independent of `all`                  |
 
-- Accept: `.svg,.png,.jpg,.jpeg` / matching MIME list
-- States: idle · dragging · ready · error
-- Reject quietly with message if type/size invalid
-- Expose selected `File` to parent via callback
+Dropzone accepts the same types/size as the API. Generate disabled until a valid file is present. Errors announced for assistive tech. Settings and dropzone are interaction surfaces (not decorative cards).
 
-#### Settings Panel
+### 5.4 HTML snippet (UI only)
 
-| Control       | Type                         | Default        | Notes                                                                                                                              |
-| ------------- | ---------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Padding       | range / number               | `0`            | 0–50, step 1, suffix `%`                                                                                                           |
-| Corner radius | range / number               | `0`            | 0–100, step 1, suffix `%` of half shorter side; rounds outer canvas                                                                |
-| Monochrome    | checkbox / switch            | off            | Sends `monochrome=true` \| `false`; greyscale raster content only                                                                  |
-| Background    | color + “transparent” toggle | transparent    | Sends `transparent` or `#RRGGBB`                                                                                                   |
-| Presets       | checkbox group               | all + Original | Maps to `presets`; **Original** checked by default with `all`; independent of `all` (unchecking platforms does not clear Original) |
-
-#### HTML Snippet
-
-UI-only copy-paste markup (not written into the ZIP). Generated client-side after a successful generate:
+Copy-paste markup shown after a successful generate; **not** included in the ZIP. Omit the SVG favicon link when the source was not SVG:
 
 ```html
 <link rel="icon" href="/favicon.ico" sizes="any" />
@@ -893,172 +243,58 @@ UI-only copy-paste markup (not written into the ZIP). Generated client-side afte
 <meta property="og:image" content="/og-image.png" />
 ```
 
-Omit the SVG `<link>` when source was not SVG. **Copy** button uses `navigator.clipboard.writeText`.
+### 5.5 Product site head (SEO & social)
 
-### 5.4 Accessibility & UX Rules
+The product page document (not the ZIP snippet) should expose:
 
-- Dropzone is a `<button>` or `role="button"` with keyboard activation
-- Color inputs have text hex fallbacks
-- Generate button disabled until a valid file is present
-- Announce errors via `aria-live="polite"`
-- No cards-for-decoration; settings and dropzone are interaction surfaces only
+- Favicons / Apple Touch / Android icons and `site.webmanifest` already shipped under `public/`
+- Core SEO: title, description, keywords, canonical URL of `/`
+- Open Graph + Twitter Card with absolute URLs (including `/og-image.png` at 1200×630)
+- Manifest + theme color aligned with the site canvas (`#141826`)
 
-### 5.5 Client ↔ API Mapping
-
-```typescript
-const body = new FormData();
-body.set('file', file);
-body.set('padding', String(padding));
-body.set('cornerRadius', String(cornerRadius));
-body.set('monochrome', monochrome ? 'true' : 'false');
-body.set('background', transparent ? 'transparent' : backgroundHex);
-body.set('presets', selectedPresets.join(','));
-
-const res = await fetch('/api/v1/generate', { method: 'POST', body });
-```
-
-### 5.6 Site document head (SEO & social)
-
-Applies to the product page document (`src/layouts/app.astro` on `/`). This is **not** the generated ZIP HTML snippet (§5.3). Use only static files already shipped under `public/` — do not invent new asset filenames.
-
-#### Canonical origin
-
-- Set Astro `site` in `astro.config.js` to the canonical public origin.
-- Resolve as `https://${process.env.VERCEL_URL}` when `VERCEL_URL` is set (Vercel deploy); otherwise `http://localhost:4321` (Astro default local origin) so absolute URLs resolve in development.
-- Resolve `og:url`, `link[rel=canonical]`, and all social image URLs as **absolute** URLs from that origin (relative `og:image` / `twitter:image` are invalid for crawlers).
-
-#### Favicons & touch icons (`public/`)
-
-| File                           | Document head usage                                      |
-| ------------------------------ | -------------------------------------------------------- |
-| `favicon.ico`                  | `<link rel="icon" href="…" sizes="any" />`               |
-| `favicon-16x16.png`            | `<link rel="icon" type="image/png" sizes="16x16" … />`   |
-| `favicon-32x32.png`            | `<link rel="icon" type="image/png" sizes="32x32" … />`   |
-| `apple-touch-icon.png`         | `<link rel="apple-touch-icon" sizes="180x180" … />`      |
-| `apple-touch-icon-152x152.png` | `<link rel="apple-touch-icon" sizes="152x152" … />`      |
-| `apple-touch-icon-167x167.png` | `<link rel="apple-touch-icon" sizes="167x167" … />`      |
-| `apple-touch-icon-180x180.png` | `<link rel="apple-touch-icon" sizes="180x180" … />`      |
-| `android-chrome-192x192.png`   | `<link rel="icon" type="image/png" sizes="192x192" … />` |
-| `android-chrome-512x512.png`   | `<link rel="icon" type="image/png" sizes="512x512" … />` |
-| `site.webmanifest`             | `<link rel="manifest" href="/site.webmanifest" />`       |
-
-#### Web app manifest (`public/site.webmanifest`)
-
-Static PWA manifest for the product page (not generated into the ZIP). Fields:
-
-| Field              | Value                                                                                                  |
-| ------------------ | ------------------------------------------------------------------------------------------------------ |
-| `name`             | Product display name (`Iconify`)                                                                       |
-| `short_name`       | `Iconify`                                                                                              |
-| `description`      | Product description (`package.json`)                                                                   |
-| `start_url`        | `/`                                                                                                    |
-| `display`          | `standalone`                                                                                           |
-| `background_color` | `#141826` (site dark canvas)                                                                           |
-| `theme_color`      | `#141826`                                                                                              |
-| `icons`            | `/android-chrome-192x192.png` (192×192) and `/android-chrome-512x512.png` (512×512), `type: image/png` |
-
-Also emit `<meta name="theme-color" content="#141826" />` so the browser chrome matches the manifest.
-
-#### Core SEO
-
-| Tag                         | Value                                     |
-| --------------------------- | ----------------------------------------- |
-| `<title>`                   | Product name (`package.json` `name`)      |
-| `<meta name="description">` | Product description (`package.json`)      |
-| `<meta name="keywords">`    | Comma-separated `package.json` `keywords` |
-| `<link rel="canonical">`    | Absolute URL of `/`                       |
-
-#### Open Graph
-
-| Property          | Value                                    |
-| ----------------- | ---------------------------------------- |
-| `og:type`         | `website`                                |
-| `og:locale`       | `en_US`                                  |
-| `og:site_name`    | Product name                             |
-| `og:title`        | Product name                             |
-| `og:description`  | Product description                      |
-| `og:url`          | Absolute URL of `/`                      |
-| `og:image`        | Absolute URL of `/og-image.png`          |
-| `og:image:width`  | `1200`                                   |
-| `og:image:height` | `630`                                    |
-| `og:image:type`   | `image/png`                              |
-| `og:image:alt`    | Short alt describing the product preview |
-
-`public/og-image.png` is 1200×630 (matches §2.4 dimensions).
-
-#### Twitter Card
-
-| Name                  | Value                           |
-| --------------------- | ------------------------------- |
-| `twitter:card`        | `summary_large_image`           |
-| `twitter:title`       | Product name                    |
-| `twitter:description` | Product description             |
-| `twitter:image`       | Absolute URL of `/og-image.png` |
-| `twitter:image:alt`   | Same alt as `og:image:alt`      |
+Do not invent new asset filenames for the document head.
 
 ---
 
-## 6. Milestones & Task Breakdown
+## 6. Milestones
 
-Implementation progress lives in one place: [`TASKS.md`](./TASKS.md) (M0–M5 checklist + verification shortcuts against §7).
+Implementation progress: [`TASKS.md`](./TASKS.md). Update this SPEC when product requirements change; update `TASKS.md` for work items.
 
-Do not duplicate milestone checklists here. When scope changes, update this SPEC (requirements) and adjust `TASKS.md` (work items) accordingly.
-
-**Done means green tests.** Do not check off a `TASKS.md` item (or treat a milestone as complete) unless `npm run test:unit` (Vitest) passes for all tests that cover that slice. If a slice has no tests yet, add them first, then mark done only after they pass.
+A task is done only when its acceptance criteria are met and unit tests for that slice pass.
 
 ---
 
 ## 7. Acceptance Criteria
 
-| ID   | Criterion                                                                                                                                                                                                                                                                                                                                                   |
-| ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| AC1  | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded)                                                                                                                                                                                                                                                      |
-| AC2  | Upload SVG returns ZIP that also includes `favicon.svg`                                                                                                                                                                                                                                                                                                     |
-| AC3  | Invalid MIME or >10 MB returns `400` JSON with `VALIDATION_ERROR`                                                                                                                                                                                                                                                                                           |
-| AC4  | `padding=20` visibly insets icon content in generated PNG assets                                                                                                                                                                                                                                                                                            |
-| AC5  | `favicon.ico` contains 16, 32, and 48 px layers                                                                                                                                                                                                                                                                                                             |
-| AC6  | UI can download ZIP and copy `<head>` snippet in one session without reload                                                                                                                                                                                                                                                                                 |
-| AC7  | No intermediate icon files persist on disk after the request completes                                                                                                                                                                                                                                                                                      |
-| AC8  | `cornerRadius=100` on a square PNG yield produces circular (fully rounded) raster icons; `cornerRadius=0` leaves square corners; invalid values (`-1`, `101`) return `400 VALIDATION_ERROR`                                                                                                                                                                 |
-| AC9  | Document head on `/` wires every §5.6 `public/` icon, `link[rel=manifest]` → `/site.webmanifest`, `theme-color` meta, absolute Open Graph + Twitter Card tags for `/og-image.png` (1200×630), and canonical / `og:url` from Astro `site`                                                                                                                    |
-| AC10 | `monochrome=true` yields greyscale raster PNG/ICO content (chroma ≈ 0); `monochrome=false` / omitted keeps source colors; invalid values return `400 VALIDATION_ERROR`; SVG passthrough unchanged                                                                                                                                                           |
-| AC11 | Omit `presets` (or UI defaults) → `all,original`; `presets=original` alone yields ZIP with only the upload basename at source width×height; padding / background / cornerRadius / monochrome still apply; explicit `presets=all` omits the original-size file; combining `original` with other presets adds the upload-named file alongside §2.1–2.4 assets |
-| AC12 | Missing `Origin`, or `Origin` ≠ request URL origin → `403` JSON `FORBIDDEN_ORIGIN`; matching same-origin `Origin` proceeds; response must not include `Access-Control-Allow-Origin`                                                                                                                                                                         |
+| ID   | Criterion |
+| ---- | --------- |
+| AC1  | Upload PNG ≤ 10 MB with preset `all` returns ZIP containing every §2.1–2.4 file (SVG outputs excluded) |
+| AC2  | Upload SVG returns ZIP that also includes `favicon.svg` |
+| AC3  | Invalid MIME or >10 MB returns `400` with `VALIDATION_ERROR` |
+| AC4  | `padding=20` visibly insets icon content in generated PNG assets |
+| AC5  | `favicon.ico` contains 16, 32, and 48 px layers |
+| AC6  | UI can download ZIP and copy `<head>` snippet in one session without reload |
+| AC7  | No intermediate icon files persist on disk after the request completes |
+| AC8  | `cornerRadius=100` on a square PNG yields circular rasters; `0` leaves square corners; invalid values return `400 VALIDATION_ERROR` |
+| AC9  | Document head on `/` wires §5.5 public icons, manifest, theme-color, absolute OG/Twitter for `/og-image.png`, and canonical / `og:url` |
+| AC10 | `monochrome=true` yields greyscale raster PNG/ICO content; `false`/omitted keeps source colors; invalid → `400`; SVG passthrough unchanged |
+| AC11 | Omit `presets` → `all,original`; `original` alone → ZIP with only upload basename at source size; options still apply; explicit `all` omits original; combining `original` with other presets adds the upload-named file |
+| AC12 | Missing or mismatched `Origin` → `403 FORBIDDEN_ORIGIN`; matching same-origin proceeds; no `Access-Control-Allow-Origin` |
 
 ---
 
-## 8. SDD Governance
+## 8. Governance
 
-1. **`SPEC.md` is the source of truth.** Implementation follows this document; code does not invent API fields or asset names.
-2. **Spec before code.** Requirement changes update SPEC (and OpenAPI section) first; adjust `TASKS.md` checkboxes if the work breakdown changes; then implement.
-3. **Drift is a defect.** If code and SPEC disagree, fix the drift in the same change set (prefer updating code to match SPEC unless the SPEC change is intentional).
-4. **Agents** must read `AGENTS.md` and `.cursor/rules/*` before implementing features.
-5. **Green tests before done.** A `TASKS.md` checkbox may be marked complete only when Vitest is green for the covered slice (`npm run test:unit` exit 0).
-6. **File naming.** Project-authored paths follow §1.6 (source: lowercase kebab-case; markdown: UPPERCASE).
+1. **SPEC is product truth.** Do not invent API fields, asset names, sizes, or status codes outside this document.
+2. **Spec before code.** Change requirements here first; adjust `TASKS.md` if the work breakdown changes; then implement.
+3. **Drift is a defect.** Prefer aligning code to SPEC unless the SPEC change is intentional.
+4. **Engineering policy** (stack, layout, naming, security practice) lives in [`AGENTS.md`](./AGENTS.md).
 
 ---
 
 ## Document History
 
-| Version | Date       | Notes                                                                      |
-| ------- | ---------- | -------------------------------------------------------------------------- |
-| 1.0.0   | 2026-07-23 | Initial technical specification                                            |
-| 1.0.1   | 2026-07-23 | §6 milestones checklist moved solely to `TASKS.md`                         |
-| 1.0.2   | 2026-07-23 | §6 / §8: mark `TASKS.md` items done only when `npm run test:unit` is green |
-| 1.0.3   | 2026-07-23 | §1.6 lowercase kebab-case for source; layout paths updated                 |
-| 1.0.4   | 2026-07-23 | §1.6 markdown docs use UPPERCASE basenames (`SPEC.md`, …)                  |
-| 1.0.5   | 2026-07-23 | §1.5 layout: `generator.tsx` island + `preview.ts` client approx.          |
-| 1.0.6   | 2026-07-23 | Remove live preview grid from UI (§1.1 G4, §1.3, §1.5, §5)                 |
-| 1.0.7   | 2026-07-23 | Remove `site.webmanifest` and `head.html` from package + UI                |
-| 1.0.8   | 2026-07-23 | Restore UI HTML `<head>` snippet (client-only; still omitted from ZIP)     |
-| 1.0.9   | 2026-07-23 | §5.6 site document head: SEO, Open Graph, Twitter Card via `public/`       |
-| 1.0.10  | 2026-07-23 | §5.1 header: `public/` brand icon + short product description              |
-| 1.0.11  | 2026-07-23 | `cornerRadius` range 0–100 (`100` = full circle); AC8 updated              |
-| 1.0.12  | 2026-07-23 | `monochrome` option (Sharp greyscale); UI + API; AC10                      |
-| 1.0.13  | 2026-07-23 | Preset `original` → `original.png` at source size; AC11                    |
-| 1.0.14  | 2026-07-23 | Default `all,original`; original ZIP name = upload basename; AC11          |
-| 1.0.15  | 2026-07-23 | `POST /api/v1/generate` same-origin only (`FORBIDDEN_ORIGIN`); AC12        |
-| 1.0.16  | 2026-07-23 | Status → Accepted; v1 release (package `1.0.16`, `CHANGELOG.md`)           |
-| 1.0.17  | 2026-07-24 | §5.6 site PWA: `public/site.webmanifest` + head `manifest` / `theme-color` |
-| 1.0.18  | 2026-07-24 | §5.1 footer: GitHub repository link with `github.astro` icon               |
-| 1.0.19  | 2026-07-25 | §5.6 Core SEO: `<meta name="keywords">` from `package.json` `keywords`     |
+| Version | Date       | Notes |
+| ------- | ---------- | ----- |
+| 1.0.x   | 2026-07    | Technical specification (API samples, Sharp/UI code, layout) |
+| 1.1.0   | 2026-09-24 | Slimmed to product decisions; engineering moved to `AGENTS.md` |

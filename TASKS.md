@@ -1,6 +1,6 @@
 # Iconify — Implementation Tasks
 
-Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md) §6). Check items as they complete. Do not mark done unless acceptance criteria in SPEC §7 for that slice are met **and** Vitest is green (`npm run test:unit` exit 0) for the covered slice (SPEC §6 / §8).
+Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md) §6). Check items as they complete. Do not mark done unless acceptance criteria in SPEC §7 for that slice are met **and** Vitest is green (`npm run test:unit` exit 0) for the covered slice.
 
 ## M0 — Foundation
 
@@ -44,7 +44,7 @@ Sole implementation checklist for Iconify (referenced from [`SPEC.md`](./SPEC.md
 
 ## M3b — Corner radius
 
-SPEC §3 `cornerRadius` / §4 `applyCornerRadius` / §5 settings / AC8.
+SPEC §3 `cornerRadius` / §4 processing / §5 settings / AC8.
 
 - [x] Processing: `applyCornerRadius` SVG mask (`dest-in`) after pad/background in `renderIcon` + `renderOgImage` (ICO inherits via `renderIcon`); no-op at `0`; skip SVG passthrough
 - [x] Types + defaults: `GenerateOptions.cornerRadius` (0–100, default `0`) in `types` / `generate-defaults`
@@ -55,20 +55,20 @@ SPEC §3 `cornerRadius` / §4 `applyCornerRadius` / §5 settings / AC8.
 
 ## M3c — Site SEO & social meta
 
-SPEC §5.6 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
+SPEC §5.5 / AC9. Layout: `src/layouts/app.astro`; assets: `public/` only.
 
 - [x] Configure Astro `site` (canonical public origin) so social URLs can be absolute
-- [x] Wire all §5.6 favicon / Apple Touch / Android Chrome links from `public/`
+- [x] Wire all §5.5 favicon / Apple Touch / Android Chrome links from `public/`
 - [x] Core SEO: `<title>`, meta description, meta keywords (`package.json`), `link[rel=canonical]` for `/`
-- [x] Open Graph: full §5.6 tag set with absolute `og:url` + `og:image` (`/og-image.png`, 1200×630)
+- [x] Open Graph: full §5.5 tag set with absolute `og:url` + `og:image` (`/og-image.png`, 1200×630)
 - [x] Twitter Card: `summary_large_image` + title / description / absolute image + alt
-- [x] Ship `public/site.webmanifest` (name / icons / colors / display per §5.6)
+- [x] Ship `public/site.webmanifest` (name / icons / colors / display per §5.5)
 - [x] Document head: `link[rel=manifest]` + `meta[name=theme-color]`
 - [x] Verify AC9 (view-source; optional Twitter/Facebook sharing debugger)
 
 ## M3d — Monochrome
 
-SPEC §3 `monochrome` / §4 greyscale in `renderIcon` + `renderOgImage` / §5 settings / AC10.
+SPEC §3 `monochrome` / §4 greyscale / §5 settings / AC10.
 
 - [x] Processing: Sharp `.greyscale()` on upload content when `monochrome` is true (before background composite) in `renderIcon` + `renderOgImage` (ICO inherits); no-op when false; skip SVG passthrough
 - [x] Types + defaults: `GenerateOptions.monochrome` (`boolean`, default `false`) in `types` / `generate-defaults`
@@ -79,7 +79,7 @@ SPEC §3 `monochrome` / §4 greyscale in `renderIcon` + `renderOgImage` / §5 se
 
 ## M3e — Original size preset
 
-SPEC §2.5 upload-basename / §2.6 preset `original` / §4.6 `renderOriginal` / §5 presets / AC11.
+SPEC §2.5 upload-basename / §2.6 preset `original` / §4 / §5 presets / AC11.
 
 - [x] Matrix: `original` preset row → native size; `all` still expands to §2.1–§2.4 only
 - [x] Processing: `renderOriginal` — canvas = source metadata W×H; pad / background / cornerRadius / monochrome; preserve aspect
@@ -96,7 +96,7 @@ SPEC §2.5 upload-basename / §2.6 preset `original` / §4.6 `renderOriginal` / 
 - [x] Large SVG performance sanity check
 - [x] Omit SVG links/files when source is raster
 - [x] README aligned with SPEC usage
-- [x] Same-origin guard on `POST /api/v1/generate` (SPEC §3.3 / AC12)
+- [x] Same-origin guard on `POST /api/v1/generate` (SPEC §3.4 / AC12)
 - [x] Unit tests: matching `Origin` → proceeds; missing / cross-origin → `403 FORBIDDEN_ORIGIN`; no ACAO header
 - [x] Verify AC12
 
@@ -118,7 +118,7 @@ SPEC §2.5 upload-basename / §2.6 preset `original` / §4.6 `renderOriginal` / 
 | AC6  | UI download + copy snippet without reload                                                                      |
 | AC7  | No leftover files under OS temp after request                                                                  |
 | AC8  | `cornerRadius=100` → circular square PNGs; `0` → square; bad value → `400`                                     |
-| AC9  | View-source `/`: all §5.6 `public/` icons + `site.webmanifest` + theme-color + absolute OG/Twitter + canonical |
+| AC9  | View-source `/`: all §5.5 `public/` icons + `site.webmanifest` + theme-color + absolute OG/Twitter + canonical |
 | AC10 | `monochrome=true` → greyscale rasters; `false`/omit → color; bad → `400`                                       |
 | AC11 | Default/`original` → upload basename at source size; explicit `all` omits it                                   |
 | AC12 | Missing/cross-origin `Origin` → `403 FORBIDDEN_ORIGIN`; same-origin OK                                         |

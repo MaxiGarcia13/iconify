@@ -4,7 +4,7 @@ High-performance icon set generator. Upload one SVG, PNG, or JPG and get favicon
 
 Processing runs server-side with Sharp. Successful responses stream a ZIP (`application/zip`) — no intermediate icon files are written to disk.
 
-Full requirements live in [`SPEC.md`](./SPEC.md). Implementation checklist: [`TASKS.md`](./TASKS.md). Agent policy: [`AGENTS.md`](./AGENTS.md).
+Product requirements: [`SPEC.md`](./SPEC.md). Engineering policy: [`AGENTS.md`](./AGENTS.md). Implementation checklist: [`TASKS.md`](./TASKS.md).
 
 ## Quick start
 
