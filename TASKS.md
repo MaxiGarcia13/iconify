@@ -148,8 +148,8 @@ SPEC §5.3.2 / AC14. Browser-only cutout via `@imgly/background-removal` (not th
 
 ### Tests
 
-- [ ] Unit tests: helper produces PNG File/Blob; SVG path not offered / rejected; basename rules; undo restores prior file; pending/clear does not apply stale result
-- [ ] Verify AC14
+- [x] Unit tests: helper produces PNG File/Blob; SVG path not offered / rejected; basename rules; undo restores prior file; pending/clear does not apply stale result
+- [x] Verify AC14
 
 ## M4 — Hardening
 

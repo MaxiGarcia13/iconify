@@ -76,8 +76,9 @@ export function useDropzoneRemoveBackground({
       removalPending,
       generatePending: disabled,
       previewPending,
-    }))
+    })) {
       return;
+    }
     void runnerRef.current.run(file);
   }
 
